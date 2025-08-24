@@ -17,8 +17,7 @@ namespace Reamp.Infrastructure.Configurations
              .IsUnique()
              .HasFilter("[DeletedAtUtc] IS NULL");
 
-            b.HasOne<ApplicationUser>()
-             .WithOne()
+            b.HasOne<ApplicationUser>().WithOne()
              .HasForeignKey<UserProfile>(x => x.ApplicationUserId)
              .OnDelete(DeleteBehavior.Restrict);
 
@@ -37,6 +36,7 @@ namespace Reamp.Infrastructure.Configurations
              .HasConversion<int>()
              .HasDefaultValue(UserStatus.Active);
 
+            b.HasQueryFilter(x => x.DeletedAtUtc == null);
         }
     }
 }

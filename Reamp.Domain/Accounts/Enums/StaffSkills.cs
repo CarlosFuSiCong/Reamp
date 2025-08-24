@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace Reamp.Domain.Accounts.Enums
 {
-    public enum UserRole : int
+    [Flags]
+    public enum StaffSkills
     {
         None = 0,
-        User = 1,
-        Client = 2,
-        Staff = 3,
-        Admin = 4
+        Photographer = 1 << 0, // 1
+        Videographer = 1 << 1, // 2
+        VRMaker = 1 << 2, // 4
     }
 }
-
