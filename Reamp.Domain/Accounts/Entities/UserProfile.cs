@@ -19,8 +19,8 @@ namespace Reamp.Domain.Accounts.Entities
 
         public string? AvatarUrl { get; private set; }
 
-        public UserRole Role { get; private set; }
-        public UserStatus Status { get; private set; }
+        public UserRole Role { get; private set; } = UserRole.User;
+        public UserStatus Status { get; private set; } = UserStatus.Active;
 
         // For ORM
         private UserProfile() { }

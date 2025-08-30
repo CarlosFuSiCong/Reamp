@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Reamp.Infrastructure.Configurations
+namespace Reamp.Infrastructure.Configurations.Accounts
 {
     public class StaffConfiguration : IEntityTypeConfiguration<Staff>
     {

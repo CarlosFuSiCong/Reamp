@@ -4,11 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AppDesignerFolder>Listings</AppDesignerFolder>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Production\" />
-    <Folder Include="Properties\" />
     <Folder Include="Orders\" />
   </ItemGroup>
 

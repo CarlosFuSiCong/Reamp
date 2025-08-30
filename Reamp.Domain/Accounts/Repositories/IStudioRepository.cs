@@ -1,5 +1,6 @@
 ﻿using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Common.Abstractions;
+using Reamp.Domain.Common.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,22 +9,20 @@ using System.Threading.Tasks;
 
 namespace Reamp.Domain.Accounts.Repositories
 {
-    public interface IUserProfileRepository : IRepository<UserProfile>
+    public interface IStudioRepository : IRepository<Studio>
     {
-        Task<UserProfile?> GetByIdAsync(
-            Guid id,
-            bool includeDeleted = false,
+        Task<Studio?> GetBySlugAsync(
+            Slug slug,
             bool asNoTracking = true,
             CancellationToken ct = default);
 
-        Task<UserProfile?> GetByApplicationUserIdAsync(
-            Guid appUserId,
-            bool includeDeleted = false,
-            bool asNoTracking = true,
+        Task<bool> ExistsBySlugAsync(
+            Slug slug,
             CancellationToken ct = default);
 
-        Task<bool> ExistsByApplicationUserIdAsync(
-            Guid appUserId,
+        Task<IPagedList<Studio>> ListAsync(
+            PageRequest page,
+            string? search = null,
             CancellationToken ct = default);
     }
 }

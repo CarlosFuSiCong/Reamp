@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Common.Interfaces;
+﻿using Reamp.Domain.Common.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -4,7 +4,7 @@ using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Enums;
 using Reamp.Infrastructure.Identity;
 
-namespace Reamp.Infrastructure.Configurations
+namespace Reamp.Infrastructure.Configurations.Accounts
 {
     public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
     {
@@ -28,15 +28,21 @@ namespace Reamp.Infrastructure.Configurations
 
             b.Property(x => x.Role)
              .IsRequired()
-             .HasConversion<int>()
-             .HasDefaultValue(UserRole.User);
+             .HasConversion<int>();
 
             b.Property(x => x.Status)
              .IsRequired()
-             .HasConversion<int>()
-             .HasDefaultValue(UserStatus.Active);
+             .HasConversion<int>();
 
             b.HasQueryFilter(x => x.DeletedAtUtc == null);
+
+            b.ToTable(tb =>
+            {
+                tb.HasCheckConstraint("CK_UserProfiles_FirstName_NotEmpty",
+                    "LEN(LTRIM(RTRIM([FirstName]))) > 0");
+                tb.HasCheckConstraint("CK_UserProfiles_LastName_NotEmpty",
+                    "LEN(LTRIM(RTRIM([LastName]))) > 0");
+            });
         }
     }
 }
