@@ -31,11 +31,11 @@ namespace Reamp.Application.Accounts.Studios.Services
 
             var address = new Address(
                 dto.Address.Line1,
-                dto.Address.Line2,
                 dto.Address.City,
                 dto.Address.State,
                 dto.Address.Postcode,
                 dto.Address.Country,
+                dto.Address.Line2,
                 dto.Address.Latitude,
                 dto.Address.Longitude
             );
@@ -46,7 +46,6 @@ namespace Reamp.Application.Accounts.Studios.Services
                 contactEmail: dto.ContactEmail,
                 contactPhone: dto.ContactPhone,
                 description: dto.Description,
-                logoUrl: dto.LogoUrl,
                 address: address
             );
 

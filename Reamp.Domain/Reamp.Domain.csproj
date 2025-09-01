@@ -7,9 +7,4 @@
     <AppDesignerFolder>Listings</AppDesignerFolder>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Production\" />
-    <Folder Include="Orders\" />
-  </ItemGroup>
-
 </Project>

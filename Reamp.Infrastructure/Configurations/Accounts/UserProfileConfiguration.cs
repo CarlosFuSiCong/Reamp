@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Enums;
+using Reamp.Domain.Media.Entities;
 using Reamp.Infrastructure.Identity;
 
 namespace Reamp.Infrastructure.Configurations.Accounts
@@ -17,14 +18,20 @@ namespace Reamp.Infrastructure.Configurations.Accounts
              .IsUnique()
              .HasFilter("[DeletedAtUtc] IS NULL");
 
-            b.HasOne<ApplicationUser>().WithOne()
+            b.HasOne<ApplicationUser>()
+             .WithOne()
              .HasForeignKey<UserProfile>(x => x.ApplicationUserId)
              .OnDelete(DeleteBehavior.Restrict);
 
             b.Property(x => x.ApplicationUserId).IsRequired();
             b.Property(x => x.FirstName).IsRequired().HasMaxLength(40);
             b.Property(x => x.LastName).IsRequired().HasMaxLength(40);
-            b.Property(x => x.AvatarUrl).HasMaxLength(256);
+
+            b.Property(x => x.AvatarAssetId).IsRequired(false);
+            b.HasOne<MediaAsset>()
+             .WithMany()
+             .HasForeignKey(x => x.AvatarAssetId)
+             .OnDelete(DeleteBehavior.NoAction);
 
             b.Property(x => x.Role)
              .IsRequired()

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Common.ValueObjects;
+using Reamp.Domain.Media.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,13 @@ namespace Reamp.Infrastructure.Configurations.Accounts
 
             b.Property(x => x.Name).IsRequired().HasMaxLength(120);
             b.Property(x => x.Description).HasMaxLength(512);
-            b.Property(x => x.LogoUrl).HasMaxLength(256);
+
+            b.Property(x => x.LogoAssetId).IsRequired(false);
+            b.HasOne<MediaAsset>()
+             .WithMany()
+             .HasForeignKey(x => x.LogoAssetId)
+             .OnDelete(DeleteBehavior.NoAction);
+
             b.Property(x => x.CreatedBy).IsRequired();
             b.Property(x => x.ContactEmail).IsRequired().HasMaxLength(120);
             b.Property(x => x.ContactPhone).IsRequired().HasMaxLength(40);

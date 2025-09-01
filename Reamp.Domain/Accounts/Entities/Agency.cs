@@ -14,7 +14,7 @@ namespace Reamp.Domain.Accounts.Entities
         public Slug Slug { get; private set; }
         public string? Description { get; private set; }
 
-        public string? LogoUrl { get; private set; }
+        public Guid? LogoAssetId { get; private set; }
         public Guid CreatedBy { get; private set; }
 
         public string ContactEmail { get; private set; }
@@ -31,18 +31,19 @@ namespace Reamp.Domain.Accounts.Entities
             string contactEmail,
             string contactPhone,
             string? description = null,
-            string? logoUrl = null)
+            Guid? logoAssetId = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Agency name cannot be empty.");
-            if (string.IsNullOrWhiteSpace(contactEmail)) throw new ArgumentException("Contact email is required.");
-            if (string.IsNullOrWhiteSpace(contactPhone)) throw new ArgumentException("Contact phone is required.");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Agency name is required.", nameof(name));
+            if (createdBy == Guid.Empty) throw new ArgumentException("CreatedBy is required.", nameof(createdBy));
+            if (string.IsNullOrWhiteSpace(contactEmail)) throw new ArgumentException("Contact email is required.", nameof(contactEmail));
+            if (string.IsNullOrWhiteSpace(contactPhone)) throw new ArgumentException("Contact phone is required.", nameof(contactPhone));
 
             return new Agency
             {
                 Name = name.Trim(),
                 Slug = Slug.From(name),
                 Description = description,
-                LogoUrl = logoUrl,
+                LogoAssetId = logoAssetId,
                 CreatedBy = createdBy,
                 ContactEmail = contactEmail.Trim(),
                 ContactPhone = contactPhone.Trim()
@@ -51,18 +52,35 @@ namespace Reamp.Domain.Accounts.Entities
 
         public void Rename(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Agency name cannot be empty.");
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Agency name is required.", nameof(name));
             Name = name.Trim();
             Slug = Slug.From(name);
             Touch();
         }
 
-        public void UpdateLogo(string? logoUrl) { LogoUrl = logoUrl; Touch(); }
-        public void UpdateDescription(string? description) { Description = description; Touch(); }
+        public void UpdateDescription(string? description)
+        {
+            Description = description;
+            Touch();
+        }
+
+        public void SetLogoAsset(Guid mediaAssetId)
+        {
+            if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId is required.", nameof(mediaAssetId));
+            LogoAssetId = mediaAssetId;
+            Touch();
+        }
+
+        public void ClearLogo()
+        {
+            LogoAssetId = null;
+            Touch();
+        }
+
         public void UpdateContact(string email, string phone)
         {
-            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Contact email is required.");
-            if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Contact phone is required.");
+            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Contact email is required.", nameof(email));
+            if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Contact phone is required.", nameof(phone));
             ContactEmail = email.Trim();
             ContactPhone = phone.Trim();
             Touch();

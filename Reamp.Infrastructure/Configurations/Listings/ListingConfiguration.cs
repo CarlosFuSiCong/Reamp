@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Listings.Entities;
+using Reamp.Domain.Accounts.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,18 @@ public class ListingConfiguration : IEntityTypeConfiguration<Listing>
             a.Property(p => p.Latitude);
             a.Property(p => p.Longitude);
         });
+
+        // Foreign keys and indexes
+        b.HasIndex(x => x.OwnerAgencyId);
+        b.HasOne<Agency>()
+         .WithMany()
+         .HasForeignKey(x => x.OwnerAgencyId)
+         .OnDelete(DeleteBehavior.Restrict);
+
+        b.HasIndex(x => x.AgentUserId);
+        // AgentUserId references Identity user table; keep as loose FK (no FK if cross-DbContext)
+        // If ApplicationUser is in the same DbContext, uncomment below and add using for identity namespace
+        // b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.AgentUserId).OnDelete(DeleteBehavior.NoAction);
 
         b.HasIndex(x => new { x.Status, x.ListingType });
         b.HasIndex(x => x.PropertyType);

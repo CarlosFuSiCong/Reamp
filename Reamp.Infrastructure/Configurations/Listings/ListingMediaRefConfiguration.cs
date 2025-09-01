@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Listings.Entities;
+using Reamp.Domain.Media.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,13 @@ public class ListingMediaRefConfiguration : IEntityTypeConfiguration<ListingMedi
             .WithMany(l => l.MediaRefs)
             .HasForeignKey(x => x.ListingId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Do NOT cascade delete media asset
+        b.HasIndex(x => x.MediaAssetId);
+        b.HasOne<MediaAsset>()
+            .WithMany()
+            .HasForeignKey(x => x.MediaAssetId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         b.HasIndex(x => new { x.ListingId, x.IsCover })
          .HasFilter("[IsCover] = 1")

@@ -50,8 +50,8 @@ namespace Reamp.Infrastructure.Configurations.Accounts
                 a.Property(p => p.State).HasMaxLength(40).HasColumnName("Address_State");
                 a.Property(p => p.Postcode).HasMaxLength(10).HasColumnName("Address_Postcode");
                 a.Property(p => p.Country).HasMaxLength(2).HasColumnName("Address_Country");
-                a.Property(p => p.Latitude).HasPrecision(9, 6).HasColumnName("Address_Latitude");
-                a.Property(p => p.Longitude).HasPrecision(9, 6).HasColumnName("Address_Longitude");
+                a.Property(p => p.Latitude).HasColumnType("float").HasColumnName("Address_Latitude");
+                a.Property(p => p.Longitude).HasColumnType("float").HasColumnName("Address_Longitude");
                 a.HasIndex(p => p.City);
             });
 

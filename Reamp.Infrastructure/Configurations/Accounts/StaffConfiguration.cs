@@ -17,7 +17,9 @@ namespace Reamp.Infrastructure.Configurations.Accounts
             b.HasKey(x => x.Id);
 
             b.Property(x => x.UserProfileId).IsRequired();
-            b.HasIndex(x => x.UserProfileId).IsUnique();
+            b.HasIndex(x => x.UserProfileId)
+             .IsUnique()
+             .HasFilter("[DeletedAtUtc] IS NULL");
             b.HasOne<UserProfile>().WithOne()
              .HasForeignKey<Staff>(x => x.UserProfileId)
              .OnDelete(DeleteBehavior.Restrict);

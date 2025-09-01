@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace Reamp.Domain.Accounts.Entities
 {
-    // User profile (one-to-one with ApplicationUser)
     public sealed class UserProfile : AuditableEntity
     {
         public Guid ApplicationUserId { get; private set; }
@@ -17,16 +16,14 @@ namespace Reamp.Domain.Accounts.Entities
         public string LastName { get; private set; }
         public string DisplayName => $"{FirstName} {LastName}".Trim();
 
-        public string? AvatarUrl { get; private set; }
+        public Guid? AvatarAssetId { get; private set; }
 
         public UserRole Role { get; private set; } = UserRole.User;
         public UserStatus Status { get; private set; } = UserStatus.Active;
 
-        // For ORM
         private UserProfile() { }
 
-        // Create new profile
-        public static UserProfile Create(Guid applicationUserId, string firstName, string lastName, UserRole role = UserRole.User, string? avatarUrl = null)
+        public static UserProfile Create(Guid applicationUserId, string firstName, string lastName, UserRole role = UserRole.User, Guid? avatarAssetId = null)
         {
             if (applicationUserId == Guid.Empty)
                 throw new ArgumentException("ApplicationUserId is required.", nameof(applicationUserId));
@@ -35,19 +32,19 @@ namespace Reamp.Domain.Accounts.Entities
             {
                 ApplicationUserId = applicationUserId,
                 Role = role,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                AvatarAssetId = avatarAssetId
             };
 
             profile.SetName(firstName, lastName);
-            profile.SetAvatar(avatarUrl);
             return profile;
         }
 
-        public void UpdateBasicInfo(string firstName, string lastName, string? avatarUrl)
+        public void UpdateBasicInfo(string firstName, string lastName, Guid? avatarAssetId = null)
         {
             EnsureNotDeleted();
             SetName(firstName, lastName);
-            SetAvatar(avatarUrl);
+            AvatarAssetId = avatarAssetId;
             Touch();
         }
 
@@ -78,7 +75,6 @@ namespace Reamp.Domain.Accounts.Entities
             }
         }
 
-        // ==== Internal helpers ====
         private void SetName(string firstName, string lastName)
         {
             if (string.IsNullOrWhiteSpace(firstName))
@@ -90,23 +86,31 @@ namespace Reamp.Domain.Accounts.Entities
             lastName = lastName.Trim();
 
             if (firstName.Length > 40)
-                throw new ArgumentException("First name max length 40", nameof(firstName));
+                throw new ArgumentException("First name max length is 40 characters.", nameof(firstName));
             if (lastName.Length > 40)
-                throw new ArgumentException("Last name max length 40", nameof(lastName));
+                throw new ArgumentException("Last name max length is 40 characters.", nameof(lastName));
 
             FirstName = firstName;
             LastName = lastName;
-        }
-
-        private void SetAvatar(string? avatarUrl)
-        {
-            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? null : avatarUrl.Trim();
         }
 
         private void EnsureNotDeleted()
         {
             if (IsDeleted)
                 throw new InvalidOperationException("Profile is deleted");
+        }
+
+        public void SetAvatarAsset(Guid mediaAssetId)
+        {
+            if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId is required.", nameof(mediaAssetId));
+            AvatarAssetId = mediaAssetId;
+            Touch();
+        }
+
+        public void ClearAvatar()
+        {
+            AvatarAssetId = null;
+            Touch();
         }
     }
 }
