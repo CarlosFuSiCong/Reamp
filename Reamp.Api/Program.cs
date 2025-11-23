@@ -110,6 +110,34 @@ namespace Reamp.Api
                     };
                 });
 
+            // Authorization Policies
+            builder.Services.AddAuthorization(options =>
+            {
+                // Admin only
+                options.AddPolicy(AuthPolicies.RequireAdminRole, policy =>
+                    policy.RequireRole("Admin"));
+
+                // Staff only
+                options.AddPolicy(AuthPolicies.RequireStaffRole, policy =>
+                    policy.RequireRole("Staff"));
+
+                // Client only
+                options.AddPolicy(AuthPolicies.RequireClientRole, policy =>
+                    policy.RequireRole("Client"));
+
+                // User only
+                options.AddPolicy(AuthPolicies.RequireUserRole, policy =>
+                    policy.RequireRole("User"));
+
+                // Staff or Admin
+                options.AddPolicy(AuthPolicies.RequireStaffOrAdmin, policy =>
+                    policy.RequireRole("Staff", "Admin"));
+
+                // Client or Admin
+                options.AddPolicy(AuthPolicies.RequireClientOrAdmin, policy =>
+                    policy.RequireRole("Client", "Admin"));
+            });
+
             // FluentValidation
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<CreateStudioDtoValidator>();
