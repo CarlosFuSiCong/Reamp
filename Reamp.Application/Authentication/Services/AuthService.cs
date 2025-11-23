@@ -124,6 +124,40 @@ namespace Reamp.Application.Authentication.Services
                 Role = profile.Role.ToString()
             };
         }
+
+        public async Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken ct = default)
+        {
+            // Get user profile
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, false, false, ct);
+            if (profile == null)
+                throw new InvalidOperationException("User profile not found");
+
+            // Update profile
+            profile.UpdateBasicInfo(dto.FirstName, dto.LastName);
+
+            await _uow.SaveChangesAsync(ct);
+        }
+
+        public async Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken ct = default)
+        {
+            // Get Identity user
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null || user.DeletedAtUtc.HasValue)
+                throw new InvalidOperationException("User not found");
+
+            // Verify current password
+            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, dto.CurrentPassword);
+            if (!isCurrentPasswordValid)
+                throw new UnauthorizedAccessException("Current password is incorrect");
+
+            // Change password
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Failed to change password: {errors}");
+            }
+        }
     }
 }
 

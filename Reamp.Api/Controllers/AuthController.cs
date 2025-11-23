@@ -63,6 +63,40 @@ namespace Reamp.Api.Controllers
 
             return Ok(ApiResponse<UserInfoDto>.Ok(userInfo));
         }
+
+        // Update user profile (requires authentication)
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto, CancellationToken ct)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            }
+
+            await _authService.UpdateProfileAsync(userId, dto, ct);
+
+            _logger.LogInformation("User profile updated: {UserId}", userId);
+            return Ok(ApiResponse.Ok("Profile updated successfully"));
+        }
+
+        // Change password (requires authentication)
+        [HttpPut("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken ct)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            }
+
+            await _authService.ChangePasswordAsync(userId, dto, ct);
+
+            _logger.LogInformation("Password changed for user: {UserId}", userId);
+            return Ok(ApiResponse.Ok("Password changed successfully"));
+        }
     }
 }
 

@@ -13,6 +13,12 @@ namespace Reamp.Application.Authentication.Services
 
         // Get current user info
         Task<UserInfoDto?> GetUserInfoAsync(Guid userId, CancellationToken ct = default);
+
+        // Update user profile
+        Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken ct = default);
+
+        // Change user password
+        Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken ct = default);
     }
 }
 
