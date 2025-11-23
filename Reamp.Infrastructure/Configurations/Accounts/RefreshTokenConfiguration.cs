@@ -22,9 +22,6 @@ namespace Reamp.Infrastructure.Configurations.Accounts
             builder.Property(rt => rt.ExpiresAt)
                 .IsRequired();
 
-            builder.Property(rt => rt.CreatedAt)
-                .IsRequired();
-
             builder.Property(rt => rt.IsRevoked)
                 .IsRequired();
 
@@ -32,6 +29,9 @@ namespace Reamp.Infrastructure.Configurations.Accounts
 
             builder.Property(rt => rt.ReplacedByToken)
                 .HasMaxLength(200);
+
+            // Soft delete filter (inherited from AuditableEntity)
+            builder.HasQueryFilter(rt => rt.DeletedAtUtc == null);
 
             // Indexes
             builder.HasIndex(rt => rt.Token)
