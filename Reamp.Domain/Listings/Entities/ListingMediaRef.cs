@@ -5,9 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Reamp.Domain.Listings.Enums;
-using System;
-
 namespace Reamp.Domain.Listings.Entities
 {
     public sealed class ListingMediaRef
@@ -15,19 +12,18 @@ namespace Reamp.Domain.Listings.Entities
         public Guid Id { get; private set; }
         public Guid ListingId { get; private set; }
         public Guid MediaAssetId { get; private set; }
-
         public ListingMediaRole Role { get; private set; }
-
         public int SortOrder { get; private set; }
         public bool IsCover { get; private set; }
+        public bool IsVisible { get; private set; }
 
-        private ListingMediaRef() { } // EF
+        private ListingMediaRef() { }
 
-        public ListingMediaRef(Guid listingId, Guid mediaAssetId, ListingMediaRole role, int sortOrder = 0, bool isCover = false)
+        public ListingMediaRef(Guid listingId, Guid mediaAssetId, ListingMediaRole role, int sortOrder = 0, bool isCover = false, bool isVisible = true)
         {
-            if (listingId == Guid.Empty) throw new ArgumentException("ListingId is required.", nameof(listingId));
-            if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId is required.", nameof(mediaAssetId));
-            if (sortOrder < 0) throw new ArgumentOutOfRangeException(nameof(sortOrder), "SortOrder cannot be negative.");
+            if (listingId == Guid.Empty) throw new ArgumentException(nameof(listingId));
+            if (mediaAssetId == Guid.Empty) throw new ArgumentException(nameof(mediaAssetId));
+            if (sortOrder < 0) throw new ArgumentOutOfRangeException(nameof(sortOrder));
 
             Id = Guid.NewGuid();
             ListingId = listingId;
@@ -35,6 +31,7 @@ namespace Reamp.Domain.Listings.Entities
             Role = role;
             SortOrder = sortOrder;
             IsCover = isCover;
+            IsVisible = isVisible;
         }
 
         public void UpdateRole(ListingMediaRole role) => Role = role;
@@ -48,19 +45,21 @@ namespace Reamp.Domain.Listings.Entities
         public void SetCover() => IsCover = true;
         public void UnsetCover() => IsCover = false;
 
+        public void SetVisible(bool isVisible) => IsVisible = isVisible;
+
         public static ListingMediaRef CreateCover(Guid listingId, Guid mediaAssetId, int sortOrder = 0)
-            => new(listingId, mediaAssetId, ListingMediaRole.Cover, sortOrder, true);
+            => new(listingId, mediaAssetId, ListingMediaRole.Cover, sortOrder, true, true);
 
         public static ListingMediaRef CreateGallery(Guid listingId, Guid mediaAssetId, int sortOrder = 0)
-            => new(listingId, mediaAssetId, ListingMediaRole.Gallery, sortOrder);
+            => new(listingId, mediaAssetId, ListingMediaRole.Gallery, sortOrder, false, true);
 
         public static ListingMediaRef CreateFloorPlan(Guid listingId, Guid mediaAssetId, int sortOrder = 0)
-            => new(listingId, mediaAssetId, ListingMediaRole.FloorPlan, sortOrder);
+            => new(listingId, mediaAssetId, ListingMediaRole.FloorPlan, sortOrder, false, true);
 
         public static ListingMediaRef CreateVideo(Guid listingId, Guid mediaAssetId, int sortOrder = 0)
-            => new(listingId, mediaAssetId, ListingMediaRole.TourVideo, sortOrder);
+            => new(listingId, mediaAssetId, ListingMediaRole.TourVideo, sortOrder, false, true);
 
         public static ListingMediaRef CreateVrPreview(Guid listingId, Guid mediaAssetId, int sortOrder = 0)
-            => new(listingId, mediaAssetId, ListingMediaRole.VRPreview, sortOrder);
+            => new(listingId, mediaAssetId, ListingMediaRole.VRPreview, sortOrder, false, true);
     }
 }

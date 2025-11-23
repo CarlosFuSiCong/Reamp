@@ -8,54 +8,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class ListingConfiguration : IEntityTypeConfiguration<Listing>
+namespace Reamp.Infrastructure.Configurations.Listings
 {
-    public void Configure(EntityTypeBuilder<Listing> b)
+    public class ListingConfiguration : IEntityTypeConfiguration<Listing>
     {
-        b.ToTable("Listings", t => t.HasCheckConstraint("CK_Listings_Price_Positive", "[Price] > 0"));
-        b.HasKey(x => x.Id);
-
-        b.Property(x => x.Title).IsRequired().HasMaxLength(160);
-        b.Property(x => x.Description).IsRequired().HasMaxLength(4000);
-        b.Property(x => x.Price).HasColumnType("decimal(18,2)");
-        b.Property(x => x.Currency).IsRequired().HasMaxLength(3);
-
-        b.Property(x => x.Bedrooms);
-        b.Property(x => x.Bathrooms);
-        b.Property(x => x.ParkingSpaces);
-        b.Property(x => x.FloorAreaSqm);
-        b.Property(x => x.LandAreaSqm);
-
-        b.Property(x => x.ListingType).HasConversion<int>().IsRequired();
-        b.Property(x => x.PropertyType).HasConversion<int>().IsRequired();
-        b.Property(x => x.Status).HasConversion<int>().IsRequired();
-
-        b.OwnsOne(x => x.Address, a =>
+        public void Configure(EntityTypeBuilder<Listing> b)
         {
-            a.Property(p => p.Line1).IsRequired().HasMaxLength(160);
-            a.Property(p => p.Line2).HasMaxLength(160);
-            a.Property(p => p.City).IsRequired().HasMaxLength(80);
-            a.Property(p => p.State).IsRequired().HasMaxLength(80);
-            a.Property(p => p.Postcode).IsRequired().HasMaxLength(20);
-            a.Property(p => p.Country).IsRequired().HasMaxLength(2);
-            a.Property(p => p.Latitude);
-            a.Property(p => p.Longitude);
-        });
+            b.ToTable("Listings", t => t.HasCheckConstraint("CK_Listings_Price_Positive", "[Price] > 0"));
+            b.HasKey(x => x.Id);
 
-        // Foreign keys and indexes
-        b.HasIndex(x => x.OwnerAgencyId);
-        b.HasOne<Agency>()
-         .WithMany()
-         .HasForeignKey(x => x.OwnerAgencyId)
-         .OnDelete(DeleteBehavior.Restrict);
+            b.Property(x => x.Title).IsRequired().HasMaxLength(160);
+            b.Property(x => x.Description).IsRequired().HasMaxLength(4000);
+            b.Property(x => x.Price).HasColumnType("decimal(18,2)");
+            b.Property(x => x.Currency).IsRequired().HasMaxLength(3);
 
-        b.HasIndex(x => x.AgentUserId);
-        // AgentUserId references Identity user table; keep as loose FK (no FK if cross-DbContext)
-        // If ApplicationUser is in the same DbContext, uncomment below and add using for identity namespace
-        // b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.AgentUserId).OnDelete(DeleteBehavior.NoAction);
+            b.Property(x => x.Bedrooms);
+            b.Property(x => x.Bathrooms);
+            b.Property(x => x.ParkingSpaces);
+            b.Property(x => x.FloorAreaSqm);
+            b.Property(x => x.LandAreaSqm);
 
-        b.HasIndex(x => new { x.Status, x.ListingType });
-        b.HasIndex(x => x.PropertyType);
-        b.HasIndex(x => x.Price);
+            b.Property(x => x.ListingType).HasConversion<int>().IsRequired();
+            b.Property(x => x.PropertyType).HasConversion<int>().IsRequired();
+            b.Property(x => x.Status).HasConversion<int>().IsRequired();
+
+            b.OwnsOne(x => x.Address, a =>
+            {
+                a.Property(p => p.Line1).IsRequired().HasMaxLength(160);
+                a.Property(p => p.Line2).HasMaxLength(160);
+                a.Property(p => p.City).IsRequired().HasMaxLength(80);
+                a.Property(p => p.State).IsRequired().HasMaxLength(80);
+                a.Property(p => p.Postcode).IsRequired().HasMaxLength(20);
+                a.Property(p => p.Country).IsRequired().HasMaxLength(2);
+                a.Property(p => p.Latitude);
+                a.Property(p => p.Longitude);
+            });
+
+            // Foreign keys and indexes
+            b.HasIndex(x => x.OwnerAgencyId);
+            b.HasOne<Agency>()
+             .WithMany()
+             .HasForeignKey(x => x.OwnerAgencyId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasIndex(x => x.AgentUserId);
+            // AgentUserId references Identity user table; keep as loose FK (no FK if cross-DbContext)
+            // If ApplicationUser is in the same DbContext, uncomment below and add using for identity namespace
+            // b.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.AgentUserId).OnDelete(DeleteBehavior.NoAction);
+
+            b.HasIndex(x => new { x.Status, x.ListingType });
+            b.HasIndex(x => x.PropertyType);
+            b.HasIndex(x => x.Price);
+        }
     }
 }
