@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Reamp.Application.Authentication;
 using Reamp.Application.Listings.Dtos;
 using Reamp.Application.Listings.Services;
 using Reamp.Application.Read.Listings;
@@ -23,14 +25,18 @@ namespace Reamp.Api.Controllers
             _logger = logger;
         }
 
+        // Create listing - requires Client or Admin role
         [HttpPost]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
         public async Task<IActionResult> Create([FromBody] CreateListingDto dto, CancellationToken ct)
         {
             var id = await _appService.CreateAsync(dto, ct);
             return CreatedAtAction(nameof(GetDetail), new { id }, new { id });
         }
 
+        // List listings - public access
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> List(
             [FromQuery] Guid? agencyId,
             [FromQuery] ListingStatus? status,
@@ -55,28 +61,36 @@ namespace Reamp.Api.Controllers
             return Ok(result);
         }
 
+        // Get listing detail - public access
         [HttpGet("{id:guid}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var listing = await _readService.GetDetailAsync(id, ct);
             return listing is null ? NotFound() : Ok(listing);
         }
 
+        // Get editor detail - requires Client or Admin
         [HttpGet("{id:guid}/editor")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
         public async Task<IActionResult> GetEditorDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var listing = await _readService.GetEditorDetailAsync(id, ct);
             return listing is null ? NotFound() : Ok(listing);
         }
 
+        // Update listing details - requires Client or Admin
         [HttpPut("{id:guid}")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
         public async Task<IActionResult> UpdateDetails([FromRoute] Guid id, [FromBody] UpdateListingDetailsDto dto, CancellationToken ct)
         {
             await _appService.UpdateDetailsAsync(id, dto, ct);
             return NoContent();
         }
 
+        // Publish listing - requires Client or Admin
         [HttpPost("{id:guid}/publish")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
         public async Task<IActionResult> Publish([FromRoute] Guid id, CancellationToken ct)
         {
             _logger.LogInformation("API request to publish listing {ListingId}", id);
@@ -92,7 +106,9 @@ namespace Reamp.Api.Controllers
             }
         }
 
+        // Archive listing - requires Client or Admin
         [HttpPost("{id:guid}/archive")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
         public async Task<IActionResult> Archive([FromRoute] Guid id, CancellationToken ct)
         {
             _logger.LogInformation("API request to archive listing {ListingId}", id);
