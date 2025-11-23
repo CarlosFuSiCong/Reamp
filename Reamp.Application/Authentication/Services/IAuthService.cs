@@ -19,6 +19,9 @@ namespace Reamp.Application.Authentication.Services
 
         // Change user password
         Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken ct = default);
+
+        // Refresh access token using refresh token
+        Task<TokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken ct = default);
     }
 }
 

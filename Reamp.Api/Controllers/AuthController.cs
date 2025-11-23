@@ -97,6 +97,18 @@ namespace Reamp.Api.Controllers
             _logger.LogInformation("Password changed for user: {UserId}", userId);
             return Ok(ApiResponse.Ok("Password changed successfully"));
         }
+
+        // Refresh access token
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto dto, CancellationToken ct)
+        {
+            _logger.LogInformation("Token refresh attempt");
+
+            var response = await _authService.RefreshTokenAsync(dto.RefreshToken, ct);
+
+            _logger.LogInformation("Token refreshed successfully");
+            return Ok(ApiResponse<TokenResponse>.Ok(response, "Token refreshed successfully"));
+        }
     }
 }
 
