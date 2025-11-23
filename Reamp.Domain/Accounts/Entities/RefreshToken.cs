@@ -3,12 +3,11 @@ using Reamp.Domain.Common.Entities;
 namespace Reamp.Domain.Accounts.Entities
 {
     // Refresh token entity for token rotation
-    public sealed class RefreshToken : BaseEntity
+    public sealed class RefreshToken : AuditableEntity
     {
         public Guid UserId { get; private set; }
         public string Token { get; private set; } = default!;
         public DateTime ExpiresAt { get; private set; }
-        public DateTime CreatedAt { get; private set; }
         public bool IsRevoked { get; private set; }
         public DateTime? RevokedAt { get; private set; }
         public string? ReplacedByToken { get; private set; }
@@ -26,7 +25,6 @@ namespace Reamp.Domain.Accounts.Entities
             {
                 UserId = userId,
                 Token = token,
-                CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddDays(expiryDays)
             };
         }
@@ -38,6 +36,7 @@ namespace Reamp.Domain.Accounts.Entities
             IsRevoked = true;
             RevokedAt = DateTime.UtcNow;
             ReplacedByToken = replacedByToken;
+            Touch();
         }
     }
 }
