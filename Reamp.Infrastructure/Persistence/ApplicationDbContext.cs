@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Common.Abstractions;
+using Reamp.Domain.Listings.Entities;
 using Reamp.Domain.Media.Entities;
 using Reamp.Domain.Shoots.Entities;
 using Reamp.Infrastructure.Extensions;
@@ -36,6 +37,11 @@ namespace Reamp.Infrastructure
         public DbSet<ShootOrder> ShootOrders { get; set; } = null!;
         public DbSet<ShootTask> ShootTasks { get; set; } = null!;
         
+        // Listings
+        public DbSet<Listing> Listings { get; set; } = null!;
+        public DbSet<ListingMediaRef> ListingMediaRefs { get; set; } = null!;
+        public DbSet<ListingAgentSnapshot> ListingAgentSnapshots { get; set; } = null!;
+
         // Delivery
         public DbSet<Reamp.Domain.Delivery.Entities.DeliveryPackage> DeliveryPackages { get; set; } = null!;
         public DbSet<Reamp.Domain.Delivery.Entities.DeliveryItem> DeliveryItems { get; set; } = null!;
