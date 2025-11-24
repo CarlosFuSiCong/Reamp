@@ -61,11 +61,13 @@ namespace Reamp.Application.Accounts.Agencies.Services
             if (agency == null)
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
-            // Check if new name conflicts with existing slug
-            if (!agency.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase))
+            // Check if new name results in a different slug
+            var newSlug = Slug.From(dto.Name);
+            if (newSlug.Value != agency.Slug.Value)
             {
-                var newSlug = Slug.From(dto.Name);
-                if (await _agencyRepository.ExistsBySlugAsync(newSlug, ct))
+                // Only check for conflicts if slug actually changes
+                var existingAgency = await _agencyRepository.GetBySlugAsync(newSlug, asNoTracking: true, ct);
+                if (existingAgency != null && existingAgency.Id != agencyId)
                     throw new InvalidOperationException($"An agency with name '{dto.Name}' already exists.");
                 
                 agency.Rename(dto.Name);
