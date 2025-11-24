@@ -3,6 +3,8 @@ using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Common.ValueObjects;
+using Reamp.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Reamp.Application.Accounts.Agencies.Services
 {
@@ -10,13 +12,16 @@ namespace Reamp.Application.Accounts.Agencies.Services
     {
         private readonly IAgencyRepository _agencyRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationDbContext _dbContext;
 
         public AgencyAppService(
             IAgencyRepository agencyRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ApplicationDbContext dbContext)
         {
             _agencyRepository = agencyRepository;
             _unitOfWork = unitOfWork;
+            _dbContext = dbContext;
         }
 
         public async Task<AgencyDetailDto> CreateAsync(
@@ -44,7 +49,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             await _agencyRepository.AddAsync(agency, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(agency);
+            return MapToDetailDto(agency, 0); // New agency has no branches yet
         }
 
         public async Task<AgencyDetailDto> UpdateAsync(
@@ -76,20 +81,49 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(agency);
+            // Query the branch count after update
+            var branchCount = await _dbContext.Set<AgencyBranch>()
+                .CountAsync(b => b.AgencyId == agency.Id && b.DeletedAtUtc == null, ct);
+
+            return MapToDetailDto(agency, branchCount);
         }
 
         public async Task<AgencyDetailDto?> GetByIdAsync(Guid agencyId, CancellationToken ct = default)
         {
-            var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: true, ct);
-            return agency == null ? null : await MapToDetailDtoAsync(agency);
+            var result = await _dbContext.Set<Agency>()
+                .AsNoTracking()
+                .Where(a => a.Id == agencyId && a.DeletedAtUtc == null)
+                .Select(a => new
+                {
+                    Agency = a,
+                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null)
+                })
+                .FirstOrDefaultAsync(ct);
+
+            if (result == null)
+                return null;
+
+            return MapToDetailDto(result.Agency, result.BranchCount);
         }
 
         public async Task<AgencyDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
         {
             var agencySlug = Slug.From(slug);
-            var agency = await _agencyRepository.GetBySlugAsync(agencySlug, asNoTracking: true, ct);
-            return agency == null ? null : await MapToDetailDtoAsync(agency);
+            
+            var result = await _dbContext.Set<Agency>()
+                .AsNoTracking()
+                .Where(a => a.Slug.Value == agencySlug.Value && a.DeletedAtUtc == null)
+                .Select(a => new
+                {
+                    Agency = a,
+                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null)
+                })
+                .FirstOrDefaultAsync(ct);
+
+            if (result == null)
+                return null;
+
+            return MapToDetailDto(result.Agency, result.BranchCount);
         }
 
         public async Task<IPagedList<AgencyListDto>> ListAsync(
@@ -97,27 +131,42 @@ namespace Reamp.Application.Accounts.Agencies.Services
             string? search = null,
             CancellationToken ct = default)
         {
-            var pagedAgencies = await _agencyRepository.ListAsync(pageRequest, search, ct);
+            var query = _dbContext.Set<Agency>()
+                .AsNoTracking()
+                .Where(a => a.DeletedAtUtc == null);
 
-            var dtos = pagedAgencies.Items.Select(agency => new AgencyListDto
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                Id = agency.Id,
-                Name = agency.Name,
-                Slug = agency.Slug.Value,
-                Description = agency.Description,
-                LogoAssetId = agency.LogoAssetId,
-                LogoUrl = null, // TODO: Map from MediaAsset when needed
-                ContactEmail = agency.ContactEmail,
-                ContactPhone = agency.ContactPhone,
-                BranchCount = agency.Branches.Count,
-                CreatedAtUtc = agency.CreatedAtUtc
-            }).ToList();
+                var s = search.Trim().ToLower();
+                query = query.Where(a => a.Name.ToLower().Contains(s) || a.Slug.Value.Contains(s));
+            }
+
+            var totalCount = await query.CountAsync(ct);
+
+            var items = await query
+                .OrderBy(a => a.Name)
+                .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
+                .Take(pageRequest.PageSize)
+                .Select(a => new AgencyListDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Slug = a.Slug.Value,
+                    Description = a.Description,
+                    LogoAssetId = a.LogoAssetId,
+                    LogoUrl = null, // TODO: Map from MediaAsset when needed
+                    ContactEmail = a.ContactEmail,
+                    ContactPhone = a.ContactPhone,
+                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null),
+                    CreatedAtUtc = a.CreatedAtUtc
+                })
+                .ToListAsync(ct);
 
             return new PagedList<AgencyListDto>(
-                dtos,
-                pagedAgencies.TotalCount,
-                pagedAgencies.Page,
-                pagedAgencies.PageSize
+                items,
+                totalCount,
+                pageRequest.Page,
+                pageRequest.PageSize
             );
         }
 
@@ -137,9 +186,9 @@ namespace Reamp.Application.Accounts.Agencies.Services
             return await _agencyRepository.ExistsBySlugAsync(agencySlug, ct);
         }
 
-        private Task<AgencyDetailDto> MapToDetailDtoAsync(Agency agency)
+        private AgencyDetailDto MapToDetailDto(Agency agency, int branchCount)
         {
-            return Task.FromResult(new AgencyDetailDto
+            return new AgencyDetailDto
             {
                 Id = agency.Id,
                 Name = agency.Name,
@@ -152,8 +201,8 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 CreatedBy = agency.CreatedBy,
                 CreatedAtUtc = agency.CreatedAtUtc,
                 UpdatedAtUtc = agency.UpdatedAtUtc,
-                BranchCount = agency.Branches.Count
-            });
+                BranchCount = branchCount
+            };
         }
     }
 }
