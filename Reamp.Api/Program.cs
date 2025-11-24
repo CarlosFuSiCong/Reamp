@@ -151,6 +151,7 @@ namespace Reamp.Api
             builder.Services.AddScoped<IClientRepository, ClientRepository>();
             builder.Services.AddScoped<IStaffRepository, StaffRepository>();
             builder.Services.AddScoped<IListingRepository, ListingRepository>();
+            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Reamp.Application.Authentication.Dtos;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Repositories;
@@ -14,18 +15,24 @@ namespace Reamp.Application.Authentication.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IUserProfileRepository _userProfileRepo;
+        private readonly IRefreshTokenRepository _refreshTokenRepo;
         private readonly IUnitOfWork _uow;
+        private readonly JwtSettings _jwtSettings;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             IJwtTokenService jwtTokenService,
             IUserProfileRepository userProfileRepo,
-            IUnitOfWork uow)
+            IRefreshTokenRepository refreshTokenRepo,
+            IUnitOfWork uow,
+            IOptions<JwtSettings> jwtSettings)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
             _userProfileRepo = userProfileRepo;
+            _refreshTokenRepo = refreshTokenRepo;
             _uow = uow;
+            _jwtSettings = jwtSettings.Value;
         }
 
         public async Task<TokenResponse> RegisterAsync(RegisterDto dto, CancellationToken ct = default)
@@ -61,14 +68,19 @@ namespace Reamp.Application.Authentication.Services
             await _userProfileRepo.AddAsync(profile, ct);
             await _uow.SaveChangesAsync(ct);
 
-            // Generate token
-            var token = _jwtTokenService.GenerateTokenResponse(
+            // Generate tokens
+            var tokenResponse = _jwtTokenService.GenerateTokenResponse(
                 userId: user.Id,
                 email: user.Email!,
                 role: dto.Role.ToString()
             );
 
-            return token;
+            // Store refresh token
+            var refreshToken = RefreshToken.Create(user.Id, tokenResponse.RefreshToken, _jwtSettings.RefreshTokenExpirationDays);
+            await _refreshTokenRepo.AddAsync(refreshToken, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            return tokenResponse;
         }
 
         public async Task<TokenResponse> LoginAsync(LoginDto dto, CancellationToken ct = default)
@@ -92,14 +104,19 @@ namespace Reamp.Application.Authentication.Services
             if (profile == null)
                 throw new InvalidOperationException("User profile not found");
 
-            // Generate token
-            var token = _jwtTokenService.GenerateTokenResponse(
+            // Generate tokens
+            var tokenResponse = _jwtTokenService.GenerateTokenResponse(
                 userId: user.Id,
                 email: user.Email!,
                 role: profile.Role.ToString()
             );
 
-            return token;
+            // Store refresh token
+            var refreshToken = RefreshToken.Create(user.Id, tokenResponse.RefreshToken, _jwtSettings.RefreshTokenExpirationDays);
+            await _refreshTokenRepo.AddAsync(refreshToken, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            return tokenResponse;
         }
 
         public async Task<UserInfoDto?> GetUserInfoAsync(Guid userId, CancellationToken ct = default)
@@ -157,6 +174,43 @@ namespace Reamp.Application.Authentication.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Failed to change password: {errors}");
             }
+        }
+
+        public async Task<TokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken ct = default)
+        {
+            // Get refresh token from database
+            var storedToken = await _refreshTokenRepo.GetByTokenAsync(refreshToken, ct);
+            if (storedToken == null)
+                throw new UnauthorizedAccessException("Invalid refresh token");
+
+            // Validate token is active
+            if (!storedToken.IsActive)
+                throw new UnauthorizedAccessException("Refresh token is expired or revoked");
+
+            // Get user
+            var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
+            if (user == null || user.DeletedAtUtc.HasValue)
+                throw new UnauthorizedAccessException("User not found");
+
+            // Get user profile
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(user.Id, false, true, ct);
+            if (profile == null)
+                throw new InvalidOperationException("User profile not found");
+
+            // Generate new tokens
+            var newTokenResponse = _jwtTokenService.GenerateTokenResponse(
+                userId: user.Id,
+                email: user.Email!,
+                role: profile.Role.ToString()
+            );
+
+            // Revoke old refresh token and store new one
+            storedToken.Revoke(newTokenResponse.RefreshToken);
+            var newRefreshToken = RefreshToken.Create(user.Id, newTokenResponse.RefreshToken, _jwtSettings.RefreshTokenExpirationDays);
+            await _refreshTokenRepo.AddAsync(newRefreshToken, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            return newTokenResponse;
         }
     }
 }
