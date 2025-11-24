@@ -116,7 +116,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             return new PagedList<AgencyListDto>(
                 dtos,
                 pagedAgencies.TotalCount,
-                pagedAgencies.PageNumber,
+                pagedAgencies.Page,
                 pagedAgencies.PageSize
             );
         }
@@ -127,7 +127,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             if (agency == null)
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
-            await _agencyRepository.DeleteAsync(agency, ct);
+            _agencyRepository.Remove(agency);
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
@@ -155,26 +155,6 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 BranchCount = agency.Branches.Count
             });
         }
-    }
-
-    // Helper class for pagination
-    internal class PagedList<T> : IPagedList<T>
-    {
-        public PagedList(IReadOnlyList<T> items, int totalCount, int pageNumber, int pageSize)
-        {
-            Items = items;
-            TotalCount = totalCount;
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-        }
-
-        public IReadOnlyList<T> Items { get; }
-        public int TotalCount { get; }
-        public int PageNumber { get; }
-        public int PageSize { get; }
-        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
-        public bool HasPreviousPage => PageNumber > 1;
-        public bool HasNextPage => PageNumber < TotalPages;
     }
 }
 
