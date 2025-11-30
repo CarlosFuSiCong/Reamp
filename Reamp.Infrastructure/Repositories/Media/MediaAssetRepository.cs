@@ -54,6 +54,11 @@ namespace Reamp.Infrastructure.Repositories.Media
             int pageSize = 20,
             CancellationToken ct = default)
         {
+            // Normalize pagination parameters to prevent ArgumentOutOfRangeException
+            const int MaxPageSize = 100;
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
             var query = _set.Where(m => m.OwnerStudioId == studioId);
 
             if (resourceType.HasValue)
