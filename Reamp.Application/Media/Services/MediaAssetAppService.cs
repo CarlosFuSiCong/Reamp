@@ -36,6 +36,10 @@ namespace Reamp.Application.Media.Services
             if (currentUserId == Guid.Empty)
                 throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
 
+            // Validate content type
+            if (string.IsNullOrWhiteSpace(dto.ContentType))
+                throw new ArgumentException("ContentType is required.", nameof(dto.ContentType));
+
             // Validate file
             var contentType = dto.ContentType.ToLowerInvariant();
             var isImage = contentType.StartsWith("image/");
