@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Reamp.Application.Media.Dtos;
+using Reamp.Infrastructure.Configuration;
 using Reamp.Infrastructure.Services.Media;
 
 namespace Reamp.Application.Media.Services
@@ -9,14 +11,17 @@ namespace Reamp.Application.Media.Services
         private readonly IUploadSessionStore _sessionStore;
         private readonly IMediaAssetAppService _mediaAssetAppService;
         private readonly ILogger<ChunkedUploadService> _logger;
+        private readonly MediaUploadSettings _uploadSettings;
 
         public ChunkedUploadService(
             IUploadSessionStore sessionStore,
             IMediaAssetAppService mediaAssetAppService,
+            IOptions<MediaUploadSettings> uploadSettings,
             ILogger<ChunkedUploadService> logger)
         {
             _sessionStore = sessionStore;
             _mediaAssetAppService = mediaAssetAppService;
+            _uploadSettings = uploadSettings.Value;
             _logger = logger;
         }
 
@@ -124,6 +129,22 @@ namespace Reamp.Application.Media.Services
                 throw new InvalidOperationException($"Upload session {sessionId} is not complete. Received {session.UploadedChunksCount}/{session.TotalChunks} chunks.");
 
             _logger.LogInformation("Completing upload for session {SessionId}", sessionId);
+
+            // Security: Validate file size against configured upload limits BEFORE allocating buffer
+            // This prevents OOM attacks where attacker initiates large TotalSize with minimal chunks
+            var contentType = session.ContentType.ToLowerInvariant();
+            var isImage = contentType.StartsWith("image/");
+            var isVideo = contentType.StartsWith("video/");
+            var maxConfiguredSize = isImage ? _uploadSettings.MaxImageSizeBytes : _uploadSettings.MaxVideoSizeBytes;
+            
+            if (session.TotalSize > maxConfiguredSize)
+            {
+                _logger.LogError(
+                    "Session {SessionId} TotalSize {TotalSize} exceeds configured max {MaxSize} for {FileType}",
+                    sessionId, session.TotalSize, maxConfiguredSize, isImage ? "image" : "video");
+                throw new InvalidOperationException(
+                    $"File size ({session.TotalSize} bytes) exceeds maximum allowed ({maxConfiguredSize} bytes).");
+            }
 
             // Validate file size before allocating buffer (C# arrays require int dimensions)
             if (session.TotalSize > int.MaxValue)
