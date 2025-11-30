@@ -249,6 +249,8 @@ namespace Reamp.Api.Controllers.Media
                 if (chunk == null || chunk.Length == 0)
                     return BadRequest(ApiResponse<object>.Fail("Chunk is required"));
 
+                var currentUserId = GetCurrentUserId();
+
                 using var stream = chunk.OpenReadStream();
                 var dto = new UploadChunkDto
                 {
@@ -257,7 +259,7 @@ namespace Reamp.Api.Controllers.Media
                     ChunkData = stream
                 };
 
-                var session = await _chunkedUploadService.UploadChunkAsync(dto, ct);
+                var session = await _chunkedUploadService.UploadChunkAsync(dto, currentUserId, ct);
 
                 // Send progress update via SignalR
                 var connectionId = Request.Headers["X-SignalR-ConnectionId"].ToString();
@@ -281,6 +283,10 @@ namespace Reamp.Api.Controllers.Media
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading chunk");
@@ -294,7 +300,8 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                var mediaAsset = await _chunkedUploadService.CompleteUploadAsync(sessionId, ct);
+                var currentUserId = GetCurrentUserId();
+                var mediaAsset = await _chunkedUploadService.CompleteUploadAsync(sessionId, currentUserId, ct);
 
                 // Send completion notification via SignalR
                 var connectionId = Request.Headers["X-SignalR-ConnectionId"].ToString();
@@ -317,6 +324,10 @@ namespace Reamp.Api.Controllers.Media
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ApiResponse<object>.Fail(ex.Message));
@@ -334,12 +345,17 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                var session = await _chunkedUploadService.GetSessionStatusAsync(sessionId, ct);
+                var currentUserId = GetCurrentUserId();
+                var session = await _chunkedUploadService.GetSessionStatusAsync(sessionId, currentUserId, ct);
 
                 if (session == null)
                     return NotFound(ApiResponse<object>.Fail("Upload session not found"));
 
                 return Ok(ApiResponse<UploadSessionDto>.Ok(session));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {
@@ -354,11 +370,20 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                await _chunkedUploadService.CancelUploadAsync(sessionId, ct);
+                var currentUserId = GetCurrentUserId();
+                await _chunkedUploadService.CancelUploadAsync(sessionId, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
                     null,
                     "Upload cancelled successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {

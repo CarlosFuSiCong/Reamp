@@ -50,11 +50,23 @@ namespace Reamp.Application.Media.Services
 
         public async Task<UploadSessionDto> UploadChunkAsync(
             UploadChunkDto dto,
+            Guid currentUserId,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var session = await _sessionStore.GetSessionAsync(dto.UploadSessionId);
             if (session == null)
                 throw new KeyNotFoundException($"Upload session {dto.UploadSessionId} not found.");
+
+            // Security: Verify the caller owns this upload session
+            if (session.UploaderUserId != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to upload chunk to session {SessionId} owned by {OwnerId}",
+                    currentUserId, session.SessionId, session.UploaderUserId);
+                throw new UnauthorizedAccessException($"You are not authorized to upload to this session.");
+            }
 
             if (session.ReceivedChunks.Contains(dto.ChunkIndex))
             {
@@ -82,11 +94,23 @@ namespace Reamp.Application.Media.Services
 
         public async Task<MediaAssetDetailDto> CompleteUploadAsync(
             Guid sessionId,
+            Guid currentUserId,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var session = await _sessionStore.GetSessionAsync(sessionId);
             if (session == null)
                 throw new KeyNotFoundException($"Upload session {sessionId} not found.");
+
+            // Security: Verify the caller owns this upload session
+            if (session.UploaderUserId != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to complete session {SessionId} owned by {OwnerId}",
+                    currentUserId, sessionId, session.UploaderUserId);
+                throw new UnauthorizedAccessException($"You are not authorized to complete this session.");
+            }
 
             if (!session.IsComplete)
                 throw new InvalidOperationException($"Upload session {sessionId} is not complete. Received {session.UploadedChunksCount}/{session.TotalChunks} chunks.");
@@ -144,18 +168,49 @@ namespace Reamp.Application.Media.Services
 
         public async Task<UploadSessionDto?> GetSessionStatusAsync(
             Guid sessionId,
+            Guid currentUserId,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var session = await _sessionStore.GetSessionAsync(sessionId);
-            return session == null ? null : MapToDto(session);
+            if (session == null)
+                return null;
+
+            // Security: Verify the caller owns this upload session
+            if (session.UploaderUserId != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to access session {SessionId} owned by {OwnerId}",
+                    currentUserId, sessionId, session.UploaderUserId);
+                throw new UnauthorizedAccessException($"You are not authorized to access this session.");
+            }
+
+            return MapToDto(session);
         }
 
         public async Task CancelUploadAsync(
             Guid sessionId,
+            Guid currentUserId,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
+            var session = await _sessionStore.GetSessionAsync(sessionId);
+            if (session == null)
+                throw new KeyNotFoundException($"Upload session {sessionId} not found.");
+
+            // Security: Verify the caller owns this upload session
+            if (session.UploaderUserId != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to cancel session {SessionId} owned by {OwnerId}",
+                    currentUserId, sessionId, session.UploaderUserId);
+                throw new UnauthorizedAccessException($"You are not authorized to cancel this session.");
+            }
+
             await _sessionStore.DeleteSessionAsync(sessionId);
-            _logger.LogInformation("Upload session {SessionId} cancelled", sessionId);
+            _logger.LogInformation("Upload session {SessionId} cancelled by user {UserId}", sessionId, currentUserId);
         }
 
         private UploadSessionDto MapToDto(UploadSession session)
