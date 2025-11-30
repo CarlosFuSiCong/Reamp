@@ -186,13 +186,15 @@ namespace Reamp.Api.Controllers.Media
 
         // DELETE /api/media/{id} - Delete media
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+        public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid studioId, CancellationToken ct)
         {
             try
             {
-                _logger.LogInformation("Deleting media {AssetId}", id);
+                var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("User {UserId} deleting media {AssetId} from Studio {StudioId}", 
+                    currentUserId, id, studioId);
 
-                await _mediaAssetAppService.DeleteAsync(id, ct);
+                await _mediaAssetAppService.DeleteAsync(id, studioId, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
                     null,
@@ -202,10 +204,14 @@ namespace Reamp.Api.Controllers.Media
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ApiResponse<object>.Fail(ex.Message).ToString()!);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting media {AssetId}", id);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while deleting media"));
+                return StatusCode(500, ApiResponse<object>.Fail("Failed to delete media"));
             }
         }
 

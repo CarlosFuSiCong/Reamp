@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Reamp.Application.Media.Dtos;
 using Reamp.Domain.Common.Abstractions;
+using Reamp.Domain.Common.Services;
 using Reamp.Domain.Media.Entities;
 using Reamp.Domain.Media.Enums;
 using Reamp.Domain.Media.Repositories;
@@ -16,18 +17,21 @@ namespace Reamp.Application.Media.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<MediaAssetAppService> _logger;
         private readonly MediaUploadSettings _uploadSettings;
+        private readonly IBackgroundJobService _backgroundJobService;
 
         public MediaAssetAppService(
             IMediaAssetRepository mediaAssetRepository,
             ICloudinaryService cloudinaryService,
             IUnitOfWork unitOfWork,
             Microsoft.Extensions.Options.IOptions<MediaUploadSettings> uploadSettings,
+            IBackgroundJobService backgroundJobService,
             ILogger<MediaAssetAppService> logger)
         {
             _mediaAssetRepository = mediaAssetRepository;
             _cloudinaryService = cloudinaryService;
             _unitOfWork = unitOfWork;
             _uploadSettings = uploadSettings.Value;
+            _backgroundJobService = backgroundJobService;
             _logger = logger;
         }
 
@@ -189,17 +193,31 @@ namespace Reamp.Application.Media.Services
 
             _logger.LogInformation("Processing triggered for asset: {AssetId}", assetId);
 
-            // Queue background job using Hangfire (if available)
-            // Note: Hangfire BackgroundJob.Enqueue requires Hangfire to be configured
-            // For now, we'll just mark it as processing
-            // In production with Hangfire: BackgroundJob.Enqueue<IMediaProcessingJob>(x => x.OptimizeMediaAsync(assetId));
+            // Enqueue background job for actual processing
+            _backgroundJobService.Enqueue<IMediaProcessingJob>(x => x.OptimizeMediaAsync(assetId));
+            _logger.LogInformation("Enqueued background job for asset optimization: {AssetId}", assetId);
         }
 
-        public async Task DeleteAsync(Guid assetId, CancellationToken ct = default)
+        public async Task DeleteAsync(Guid assetId, Guid studioId, Guid currentUserId, CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
+            if (studioId == Guid.Empty)
+                throw new ArgumentException("StudioId is required.", nameof(studioId));
+
             var asset = await _mediaAssetRepository.GetByIdAsync(assetId, asNoTracking: false, ct);
             if (asset == null)
                 throw new KeyNotFoundException($"Media asset with ID {assetId} not found.");
+
+            // Security: Verify ownership - user must belong to the asset's owner studio
+            if (asset.OwnerStudioId != studioId)
+            {
+                _logger.LogWarning(
+                    "User {UserId} from Studio {StudioId} attempted to delete asset {AssetId} owned by Studio {OwnerStudioId}",
+                    currentUserId, studioId, assetId, asset.OwnerStudioId);
+                throw new UnauthorizedAccessException("You are not authorized to delete this media asset.");
+            }
 
             // Delete from Cloudinary
             var deleted = await _cloudinaryService.DeleteAssetAsync(
@@ -215,7 +233,7 @@ namespace Reamp.Application.Media.Services
             _mediaAssetRepository.Remove(asset);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Media asset deleted: {AssetId}", assetId);
+            _logger.LogInformation("Media asset deleted: {AssetId} by User {UserId}", assetId, currentUserId);
         }
 
         private MediaAssetDetailDto MapToDetailDto(MediaAsset asset)

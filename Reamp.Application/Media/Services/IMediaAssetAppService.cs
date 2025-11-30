@@ -27,8 +27,8 @@ namespace Reamp.Application.Media.Services
         // Trigger processing for media asset
         Task TriggerProcessingAsync(Guid assetId, CancellationToken ct = default);
 
-        // Delete media asset
-        Task DeleteAsync(Guid assetId, CancellationToken ct = default);
+        // Delete media asset (with ownership verification)
+        Task DeleteAsync(Guid assetId, Guid studioId, Guid currentUserId, CancellationToken ct = default);
     }
 }
 

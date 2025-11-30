@@ -199,6 +199,10 @@ namespace Reamp.Api
             builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaProcessingJob,
                 Reamp.Application.Media.Services.MediaProcessingJob>();
 
+            // Background Job Service (Hangfire abstraction)
+            builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
+                Reamp.Infrastructure.Services.Jobs.HangfireBackgroundJobService>();
+
             // Media Services
             builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 
                 Reamp.Infrastructure.Services.Media.CloudinaryService>();

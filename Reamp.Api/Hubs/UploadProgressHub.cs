@@ -1,27 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Reamp.Api.Hubs
 {
     // SignalR Hub for real-time upload progress updates
+    // Security: Require authentication to prevent unauthorized access
+    [Authorize]
     public class UploadProgressHub : Hub
     {
-        // Send progress update to specific user
-        public async Task SendProgress(string connectionId, int progress, string fileName)
-        {
-            await Clients.Client(connectionId).SendAsync("ReceiveProgress", progress, fileName);
-        }
-
-        // Notify upload complete
-        public async Task SendComplete(string connectionId, string fileName, Guid assetId)
-        {
-            await Clients.Client(connectionId).SendAsync("UploadComplete", fileName, assetId);
-        }
-
-        // Notify upload error
-        public async Task SendError(string connectionId, string fileName, string error)
-        {
-            await Clients.Client(connectionId).SendAsync("UploadError", fileName, error);
-        }
+        // Note: These methods are server-side only. Clients should not call them directly.
+        // Progress updates should be sent from server-side code (e.g., ChunkedUploadService)
+        // using IHubContext<UploadProgressHub> instead of allowing client-to-client messaging.
 
         public override async Task OnConnectedAsync()
         {
