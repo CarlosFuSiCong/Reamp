@@ -69,13 +69,33 @@ namespace Reamp.Infrastructure.Services.Media
 
             foreach (var session in allSessions)
             {
-                // Skip completed sessions (they have their own cleanup)
-                if (session.CompletedAtUtc.HasValue)
-                    continue;
+                bool shouldCleanup = false;
+                string reason = "";
 
-                // Check if session is abandoned (no activity for sessionTimeout)
-                var inactiveFor = now - session.LastActivityUtc;
-                if (inactiveFor > _sessionTimeout)
+                // P1 Fix: Clean up completed sessions after grace period
+                // Previously, completed sessions were skipped entirely, causing permanent memory leak
+                if (session.CompletedAtUtc.HasValue)
+                {
+                    // Keep completed sessions for 5 minutes for potential status queries
+                    var completedFor = now - session.CompletedAtUtc.Value;
+                    if (completedFor > TimeSpan.FromMinutes(5))
+                    {
+                        shouldCleanup = true;
+                        reason = $"completed {completedFor.TotalMinutes:F1} minutes ago";
+                    }
+                }
+                else
+                {
+                    // Check if session is abandoned (no activity for sessionTimeout)
+                    var inactiveFor = now - session.LastActivityUtc;
+                    if (inactiveFor > _sessionTimeout)
+                    {
+                        shouldCleanup = true;
+                        reason = $"abandoned, inactive for {inactiveFor.TotalMinutes:F1} minutes";
+                    }
+                }
+
+                if (shouldCleanup)
                 {
                     // Calculate memory being freed
                     var sessionMemory = session.ChunkData.Values.Sum(chunk => (long)chunk.Length);
@@ -85,10 +105,9 @@ namespace Reamp.Infrastructure.Services.Media
                     cleanedCount++;
 
                     _logger.LogInformation(
-                        "Cleaned up abandoned upload session {SessionId}. " +
-                        "Inactive for: {InactiveFor}, Uploaded chunks: {UploadedChunks}/{TotalChunks}, " +
-                        "Memory freed: {MemoryFreed} bytes",
-                        session.SessionId, inactiveFor, session.UploadedChunksCount, 
+                        "Cleaned up upload session {SessionId} ({Reason}). " +
+                        "Uploaded chunks: {UploadedChunks}/{TotalChunks}, Memory freed: {MemoryFreed} bytes",
+                        session.SessionId, reason, session.UploadedChunksCount, 
                         session.TotalChunks, sessionMemory);
                 }
             }
@@ -97,7 +116,7 @@ namespace Reamp.Infrastructure.Services.Media
             {
                 _logger.LogInformation(
                     "Upload session cleanup completed. " +
-                    "Cleaned sessions: {CleanedCount}, Total memory freed: {TotalMemoryFreed} bytes ({MemoryMB} MB)",
+                    "Cleaned sessions: {CleanedCount}, Total memory freed: {TotalMemoryFreed} bytes ({MemoryMB:F2} MB)",
                     cleanedCount, totalMemoryFreed, totalMemoryFreed / (1024.0 * 1024.0));
             }
         }
