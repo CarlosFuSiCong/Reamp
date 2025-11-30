@@ -71,6 +71,11 @@ namespace Reamp.Api.Controllers.Media
             {
                 return BadRequest(ApiResponse<object>.Fail(ex.Message));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized upload attempt to studio {StudioId}", studioId);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading media");
