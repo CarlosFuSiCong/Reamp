@@ -53,10 +53,12 @@ namespace Reamp.Infrastructure.Repositories.Accounts
         {
             var query = _set.Where(s => s.StudioId == studioId && s.DeletedAtUtc == null);
 
-            // Filter by skill if specified
-            if (hasSkill.HasValue)
+            // P2 Fix: Filter by skill if specified (match ANY requested skill, not ALL)
+            // Changed from == to != 0 to align with StaffAppService expectation
+            // When multiple skills passed (e.g., Photographer | Videographer), should match staff with either skill
+            if (hasSkill.HasValue && hasSkill.Value != StaffSkills.None)
             {
-                query = query.Where(s => (s.Skills & hasSkill.Value) == hasSkill.Value);
+                query = query.Where(s => (s.Skills & hasSkill.Value) != 0);
             }
 
             var totalCount = await query.CountAsync(ct);
