@@ -1,5 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +71,18 @@ namespace Reamp.Api
                 })
             );
 
+            // Hangfire (Background Jobs)
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(conn));
+
+            builder.Services.AddHangfireServer();
+
+            // SignalR
+            builder.Services.AddSignalR();
+
             // Identity
             builder.Services
                 .AddIdentity<ApplicationUser, ApplicationRole>()
@@ -81,6 +95,12 @@ namespace Reamp.Api
                 throw new InvalidOperationException("JWT settings are not configured properly.");
 
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+
+            // Cloudinary Settings
+            builder.Services.Configure<Reamp.Infrastructure.Configuration.CloudinarySettings>(
+                builder.Configuration.GetSection("CloudinarySettings"));
+            builder.Services.Configure<Reamp.Infrastructure.Configuration.MediaUploadSettings>(
+                builder.Configuration.GetSection("MediaUploadSettings"));
 
             // JWT Authentication
             builder.Services
@@ -161,6 +181,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<IStaffRepository, StaffRepository>();
             builder.Services.AddScoped<IListingRepository, ListingRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            builder.Services.AddScoped<Reamp.Domain.Media.Repositories.IMediaAssetRepository,
+                Reamp.Infrastructure.Repositories.Media.MediaAssetRepository>();
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -170,6 +192,25 @@ namespace Reamp.Api
             builder.Services.AddScoped<IStudioAppService, StudioAppService>();
             builder.Services.AddScoped<IListingAppService, ListingAppService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaAssetAppService,
+                Reamp.Application.Media.Services.MediaAssetAppService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IChunkedUploadService,
+                Reamp.Application.Media.Services.ChunkedUploadService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaProcessingJob,
+                Reamp.Application.Media.Services.MediaProcessingJob>();
+
+            // Background Job Service (Hangfire abstraction)
+            builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
+                Reamp.Infrastructure.Services.Jobs.HangfireBackgroundJobService>();
+
+            // Media Services
+            builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 
+                Reamp.Infrastructure.Services.Media.CloudinaryService>();
+            builder.Services.AddSingleton<Reamp.Infrastructure.Services.Media.IUploadSessionStore,
+                Reamp.Infrastructure.Services.Media.InMemoryUploadSessionStore>();
+            
+            // P1 Fix: Background service to clean up abandoned chunked upload sessions
+            builder.Services.AddHostedService<Reamp.Infrastructure.Services.Media.UploadSessionCleanupService>();
 
             // Read Services  
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();
@@ -230,7 +271,15 @@ namespace Reamp.Api
                 }
             });
 
+            // Hangfire Dashboard (restricted to Development environment for security)
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseHangfireDashboard("/hangfire");
+            }
+            // For Production: Consider adding authentication via DashboardOptions with IDashboardAuthorizationFilter
+
             app.MapControllers();
+            app.MapHub<Reamp.Api.Hubs.UploadProgressHub>("/hubs/upload-progress");
             app.MapGet("/health", () => "OK");
 
             app.Run();

@@ -148,8 +148,7 @@ namespace Reamp.Domain.Media.Entities
             if (provider == MediaProvider.CloudflareStream && type != MediaResourceType.Video)
                 throw new InvalidOperationException("Cloudflare Stream can only be used for Video assets.");
 
-            if (provider == MediaProvider.Cloudinary && type == MediaResourceType.Video)
-                throw new InvalidOperationException("Video assets must use Cloudflare Stream.");
+            // Cloudinary can handle both images and videos
         }
 
         private void Touch() => UpdatedAtUtc = DateTime.UtcNow;
