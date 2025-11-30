@@ -248,7 +248,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             // Check for slug conflicts before creating
             var newSlug = Slug.From(dto.Name);
             var existingBranch = await _dbContext.Set<AgencyBranch>()
-                .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug == newSlug && b.DeletedAtUtc == null, ct);
+                .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug.Value == newSlug.Value && b.DeletedAtUtc == null, ct);
 
             if (existingBranch != null)
                 throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
@@ -291,7 +291,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             if (newSlug.Value != branch.Slug.Value)
             {
                 var existingBranch = await _dbContext.Set<AgencyBranch>()
-                    .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug == newSlug && b.DeletedAtUtc == null, ct);
+                    .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug.Value == newSlug.Value && b.DeletedAtUtc == null, ct);
 
                 if (existingBranch != null && existingBranch.Id != branchId)
                     throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
