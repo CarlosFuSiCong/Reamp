@@ -54,14 +54,14 @@ namespace Reamp.Application.Media.Services
             if (allowedTypes != null && !allowedTypes.Contains(contentType))
                 throw new InvalidOperationException($"File type '{contentType}' is not allowed.");
 
-            // Compute checksum for deduplication
+            // Compute checksum for deduplication (scoped to current studio)
             var checksum = await CloudinaryService.ComputeSha256Async(dto.FileStream);
 
-            // Check for duplicate
+            // Check for duplicate within the SAME studio only (security: prevent cross-tenant data leakage)
             var existing = await _mediaAssetRepository.FindByChecksumAsync(checksum, ct);
-            if (existing != null)
+            if (existing != null && existing.OwnerStudioId == dto.OwnerStudioId)
             {
-                _logger.LogInformation("Found duplicate media asset: {AssetId}", existing.Id);
+                _logger.LogInformation("Found duplicate media asset within studio: {AssetId}", existing.Id);
                 return MapToDetailDto(existing);
             }
 
