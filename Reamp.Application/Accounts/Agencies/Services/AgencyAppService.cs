@@ -238,6 +238,9 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid currentUserId,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: false, ct);
             if (agency == null)
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
