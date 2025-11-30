@@ -5,40 +5,46 @@ namespace Reamp.Application.Accounts.Agencies.Services
 {
     public interface IAgencyAppService
     {
-        /// <summary>
-        /// Create a new agency
-        /// </summary>
+        // Create a new agency
         Task<AgencyDetailDto> CreateAsync(CreateAgencyDto dto, Guid currentUserId, CancellationToken ct = default);
 
-        /// <summary>
-        /// Update an existing agency
-        /// </summary>
+        // Update an existing agency
         Task<AgencyDetailDto> UpdateAsync(Guid agencyId, UpdateAgencyDto dto, CancellationToken ct = default);
 
-        /// <summary>
-        /// Get agency by ID
-        /// </summary>
+        // Get agency by ID
         Task<AgencyDetailDto?> GetByIdAsync(Guid agencyId, CancellationToken ct = default);
 
-        /// <summary>
-        /// Get agency by slug
-        /// </summary>
+        // Get agency by slug
         Task<AgencyDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default);
 
-        /// <summary>
-        /// List agencies with pagination
-        /// </summary>
+        // List agencies with pagination
         Task<IPagedList<AgencyListDto>> ListAsync(PageRequest pageRequest, string? search = null, CancellationToken ct = default);
 
-        /// <summary>
-        /// Delete an agency (soft delete)
-        /// </summary>
+        // Delete an agency (soft delete)
         Task DeleteAsync(Guid agencyId, CancellationToken ct = default);
 
-        /// <summary>
-        /// Check if agency exists by slug
-        /// </summary>
+        // Update agency logo
+        Task<AgencyDetailDto> UpdateLogoAsync(Guid agencyId, Guid? logoAssetId, CancellationToken ct = default);
+
+        // Check if agency exists by slug
         Task<bool> ExistsBySlugAsync(string slug, CancellationToken ct = default);
+
+        // Branch Management
+
+        // Create a new branch for an agency
+        Task<AgencyBranchDetailDto> CreateBranchAsync(Guid agencyId, CreateAgencyBranchDto dto, Guid currentUserId, CancellationToken ct = default);
+
+        // Update an existing branch
+        Task<AgencyBranchDetailDto> UpdateBranchAsync(Guid agencyId, Guid branchId, UpdateAgencyBranchDto dto, CancellationToken ct = default);
+
+        // Get branch by ID
+        Task<AgencyBranchDetailDto?> GetBranchByIdAsync(Guid agencyId, Guid branchId, CancellationToken ct = default);
+
+        // List branches for an agency
+        Task<IReadOnlyList<AgencyBranchDetailDto>> ListBranchesAsync(Guid agencyId, CancellationToken ct = default);
+
+        // Delete a branch (soft delete)
+        Task DeleteBranchAsync(Guid agencyId, Guid branchId, CancellationToken ct = default);
     }
 }
 
