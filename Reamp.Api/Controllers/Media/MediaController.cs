@@ -206,7 +206,8 @@ namespace Reamp.Api.Controllers.Media
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ApiResponse<object>.Fail(ex.Message).ToString()!);
+                _logger.LogWarning(ex, "Unauthorized access to delete media {AssetId}", id);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
             catch (Exception ex)
             {

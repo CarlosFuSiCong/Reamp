@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Reamp.Application.Media.Dtos;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Common.Services;
 using Reamp.Domain.Media.Entities;
@@ -18,6 +19,7 @@ namespace Reamp.Application.Media.Services
         private readonly ILogger<MediaAssetAppService> _logger;
         private readonly MediaUploadSettings _uploadSettings;
         private readonly IBackgroundJobService _backgroundJobService;
+        private readonly IStaffRepository _staffRepository;
 
         public MediaAssetAppService(
             IMediaAssetRepository mediaAssetRepository,
@@ -25,6 +27,7 @@ namespace Reamp.Application.Media.Services
             IUnitOfWork unitOfWork,
             Microsoft.Extensions.Options.IOptions<MediaUploadSettings> uploadSettings,
             IBackgroundJobService backgroundJobService,
+            IStaffRepository staffRepository,
             ILogger<MediaAssetAppService> logger)
         {
             _mediaAssetRepository = mediaAssetRepository;
@@ -32,6 +35,7 @@ namespace Reamp.Application.Media.Services
             _unitOfWork = unitOfWork;
             _uploadSettings = uploadSettings.Value;
             _backgroundJobService = backgroundJobService;
+            _staffRepository = staffRepository;
             _logger = logger;
         }
 
@@ -210,13 +214,23 @@ namespace Reamp.Application.Media.Services
             if (asset == null)
                 throw new KeyNotFoundException($"Media asset with ID {assetId} not found.");
 
-            // Security: Verify ownership - user must belong to the asset's owner studio
+            // Security: Verify asset belongs to the specified studio
             if (asset.OwnerStudioId != studioId)
             {
                 _logger.LogWarning(
-                    "User {UserId} from Studio {StudioId} attempted to delete asset {AssetId} owned by Studio {OwnerStudioId}",
-                    currentUserId, studioId, assetId, asset.OwnerStudioId);
+                    "Asset {AssetId} does not belong to Studio {StudioId} (actual owner: {ActualOwner})",
+                    assetId, studioId, asset.OwnerStudioId);
                 throw new UnauthorizedAccessException("You are not authorized to delete this media asset.");
+            }
+
+            // Security: Verify current user is actually a staff member of the studio
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, studioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to delete asset {AssetId} from Studio {StudioId} but is not a staff member",
+                    currentUserId, assetId, studioId);
+                throw new UnauthorizedAccessException("You are not authorized to delete this media asset. You must be a staff member of the studio.");
             }
 
             // Delete from Cloudinary
@@ -233,7 +247,8 @@ namespace Reamp.Application.Media.Services
             _mediaAssetRepository.Remove(asset);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Media asset deleted: {AssetId} by User {UserId}", assetId, currentUserId);
+            _logger.LogInformation("Media asset deleted: {AssetId} by User {UserId} from Studio {StudioId}", 
+                assetId, currentUserId, studioId);
         }
 
         private MediaAssetDetailDto MapToDetailDto(MediaAsset asset)
