@@ -264,8 +264,12 @@ namespace Reamp.Api
                 }
             });
 
-            // Hangfire Dashboard (no auth for development)
-            app.UseHangfireDashboard("/hangfire");
+            // Hangfire Dashboard (restricted to Development environment for security)
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseHangfireDashboard("/hangfire");
+            }
+            // For Production: Consider adding authentication via DashboardOptions with IDashboardAuthorizationFilter
 
             app.MapControllers();
             app.MapHub<Reamp.Api.Hubs.UploadProgressHub>("/hubs/upload-progress");

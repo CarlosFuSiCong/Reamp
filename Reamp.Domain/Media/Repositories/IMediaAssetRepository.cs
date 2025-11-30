@@ -6,9 +6,10 @@ namespace Reamp.Domain.Media.Repositories
 {
     public interface IMediaAssetRepository : IRepository<MediaAsset>
     {
-        // Find media asset by checksum (for deduplication)
+        // Find media asset by checksum within a specific studio (for deduplication)
         Task<MediaAsset?> FindByChecksumAsync(
             string checksumSha256,
+            Guid studioId,
             CancellationToken ct = default);
 
         // List media assets by studio with optional filters

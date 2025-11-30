@@ -36,10 +36,11 @@ namespace Reamp.Infrastructure.Repositories.Media
 
         public async Task<MediaAsset?> FindByChecksumAsync(
             string checksumSha256,
+            Guid studioId,
             CancellationToken ct = default)
         {
             return await _set
-                .FirstOrDefaultAsync(m => m.ChecksumSha256 == checksumSha256, ct);
+                .FirstOrDefaultAsync(m => m.ChecksumSha256 == checksumSha256 && m.OwnerStudioId == studioId, ct);
         }
 
         public async Task<IPagedList<MediaAsset>> ListByStudioAsync(

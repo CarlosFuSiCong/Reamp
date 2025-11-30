@@ -58,8 +58,8 @@ namespace Reamp.Application.Media.Services
             var checksum = await CloudinaryService.ComputeSha256Async(dto.FileStream);
 
             // Check for duplicate within the SAME studio only (security: prevent cross-tenant data leakage)
-            var existing = await _mediaAssetRepository.FindByChecksumAsync(checksum, ct);
-            if (existing != null && existing.OwnerStudioId == dto.OwnerStudioId)
+            var existing = await _mediaAssetRepository.FindByChecksumAsync(checksum, dto.OwnerStudioId, ct);
+            if (existing != null)
             {
                 _logger.LogInformation("Found duplicate media asset within studio: {AssetId}", existing.Id);
                 return MapToDetailDto(existing);
