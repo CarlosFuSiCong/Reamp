@@ -316,7 +316,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             if (branch == null)
                 throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");
 
-            _dbContext.Set<AgencyBranch>().Remove(branch);
+            branch.SoftDelete();
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
