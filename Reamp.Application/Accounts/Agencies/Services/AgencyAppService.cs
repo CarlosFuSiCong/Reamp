@@ -186,6 +186,25 @@ namespace Reamp.Application.Accounts.Agencies.Services
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
+        public async Task<AgencyDetailDto> UpdateLogoAsync(Guid agencyId, Guid? logoAssetId, CancellationToken ct = default)
+        {
+            var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: false, ct);
+            if (agency == null)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
+            if (logoAssetId.HasValue && logoAssetId.Value != Guid.Empty)
+                agency.SetLogoAsset(logoAssetId.Value);
+            else
+                agency.ClearLogo();
+
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            var branchCount = await _dbContext.Set<AgencyBranch>()
+                .CountAsync(b => b.AgencyId == agency.Id && b.DeletedAtUtc == null, ct);
+
+            return MapToDetailDto(agency, branchCount);
+        }
+
         public async Task<bool> ExistsBySlugAsync(string slug, CancellationToken ct = default)
         {
             var agencySlug = Slug.From(slug);
@@ -208,6 +227,124 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 CreatedAtUtc = agency.CreatedAtUtc,
                 UpdatedAtUtc = agency.UpdatedAtUtc,
                 BranchCount = branchCount
+            };
+        }
+
+        // Branch Management Implementation
+
+        public async Task<AgencyBranchDetailDto> CreateBranchAsync(
+            Guid agencyId,
+            CreateAgencyBranchDto dto,
+            Guid currentUserId,
+            CancellationToken ct = default)
+        {
+            var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: false, ct);
+            if (agency == null)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
+            var branch = agency.AddBranch(
+                name: dto.Name,
+                createdBy: currentUserId,
+                contactEmail: dto.ContactEmail,
+                contactPhone: dto.ContactPhone,
+                description: dto.Description,
+                address: dto.Address?.ToValueObject()
+            );
+
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return MapToBranchDetailDto(branch);
+        }
+
+        public async Task<AgencyBranchDetailDto> UpdateBranchAsync(
+            Guid agencyId,
+            Guid branchId,
+            UpdateAgencyBranchDto dto,
+            CancellationToken ct = default)
+        {
+            var branch = await _dbContext.Set<AgencyBranch>()
+                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+
+            if (branch == null)
+                throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");
+
+            branch.Rename(dto.Name);
+            branch.UpdateDescription(dto.Description);
+            branch.UpdateContact(dto.ContactEmail, dto.ContactPhone);
+            
+            if (dto.Address != null)
+                branch.UpdateAddress(dto.Address.ToValueObject());
+
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return MapToBranchDetailDto(branch);
+        }
+
+        public async Task<AgencyBranchDetailDto?> GetBranchByIdAsync(
+            Guid agencyId,
+            Guid branchId,
+            CancellationToken ct = default)
+        {
+            var branch = await _dbContext.Set<AgencyBranch>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+
+            return branch == null ? null : MapToBranchDetailDto(branch);
+        }
+
+        public async Task<IReadOnlyList<AgencyBranchDetailDto>> ListBranchesAsync(
+            Guid agencyId,
+            CancellationToken ct = default)
+        {
+            var branches = await _dbContext.Set<AgencyBranch>()
+                .AsNoTracking()
+                .Where(b => b.AgencyId == agencyId && b.DeletedAtUtc == null)
+                .OrderBy(b => b.Name)
+                .ToListAsync(ct);
+
+            return branches.Select(MapToBranchDetailDto).ToList();
+        }
+
+        public async Task DeleteBranchAsync(
+            Guid agencyId,
+            Guid branchId,
+            CancellationToken ct = default)
+        {
+            var branch = await _dbContext.Set<AgencyBranch>()
+                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+
+            if (branch == null)
+                throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");
+
+            _dbContext.Set<AgencyBranch>().Remove(branch);
+            await _unitOfWork.SaveChangesAsync(ct);
+        }
+
+        private AgencyBranchDetailDto MapToBranchDetailDto(AgencyBranch branch)
+        {
+            return new AgencyBranchDetailDto
+            {
+                Id = branch.Id,
+                AgencyId = branch.AgencyId,
+                Name = branch.Name,
+                Slug = branch.Slug.Value,
+                Description = branch.Description,
+                ContactEmail = branch.ContactEmail,
+                ContactPhone = branch.ContactPhone,
+                Address = branch.Address != null ? new AddressDto
+                {
+                    Line1 = branch.Address.Line1,
+                    Line2 = branch.Address.Line2,
+                    City = branch.Address.City,
+                    State = branch.Address.State,
+                    Postcode = branch.Address.Postcode,
+                    Country = branch.Address.Country,
+                    Latitude = branch.Address.Latitude,
+                    Longitude = branch.Address.Longitude
+                } : null,
+                CreatedBy = branch.CreatedBy,
+                CreatedAtUtc = branch.CreatedAtUtc,
+                UpdatedAtUtc = branch.UpdatedAtUtc
             };
         }
     }
