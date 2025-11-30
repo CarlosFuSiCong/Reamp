@@ -112,6 +112,14 @@ namespace Reamp.Application.Media.Services
                 throw new UnauthorizedAccessException($"You are not authorized to complete this session.");
             }
 
+            // Idempotency: Prevent duplicate completion and re-upload
+            if (session.CompletedAtUtc.HasValue)
+            {
+                _logger.LogWarning("Session {SessionId} already completed at {CompletedAt}, ignoring duplicate completion request",
+                    sessionId, session.CompletedAtUtc.Value);
+                throw new InvalidOperationException($"Upload session {sessionId} has already been completed at {session.CompletedAtUtc.Value:u}. Cannot re-process a completed session.");
+            }
+
             if (!session.IsComplete)
                 throw new InvalidOperationException($"Upload session {sessionId} is not complete. Received {session.UploadedChunksCount}/{session.TotalChunks} chunks.");
 
