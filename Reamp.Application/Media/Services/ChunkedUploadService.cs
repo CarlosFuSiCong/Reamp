@@ -112,6 +112,17 @@ namespace Reamp.Application.Media.Services
                 return MapToDto(session);
             }
 
+            // P2 Fix: Validate chunk index is within expected range [0, TotalChunks-1]
+            // Out-of-range indexes cause false progress and spurious "missing chunk" errors at completion
+            if (dto.ChunkIndex < 0 || dto.ChunkIndex >= session.TotalChunks)
+            {
+                _logger.LogError(
+                    "Chunk index {ChunkIndex} is out of range for session {SessionId}. Valid range: [0, {MaxIndex}]",
+                    dto.ChunkIndex, session.SessionId, session.TotalChunks - 1);
+                throw new InvalidOperationException(
+                    $"Chunk index {dto.ChunkIndex} is out of range. Expected index between 0 and {session.TotalChunks - 1}.");
+            }
+
             // Read chunk data into memory
             using var memoryStream = new MemoryStream();
             await dto.ChunkData.CopyToAsync(memoryStream, ct);
