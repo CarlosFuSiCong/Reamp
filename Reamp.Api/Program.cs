@@ -1,5 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +70,18 @@ namespace Reamp.Api
                     sql.EnableRetryOnFailure();
                 })
             );
+
+            // Hangfire (Background Jobs)
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(conn));
+
+            builder.Services.AddHangfireServer();
+
+            // SignalR
+            builder.Services.AddSignalR();
 
             // Identity
             builder.Services
@@ -180,10 +194,16 @@ namespace Reamp.Api
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaAssetAppService,
                 Reamp.Application.Media.Services.MediaAssetAppService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IChunkedUploadService,
+                Reamp.Application.Media.Services.ChunkedUploadService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaProcessingJob,
+                Reamp.Application.Media.Services.MediaProcessingJob>();
 
             // Media Services
             builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 
                 Reamp.Infrastructure.Services.Media.CloudinaryService>();
+            builder.Services.AddSingleton<Reamp.Infrastructure.Services.Media.IUploadSessionStore,
+                Reamp.Infrastructure.Services.Media.InMemoryUploadSessionStore>();
 
             // Read Services  
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();
@@ -244,7 +264,11 @@ namespace Reamp.Api
                 }
             });
 
+            // Hangfire Dashboard (no auth for development)
+            app.UseHangfireDashboard("/hangfire");
+
             app.MapControllers();
+            app.MapHub<Reamp.Api.Hubs.UploadProgressHub>("/hubs/upload-progress");
             app.MapGet("/health", () => "OK");
 
             app.Run();

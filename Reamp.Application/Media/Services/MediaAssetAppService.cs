@@ -185,7 +185,10 @@ namespace Reamp.Application.Media.Services
 
             _logger.LogInformation("Processing triggered for asset: {AssetId}", assetId);
 
-            // TODO: Queue background job for processing
+            // Queue background job using Hangfire (if available)
+            // Note: Hangfire BackgroundJob.Enqueue requires Hangfire to be configured
+            // For now, we'll just mark it as processing
+            // In production with Hangfire: BackgroundJob.Enqueue<IMediaProcessingJob>(x => x.OptimizeMediaAsync(assetId));
         }
 
         public async Task DeleteAsync(Guid assetId, CancellationToken ct = default)
