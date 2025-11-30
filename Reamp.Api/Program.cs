@@ -82,6 +82,12 @@ namespace Reamp.Api
 
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
+            // Cloudinary Settings
+            builder.Services.Configure<Reamp.Infrastructure.Configuration.CloudinarySettings>(
+                builder.Configuration.GetSection("CloudinarySettings"));
+            builder.Services.Configure<Reamp.Infrastructure.Configuration.MediaUploadSettings>(
+                builder.Configuration.GetSection("MediaUploadSettings"));
+
             // JWT Authentication
             builder.Services
                 .AddAuthentication(options =>
@@ -161,6 +167,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<IStaffRepository, StaffRepository>();
             builder.Services.AddScoped<IListingRepository, ListingRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            builder.Services.AddScoped<Reamp.Domain.Media.Repositories.IMediaAssetRepository,
+                Reamp.Infrastructure.Repositories.Media.MediaAssetRepository>();
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -170,6 +178,12 @@ namespace Reamp.Api
             builder.Services.AddScoped<IStudioAppService, StudioAppService>();
             builder.Services.AddScoped<IListingAppService, ListingAppService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+            builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaAssetAppService,
+                Reamp.Application.Media.Services.MediaAssetAppService>();
+
+            // Media Services
+            builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 
+                Reamp.Infrastructure.Services.Media.CloudinaryService>();
 
             // Read Services  
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();
