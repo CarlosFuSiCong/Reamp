@@ -1,5 +1,6 @@
 using Hangfire;
 using Reamp.Domain.Common.Services;
+using System.Linq.Expressions;
 
 namespace Reamp.Infrastructure.Services.Jobs
 {
@@ -13,7 +14,14 @@ namespace Reamp.Infrastructure.Services.Jobs
             _backgroundJobClient = backgroundJobClient;
         }
 
-        public string Enqueue<T>(System.Linq.Expressions.Expression<Action<T>> methodCall)
+        // Enqueue synchronous job
+        public string Enqueue<T>(Expression<Action<T>> methodCall)
+        {
+            return _backgroundJobClient.Enqueue(methodCall);
+        }
+
+        // Enqueue asynchronous job (Hangfire supports Task-returning methods)
+        public string Enqueue<T>(Expression<Func<T, Task>> methodCall)
         {
             return _backgroundJobClient.Enqueue(methodCall);
         }
