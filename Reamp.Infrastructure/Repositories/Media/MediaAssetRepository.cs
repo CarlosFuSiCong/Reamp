@@ -21,7 +21,9 @@ namespace Reamp.Infrastructure.Repositories.Media
         public async Task<MediaAsset?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken ct = default)
         {
             var query = asNoTracking ? _set.AsNoTracking() : _set;
-            return await query.FirstOrDefaultAsync(m => m.Id == id, ct);
+            return await query
+                .Include(m => m.Variants)
+                .FirstOrDefaultAsync(m => m.Id == id, ct);
         }
 
         public async Task AddAsync(MediaAsset entity, CancellationToken ct = default)
@@ -40,6 +42,7 @@ namespace Reamp.Infrastructure.Repositories.Media
             CancellationToken ct = default)
         {
             return await _set
+                .Include(m => m.Variants)
                 .FirstOrDefaultAsync(m => m.ChecksumSha256 == checksumSha256 && m.OwnerStudioId == studioId, ct);
         }
 
@@ -63,6 +66,7 @@ namespace Reamp.Infrastructure.Repositories.Media
 
             var totalCount = await query.CountAsync(ct);
             var items = await query
+                .Include(m => m.Variants)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(ct);
