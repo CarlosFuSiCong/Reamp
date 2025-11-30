@@ -270,6 +270,13 @@ namespace Reamp.Application.Accounts.Agencies.Services
             UpdateAgencyBranchDto dto,
             CancellationToken ct = default)
         {
+            // Check if parent agency exists and is not deleted
+            var agencyExists = await _dbContext.Set<Agency>()
+                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
+
+            if (!agencyExists)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
             var branch = await _dbContext.Set<AgencyBranch>()
                 .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
 
@@ -304,6 +311,13 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid branchId,
             CancellationToken ct = default)
         {
+            // Check if parent agency exists and is not deleted
+            var agencyExists = await _dbContext.Set<Agency>()
+                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
+
+            if (!agencyExists)
+                return null;
+
             var branch = await _dbContext.Set<AgencyBranch>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
@@ -315,6 +329,13 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid agencyId,
             CancellationToken ct = default)
         {
+            // Check if parent agency exists and is not deleted
+            var agencyExists = await _dbContext.Set<Agency>()
+                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
+
+            if (!agencyExists)
+                return new List<AgencyBranchDetailDto>();
+
             var branches = await _dbContext.Set<AgencyBranch>()
                 .AsNoTracking()
                 .Where(b => b.AgencyId == agencyId && b.DeletedAtUtc == null)
@@ -329,6 +350,13 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid branchId,
             CancellationToken ct = default)
         {
+            // Check if parent agency exists and is not deleted
+            var agencyExists = await _dbContext.Set<Agency>()
+                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
+
+            if (!agencyExists)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
             var branch = await _dbContext.Set<AgencyBranch>()
                 .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
 
