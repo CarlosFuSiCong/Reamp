@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Reamp.Application.Accounts.Agencies.Services;
 using Reamp.Application.Accounts.Clients.Services;
+using Reamp.Application.Accounts.Staff.Services;
 using Reamp.Application.Accounts.Studios.Services;
 using Reamp.Application.Accounts.Studios.Validators;
 using Reamp.Application.Authentication;
@@ -14,6 +15,7 @@ using Reamp.Application.Listings.Services;
 using Reamp.Application.Read.Agencies;
 using Reamp.Application.Read.Clients;
 using Reamp.Application.Read.Listings;
+using Reamp.Application.Read.Staff;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Listings.Repositories;
@@ -22,6 +24,7 @@ using Reamp.Infrastructure.Identity;
 using Reamp.Infrastructure.Read.EF.Agencies;
 using Reamp.Infrastructure.Read.EF.Clients;
 using Reamp.Infrastructure.Read.EF.Listings;
+using Reamp.Infrastructure.Read.EF.Staff;
 using Reamp.Infrastructure.Repositories.Accounts;
 using Reamp.Infrastructure.Repositories.Common;
 using Reamp.Infrastructure.Repositories.Listings;
@@ -163,6 +166,7 @@ namespace Reamp.Api
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IAgencyAppService, AgencyAppService>();
             builder.Services.AddScoped<IClientAppService, ClientAppService>();
+            builder.Services.AddScoped<IStaffAppService, StaffAppService>();
             builder.Services.AddScoped<IStudioAppService, StudioAppService>();
             builder.Services.AddScoped<IListingAppService, ListingAppService>();
             builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -170,6 +174,7 @@ namespace Reamp.Api
             // Read Services  
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();
             builder.Services.AddScoped<IClientReadService, EfClientReadService>();
+            builder.Services.AddScoped<IStaffReadService, EfStaffReadService>();
             builder.Services.AddScoped<IListingReadService, EfListingReadService>();
 
             var app = builder.Build();
