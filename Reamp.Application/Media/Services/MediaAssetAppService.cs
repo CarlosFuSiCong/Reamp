@@ -146,20 +146,50 @@ namespace Reamp.Application.Media.Services
             return MapToDetailDto(mediaAsset);
         }
 
-        public async Task<MediaAssetDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        public async Task<MediaAssetDetailDto?> GetByIdAsync(Guid id, Guid currentUserId, CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var asset = await _mediaAssetRepository.GetByIdAsync(id, asNoTracking: true, ct);
-            return asset == null ? null : MapToDetailDto(asset);
+            if (asset == null)
+                return null;
+
+            // Security: Verify user is a staff member of the asset's owner studio
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, asset.OwnerStudioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to view asset {AssetId} from Studio {StudioId} but is not a staff member",
+                    currentUserId, id, asset.OwnerStudioId);
+                throw new UnauthorizedAccessException("You are not authorized to view this media asset. You must be a staff member of the studio.");
+            }
+
+            return MapToDetailDto(asset);
         }
 
         public async Task<IPagedList<MediaAssetListDto>> ListByStudioAsync(
             Guid studioId,
+            Guid currentUserId,
             MediaResourceType? resourceType = null,
             MediaProcessStatus? status = null,
             int page = 1,
             int pageSize = 20,
             CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
+            // Security: Verify user is a staff member of the target studio
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, studioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to list assets from Studio {StudioId} but is not a staff member",
+                    currentUserId, studioId);
+                throw new UnauthorizedAccessException("You are not authorized to list assets from this studio. You must be a staff member.");
+            }
+
             var pagedAssets = await _mediaAssetRepository.ListByStudioAsync(
                 studioId, resourceType, status, page, pageSize, ct);
 
@@ -172,11 +202,24 @@ namespace Reamp.Application.Media.Services
                 pagedAssets.PageSize);
         }
 
-        public async Task<MediaAssetDetailDto> AddVariantAsync(Guid assetId, AddVariantDto dto, CancellationToken ct = default)
+        public async Task<MediaAssetDetailDto> AddVariantAsync(Guid assetId, AddVariantDto dto, Guid currentUserId, CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var asset = await _mediaAssetRepository.GetByIdAsync(assetId, asNoTracking: false, ct);
             if (asset == null)
                 throw new KeyNotFoundException($"Media asset with ID {assetId} not found.");
+
+            // Security: Verify user is a staff member of the asset's owner studio
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, asset.OwnerStudioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to add variant to asset {AssetId} from Studio {StudioId} but is not a staff member",
+                    currentUserId, assetId, asset.OwnerStudioId);
+                throw new UnauthorizedAccessException("You are not authorized to modify this media asset. You must be a staff member of the studio.");
+            }
 
             // Generate transformation URL
             var transformedUrl = _cloudinaryService.GenerateTransformationUrl(
@@ -196,11 +239,24 @@ namespace Reamp.Application.Media.Services
             return MapToDetailDto(asset);
         }
 
-        public async Task TriggerProcessingAsync(Guid assetId, CancellationToken ct = default)
+        public async Task TriggerProcessingAsync(Guid assetId, Guid currentUserId, CancellationToken ct = default)
         {
+            if (currentUserId == Guid.Empty)
+                throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
             var asset = await _mediaAssetRepository.GetByIdAsync(assetId, asNoTracking: false, ct);
             if (asset == null)
                 throw new KeyNotFoundException($"Media asset with ID {assetId} not found.");
+
+            // Security: Verify user is a staff member of the asset's owner studio
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, asset.OwnerStudioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to trigger processing for asset {AssetId} from Studio {StudioId} but is not a staff member",
+                    currentUserId, assetId, asset.OwnerStudioId);
+                throw new UnauthorizedAccessException("You are not authorized to process this media asset. You must be a staff member of the studio.");
+            }
 
             asset.StartProcessing();
             await _unitOfWork.SaveChangesAsync(ct);

@@ -84,12 +84,18 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                var result = await _mediaAssetAppService.GetByIdAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                var result = await _mediaAssetAppService.GetByIdAsync(id, currentUserId, ct);
 
                 if (result == null)
                     return NotFound(ApiResponse<object>.Fail("Media asset not found"));
 
                 return Ok(ApiResponse<MediaAssetDetailDto>.Ok(result));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access to view media {AssetId}", id);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -110,8 +116,9 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
+                var currentUserId = GetCurrentUserId();
                 var result = await _mediaAssetAppService.ListByStudioAsync(
-                    studioId, resourceType, status, page, pageSize, ct);
+                    studioId, currentUserId, resourceType, status, page, pageSize, ct);
 
                 var totalPages = (int)Math.Ceiling(result.TotalCount / (double)result.PageSize);
 
@@ -126,6 +133,11 @@ namespace Reamp.Api.Controllers.Media
                     },
                     "Media list retrieved successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access to list media for studio {StudioId}", studioId);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error listing media for studio {StudioId}", studioId);
@@ -139,10 +151,11 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                _logger.LogInformation("Adding variant '{VariantName}' to media {AssetId}",
-                    dto.VariantName, id);
+                var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("User {UserId} adding variant '{VariantName}' to media {AssetId}",
+                    currentUserId, dto.VariantName, id);
 
-                var result = await _mediaAssetAppService.AddVariantAsync(id, dto, ct);
+                var result = await _mediaAssetAppService.AddVariantAsync(id, dto, currentUserId, ct);
 
                 return Ok(ApiResponse<MediaAssetDetailDto>.Ok(
                     result,
@@ -151,6 +164,11 @@ namespace Reamp.Api.Controllers.Media
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access to add variant to media {AssetId}", id);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
@@ -165,9 +183,10 @@ namespace Reamp.Api.Controllers.Media
         {
             try
             {
-                _logger.LogInformation("Triggering processing for media {AssetId}", id);
+                var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("User {UserId} triggering processing for media {AssetId}", currentUserId, id);
 
-                await _mediaAssetAppService.TriggerProcessingAsync(id, ct);
+                await _mediaAssetAppService.TriggerProcessingAsync(id, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
                     null,
@@ -176,6 +195,11 @@ namespace Reamp.Api.Controllers.Media
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access to trigger processing for media {AssetId}", id);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
             catch (Exception ex)
             {
