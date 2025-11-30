@@ -38,6 +38,10 @@ namespace Reamp.Infrastructure.Read.EF.Clients
                 );
             }
 
+            // Normalize page request
+            var pageNumber = pageRequest.Page <= 0 ? 1 : pageRequest.Page;
+            var pageSize = pageRequest.PageSize <= 0 ? 20 : (pageRequest.PageSize > PageRequest.MaxPageSize ? PageRequest.MaxPageSize : pageRequest.PageSize);
+
             var totalCount = await query.CountAsync(ct);
 
             // Apply sorting and pagination
@@ -51,8 +55,8 @@ namespace Reamp.Infrastructure.Read.EF.Clients
             };
 
             var items = await query
-                .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
-                .Take(pageRequest.PageSize)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(c => new ClientSummaryDto
                 {
                     Id = c.Id,
@@ -89,8 +93,8 @@ namespace Reamp.Infrastructure.Read.EF.Clients
             {
                 Items = items,
                 Total = totalCount,
-                Page = pageRequest.Page,
-                PageSize = pageRequest.PageSize
+                Page = pageNumber,
+                PageSize = pageSize
             };
         }
 
