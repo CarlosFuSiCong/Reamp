@@ -233,6 +233,11 @@ namespace Reamp.Api.Controllers.Media
                 _logger.LogWarning(ex, "Unauthorized access to delete media {AssetId}", id);
                 return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid input for deleting media {AssetId}", id);
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting media {AssetId}", id);

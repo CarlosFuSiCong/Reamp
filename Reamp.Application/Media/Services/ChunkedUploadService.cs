@@ -89,6 +89,22 @@ namespace Reamp.Application.Media.Services
                 throw new UnauthorizedAccessException($"You are not authorized to upload to this session.");
             }
 
+            // Security: Validate TotalSize against configured limits BEFORE buffering chunk data
+            // This prevents memory exhaustion DoS where attacker uploads gigabytes before completion is rejected
+            var contentType = session.ContentType.ToLowerInvariant();
+            var isImage = contentType.StartsWith("image/");
+            var isVideo = contentType.StartsWith("video/");
+            var maxConfiguredSize = isImage ? _uploadSettings.MaxImageSizeBytes : _uploadSettings.MaxVideoSizeBytes;
+            
+            if (session.TotalSize > maxConfiguredSize)
+            {
+                _logger.LogError(
+                    "Session {SessionId} TotalSize {TotalSize} exceeds configured max {MaxSize} for {FileType}. Rejecting chunk upload.",
+                    session.SessionId, session.TotalSize, maxConfiguredSize, isImage ? "image" : "video");
+                throw new InvalidOperationException(
+                    $"File size ({session.TotalSize} bytes) exceeds maximum allowed ({maxConfiguredSize} bytes). Upload rejected.");
+            }
+
             if (session.ReceivedChunks.Contains(dto.ChunkIndex))
             {
                 _logger.LogWarning("Chunk {ChunkIndex} already uploaded for session {SessionId}",
