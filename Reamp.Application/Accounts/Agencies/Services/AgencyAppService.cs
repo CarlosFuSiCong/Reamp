@@ -242,6 +242,14 @@ namespace Reamp.Application.Accounts.Agencies.Services
             if (agency == null)
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
+            // Check for slug conflicts before creating
+            var newSlug = Slug.From(dto.Name);
+            var existingBranch = await _dbContext.Set<AgencyBranch>()
+                .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug == newSlug && b.DeletedAtUtc == null, ct);
+
+            if (existingBranch != null)
+                throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
+
             var branch = agency.AddBranch(
                 name: dto.Name,
                 createdBy: currentUserId,
@@ -267,6 +275,17 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
             if (branch == null)
                 throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");
+
+            // Check for slug conflicts when renaming (only if name actually changes)
+            var newSlug = Slug.From(dto.Name);
+            if (newSlug.Value != branch.Slug.Value)
+            {
+                var existingBranch = await _dbContext.Set<AgencyBranch>()
+                    .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug == newSlug && b.DeletedAtUtc == null, ct);
+
+                if (existingBranch != null && existingBranch.Id != branchId)
+                    throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
+            }
 
             branch.Rename(dto.Name);
             branch.UpdateDescription(dto.Description);
