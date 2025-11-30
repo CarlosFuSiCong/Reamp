@@ -22,7 +22,8 @@ namespace Reamp.Infrastructure.Repositories.Accounts
         public async Task<Staff?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken ct = default)
         {
             var query = asNoTracking ? _set.AsNoTracking() : _set;
-            return await query.FirstOrDefaultAsync(s => s.Id == id, ct);
+            // P1 Fix: Filter out soft-deleted staff to be consistent with other queries
+            return await query.FirstOrDefaultAsync(s => s.Id == id && s.DeletedAtUtc == null, ct);
         }
 
         public async Task AddAsync(Staff entity, CancellationToken ct = default)
@@ -32,7 +33,9 @@ namespace Reamp.Infrastructure.Repositories.Accounts
 
         public void Remove(Staff entity)
         {
-            _set.Remove(entity);
+            // P1 Fix: Use soft delete instead of hard delete to preserve audit trail
+            // Staff inherits from AuditableEntity which provides soft delete functionality
+            entity.SoftDelete();
         }
 
         // IStaffRepository specific methods
