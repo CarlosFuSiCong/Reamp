@@ -208,6 +208,9 @@ namespace Reamp.Api
                 Reamp.Infrastructure.Services.Media.CloudinaryService>();
             builder.Services.AddSingleton<Reamp.Infrastructure.Services.Media.IUploadSessionStore,
                 Reamp.Infrastructure.Services.Media.InMemoryUploadSessionStore>();
+            
+            // P1 Fix: Background service to clean up abandoned chunked upload sessions
+            builder.Services.AddHostedService<Reamp.Infrastructure.Services.Media.UploadSessionCleanupService>();
 
             // Read Services  
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();

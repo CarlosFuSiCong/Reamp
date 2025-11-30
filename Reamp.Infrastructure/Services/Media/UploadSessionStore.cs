@@ -14,15 +14,54 @@ namespace Reamp.Infrastructure.Services.Media
         public int TotalChunks { get; set; }
         public string? Description { get; set; }
         public DateTime CreatedAtUtc { get; set; }
+        public DateTime LastActivityUtc { get; set; } // Track last activity for cleanup
         public DateTime? CompletedAtUtc { get; set; }
 
-        // Track received chunks
-        public ConcurrentBag<int> ReceivedChunks { get; set; } = new();
+        // P2 Fix: Use HashSet instead of ConcurrentBag to prevent duplicate indexes
+        // ConcurrentBag allows duplicates, which breaks progress calculation
+        // HashSet ensures each index is added only once
+        private readonly HashSet<int> _receivedChunks = new();
+        private readonly object _chunksLock = new();
 
         // Store chunk data temporarily
         public ConcurrentDictionary<int, byte[]> ChunkData { get; set; } = new();
 
-        public int UploadedChunksCount => ReceivedChunks.Count;
+        // Thread-safe methods to manage received chunks
+        public bool TryAddChunkIndex(int chunkIndex)
+        {
+            lock (_chunksLock)
+            {
+                return _receivedChunks.Add(chunkIndex);
+            }
+        }
+
+        public bool ContainsChunkIndex(int chunkIndex)
+        {
+            lock (_chunksLock)
+            {
+                return _receivedChunks.Contains(chunkIndex);
+            }
+        }
+
+        public int[] GetReceivedChunkIndexes()
+        {
+            lock (_chunksLock)
+            {
+                return _receivedChunks.ToArray();
+            }
+        }
+
+        public int UploadedChunksCount
+        {
+            get
+            {
+                lock (_chunksLock)
+                {
+                    return _receivedChunks.Count;
+                }
+            }
+        }
+
         public double Progress => TotalChunks > 0 ? (UploadedChunksCount / (double)TotalChunks) * 100 : 0;
         public bool IsComplete => UploadedChunksCount >= TotalChunks;
     }
@@ -35,6 +74,7 @@ namespace Reamp.Infrastructure.Services.Media
         Task<UploadSession?> GetSessionAsync(Guid sessionId);
         Task UpdateSessionAsync(UploadSession session);
         Task DeleteSessionAsync(Guid sessionId);
+        Task<IEnumerable<UploadSession>> GetAllSessionsAsync(); // P1 Fix: For background cleanup
     }
 
     public class InMemoryUploadSessionStore : IUploadSessionStore
@@ -63,6 +103,11 @@ namespace Reamp.Infrastructure.Services.Media
         {
             _sessions.TryRemove(sessionId, out _);
             return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<UploadSession>> GetAllSessionsAsync()
+        {
+            return Task.FromResult<IEnumerable<UploadSession>>(_sessions.Values.ToList());
         }
     }
 }

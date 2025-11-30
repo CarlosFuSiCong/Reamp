@@ -58,7 +58,8 @@ namespace Reamp.Application.Media.Services
                 TotalSize = dto.TotalSize,
                 TotalChunks = dto.TotalChunks,
                 Description = dto.Description,
-                CreatedAtUtc = DateTime.UtcNow
+                CreatedAtUtc = DateTime.UtcNow,
+                LastActivityUtc = DateTime.UtcNow // P1 Fix: Track last activity for cleanup
             };
 
             await _sessionStore.CreateSessionAsync(session);
@@ -105,7 +106,10 @@ namespace Reamp.Application.Media.Services
                     $"File size ({session.TotalSize} bytes) exceeds maximum allowed ({maxConfiguredSize} bytes). Upload rejected.");
             }
 
-            if (session.ReceivedChunks.Contains(dto.ChunkIndex))
+            // P2 Fix: Use atomic check-and-add for duplicate detection
+            // Previous ConcurrentBag.Contains + Add was not atomic, allowing parallel retries
+            // to add the same index multiple times, breaking progress calculation
+            if (session.ContainsChunkIndex(dto.ChunkIndex))
             {
                 _logger.LogWarning("Chunk {ChunkIndex} already uploaded for session {SessionId}",
                     dto.ChunkIndex, session.SessionId);
@@ -143,9 +147,14 @@ namespace Reamp.Application.Media.Services
                     $"Cumulative chunk data ({newBufferedSize} bytes) exceeds declared file size ({session.TotalSize} bytes). Upload rejected.");
             }
 
+            // P2 Fix: Atomically add chunk index to prevent duplicates from parallel retries
+            // HashSet.Add returns false if already present, preventing duplicate indexes
             // Store chunk
             session.ChunkData[dto.ChunkIndex] = chunkBytes;
-            session.ReceivedChunks.Add(dto.ChunkIndex);
+            session.TryAddChunkIndex(dto.ChunkIndex);
+            
+            // P1 Fix: Update last activity timestamp for cleanup service
+            session.LastActivityUtc = DateTime.UtcNow;
 
             await _sessionStore.UpdateSessionAsync(session);
 
@@ -265,14 +274,11 @@ namespace Reamp.Application.Media.Services
 
             // Mark session as complete
             session.CompletedAtUtc = DateTime.UtcNow;
+            session.LastActivityUtc = DateTime.UtcNow; // P1 Fix: Update activity timestamp
             await _sessionStore.UpdateSessionAsync(session);
 
-            // Clean up session after a delay
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromMinutes(5));
-                await _sessionStore.DeleteSessionAsync(sessionId);
-            });
+            // P1 Fix: Background cleanup service will handle session deletion
+            // No need for fire-and-forget task that can't be tracked or logged properly
 
             _logger.LogInformation("Upload completed for session {SessionId}, MediaAsset {AssetId}",
                 sessionId, mediaAsset.Id);
