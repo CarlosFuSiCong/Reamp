@@ -22,6 +22,13 @@ namespace Reamp.Infrastructure.Read.EF.Clients
             PageRequest pageRequest,
             CancellationToken ct = default)
         {
+            // Validate agency exists and is not deleted
+            var agencyExists = await _dbContext.Set<Agency>()
+                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
+
+            if (!agencyExists)
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
+
             var query = _dbContext.Set<Client>()
                 .AsNoTracking()
                 .Where(c => c.AgencyId == agencyId && c.DeletedAtUtc == null);
