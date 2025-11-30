@@ -95,16 +95,23 @@ namespace Reamp.Api.Controllers.Accounts
 
             _logger.LogInformation("Creating agency: {Name} by user {UserId}", dto.Name, currentUserId);
 
-            var agency = await _agencyAppService.CreateAsync(dto, currentUserId, ct);
+            try
+            {
+                var agency = await _agencyAppService.CreateAsync(dto, currentUserId, ct);
 
-            _logger.LogInformation("Agency created successfully: {AgencyId}", agency.Id);
+                _logger.LogInformation("Agency created successfully: {AgencyId}", agency.Id);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = agency.Id },
-                ApiResponse<Application.Accounts.Agencies.Dtos.AgencyDetailDto>.Ok(
-                    agency,
-                    "Agency created successfully"));
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = agency.Id },
+                    ApiResponse<Application.Accounts.Agencies.Dtos.AgencyDetailDto>.Ok(
+                        agency,
+                        "Agency created successfully"));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.Fail(ex.Message));
+            }
         }
 
         // PUT /api/agencies/{id} - Update agency
@@ -209,17 +216,28 @@ namespace Reamp.Api.Controllers.Accounts
             {
                 return NotFound(ApiResponse<object>.Fail("Agency not found"));
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.Fail(ex.Message));
+            }
         }
 
         // GET /api/agencies/{id}/branches - List branches
         [HttpGet("{id:guid}/branches")]
         public async Task<IActionResult> ListBranches(Guid id, CancellationToken ct)
         {
-            var branches = await _agencyAppService.ListBranchesAsync(id, ct);
+            try
+            {
+                var branches = await _agencyAppService.ListBranchesAsync(id, ct);
 
-            return Ok(ApiResponse<IReadOnlyList<AgencyBranchDetailDto>>.Ok(
-                branches,
-                "Branches retrieved successfully"));
+                return Ok(ApiResponse<IReadOnlyList<AgencyBranchDetailDto>>.Ok(
+                    branches,
+                    "Branches retrieved successfully"));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(ApiResponse<object>.Fail("Agency not found"));
+            }
         }
 
         // GET /api/agencies/{id}/branches/{branchId} - Get branch by ID
@@ -260,6 +278,10 @@ namespace Reamp.Api.Controllers.Accounts
             catch (KeyNotFoundException)
             {
                 return NotFound(ApiResponse<object>.Fail("Branch not found"));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.Fail(ex.Message));
             }
         }
 

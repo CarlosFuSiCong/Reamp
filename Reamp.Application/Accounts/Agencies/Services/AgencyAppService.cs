@@ -334,7 +334,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
 
             if (!agencyExists)
-                return new List<AgencyBranchDetailDto>();
+                throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
             var branches = await _dbContext.Set<AgencyBranch>()
                 .AsNoTracking()
