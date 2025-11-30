@@ -83,7 +83,7 @@ namespace Reamp.Api.Controllers.Accounts
             {
                 var result = await _clientReadService.ListByAgencyAsync(agencyId, search, pageRequest, ct);
 
-                return Ok(ApiResponse<Reamp.Application.Read.Shared.PageResult<Application.Read.Clients.DTOs.ClientSummaryDto>>.Ok(
+                return Ok(ApiResponse<Reamp.Application.Read.Shared.PageResult<Reamp.Application.Read.Clients.DTOs.ClientSummaryDto>>.Ok(
                     result,
                     "Clients retrieved successfully"));
             }
