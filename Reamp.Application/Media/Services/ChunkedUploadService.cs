@@ -112,10 +112,25 @@ namespace Reamp.Application.Media.Services
                 return MapToDto(session);
             }
 
-            // Read chunk data
+            // Read chunk data into memory
             using var memoryStream = new MemoryStream();
             await dto.ChunkData.CopyToAsync(memoryStream, ct);
             var chunkBytes = memoryStream.ToArray();
+
+            // Security: Validate chunk size and cumulative size against declared TotalSize
+            // This prevents malicious clients from declaring small TotalSize but uploading gigabytes
+            var currentBufferedSize = session.ChunkData.Values.Sum(c => (long)c.Length);
+            var newBufferedSize = currentBufferedSize + chunkBytes.Length;
+            
+            if (newBufferedSize > session.TotalSize)
+            {
+                _logger.LogError(
+                    "Chunk {ChunkIndex} for session {SessionId} would exceed declared TotalSize. " +
+                    "Current buffered: {CurrentSize} bytes, chunk size: {ChunkSize} bytes, declared total: {TotalSize} bytes",
+                    dto.ChunkIndex, session.SessionId, currentBufferedSize, chunkBytes.Length, session.TotalSize);
+                throw new InvalidOperationException(
+                    $"Cumulative chunk data ({newBufferedSize} bytes) exceeds declared file size ({session.TotalSize} bytes). Upload rejected.");
+            }
 
             // Store chunk
             session.ChunkData[dto.ChunkIndex] = chunkBytes;
@@ -123,8 +138,8 @@ namespace Reamp.Application.Media.Services
 
             await _sessionStore.UpdateSessionAsync(session);
 
-            _logger.LogInformation("Chunk {ChunkIndex}/{TotalChunks} uploaded for session {SessionId}",
-                dto.ChunkIndex + 1, session.TotalChunks, session.SessionId);
+            _logger.LogInformation("Chunk {ChunkIndex}/{TotalChunks} uploaded for session {SessionId}. Buffered: {BufferedSize}/{TotalSize} bytes",
+                dto.ChunkIndex + 1, session.TotalChunks, session.SessionId, newBufferedSize, session.TotalSize);
 
             return MapToDto(session);
         }
