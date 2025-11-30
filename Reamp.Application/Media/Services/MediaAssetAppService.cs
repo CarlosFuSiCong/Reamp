@@ -258,14 +258,25 @@ namespace Reamp.Application.Media.Services
                 throw new UnauthorizedAccessException("You are not authorized to process this media asset. You must be a staff member of the studio.");
             }
 
+            // P2 Fix: Enqueue job BEFORE persisting state to avoid orphaned Processing status
+            // If enqueue fails, no state change is persisted (asset remains in previous state)
+            string jobId;
+            try
+            {
+                jobId = _backgroundJobService.Enqueue<IMediaProcessingJob>(x => x.OptimizeMediaAsync(assetId));
+                _logger.LogInformation("Enqueued background job {JobId} for asset optimization: {AssetId}", jobId, assetId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to enqueue background job for asset {AssetId}. State will not be changed to Processing.", assetId);
+                throw new InvalidOperationException($"Failed to schedule processing job for asset {assetId}. Please try again later.", ex);
+            }
+
+            // Only persist Processing state if job was successfully enqueued
             asset.StartProcessing();
             await _unitOfWork.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Processing triggered for asset: {AssetId}", assetId);
-
-            // Enqueue background job for actual processing
-            _backgroundJobService.Enqueue<IMediaProcessingJob>(x => x.OptimizeMediaAsync(assetId));
-            _logger.LogInformation("Enqueued background job for asset optimization: {AssetId}", assetId);
+            _logger.LogInformation("Processing triggered for asset {AssetId} with job {JobId}", assetId, jobId);
         }
 
         public async Task DeleteAsync(Guid assetId, Guid studioId, Guid currentUserId, CancellationToken ct = default)
