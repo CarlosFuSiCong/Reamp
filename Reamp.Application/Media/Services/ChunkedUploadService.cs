@@ -117,8 +117,16 @@ namespace Reamp.Application.Media.Services
 
             _logger.LogInformation("Completing upload for session {SessionId}", sessionId);
 
+            // Validate file size before allocating buffer (C# arrays require int dimensions)
+            if (session.TotalSize > int.MaxValue)
+            {
+                _logger.LogError("File size {TotalSize} exceeds maximum supported size {MaxSize} for session {SessionId}",
+                    session.TotalSize, int.MaxValue, sessionId);
+                throw new InvalidOperationException($"File size ({session.TotalSize} bytes) exceeds maximum supported size ({int.MaxValue} bytes ~2GB).");
+            }
+
             // Merge all chunks with integrity validation
-            var mergedData = new byte[session.TotalSize];
+            var mergedData = new byte[(int)session.TotalSize];
             long currentPosition = 0;
 
             for (int i = 0; i < session.TotalChunks; i++)
