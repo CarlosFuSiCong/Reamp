@@ -253,11 +253,17 @@ namespace Reamp.Api.Controllers.Media
                 var currentUserId = GetCurrentUserId();
                 var session = await _chunkedUploadService.InitiateUploadAsync(dto, currentUserId, ct);
 
-                _logger.LogInformation("Chunked upload initiated: {SessionId}", session.SessionId);
+                _logger.LogInformation("Chunked upload initiated: {SessionId} for Studio {StudioId} by User {UserId}",
+                    session.SessionId, dto.OwnerStudioId, currentUserId);
 
                 return Ok(ApiResponse<UploadSessionDto>.Ok(
                     session,
                     "Chunked upload session initiated"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access to initiate chunked upload for Studio {StudioId}", dto.OwnerStudioId);
+                return StatusCode(403, ApiResponse<object>.Fail(ex.Message));
             }
             catch (Exception ex)
             {

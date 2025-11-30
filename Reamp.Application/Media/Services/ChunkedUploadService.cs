@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Reamp.Application.Media.Dtos;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Infrastructure.Configuration;
 using Reamp.Infrastructure.Services.Media;
 
@@ -10,17 +11,20 @@ namespace Reamp.Application.Media.Services
     {
         private readonly IUploadSessionStore _sessionStore;
         private readonly IMediaAssetAppService _mediaAssetAppService;
+        private readonly IStaffRepository _staffRepository;
         private readonly ILogger<ChunkedUploadService> _logger;
         private readonly MediaUploadSettings _uploadSettings;
 
         public ChunkedUploadService(
             IUploadSessionStore sessionStore,
             IMediaAssetAppService mediaAssetAppService,
+            IStaffRepository staffRepository,
             IOptions<MediaUploadSettings> uploadSettings,
             ILogger<ChunkedUploadService> logger)
         {
             _sessionStore = sessionStore;
             _mediaAssetAppService = mediaAssetAppService;
+            _staffRepository = staffRepository;
             _uploadSettings = uploadSettings.Value;
             _logger = logger;
         }
@@ -32,6 +36,17 @@ namespace Reamp.Application.Media.Services
         {
             if (currentUserId == Guid.Empty)
                 throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
+
+            // Security: Verify user is a staff member of the target studio
+            // This prevents cross-tenant session creation and memory-based DoS attacks
+            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, dto.OwnerStudioId, ct);
+            if (!isStaffMember)
+            {
+                _logger.LogWarning(
+                    "User {UserId} attempted to initiate chunked upload for Studio {StudioId} but is not a staff member",
+                    currentUserId, dto.OwnerStudioId);
+                throw new UnauthorizedAccessException("You are not authorized to upload media to this studio. You must be a staff member.");
+            }
 
             var session = new UploadSession
             {
@@ -48,7 +63,8 @@ namespace Reamp.Application.Media.Services
 
             await _sessionStore.CreateSessionAsync(session);
 
-            _logger.LogInformation("Chunked upload session initiated: {SessionId}", session.SessionId);
+            _logger.LogInformation("Chunked upload session initiated: {SessionId} for Studio {StudioId} by User {UserId}", 
+                session.SessionId, session.OwnerStudioId, currentUserId);
 
             return MapToDto(session);
         }
