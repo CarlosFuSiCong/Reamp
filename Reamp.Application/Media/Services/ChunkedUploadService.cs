@@ -117,7 +117,7 @@ namespace Reamp.Application.Media.Services
 
             _logger.LogInformation("Completing upload for session {SessionId}", sessionId);
 
-            // Merge all chunks
+            // Merge all chunks with integrity validation
             var mergedData = new byte[session.TotalSize];
             long currentPosition = 0;
 
@@ -126,9 +126,28 @@ namespace Reamp.Application.Media.Services
                 if (!session.ChunkData.TryGetValue(i, out var chunkData))
                     throw new InvalidOperationException($"Chunk {i} is missing.");
 
+                // Data integrity: Verify chunk doesn't exceed remaining buffer space
+                long remainingSpace = session.TotalSize - currentPosition;
+                if (chunkData.Length > remainingSpace)
+                {
+                    _logger.LogError("Chunk {ChunkIndex} size {ChunkSize} exceeds remaining buffer space {RemainingSpace} for session {SessionId}",
+                        i, chunkData.Length, remainingSpace, sessionId);
+                    throw new InvalidOperationException($"Chunk {i} size ({chunkData.Length} bytes) exceeds remaining buffer space ({remainingSpace} bytes). Upload corrupted.");
+                }
+
                 Array.Copy(chunkData, 0, mergedData, currentPosition, chunkData.Length);
                 currentPosition += chunkData.Length;
             }
+
+            // Data integrity: Verify merged size matches expected total size
+            if (currentPosition != session.TotalSize)
+            {
+                _logger.LogError("Merged data size {ActualSize} does not match expected size {ExpectedSize} for session {SessionId}",
+                    currentPosition, session.TotalSize, sessionId);
+                throw new InvalidOperationException($"Data integrity check failed: merged size ({currentPosition} bytes) does not match expected size ({session.TotalSize} bytes). Upload corrupted.");
+            }
+
+            _logger.LogInformation("Data integrity verified for session {SessionId}: {TotalSize} bytes", sessionId, currentPosition);
 
             // Create a stream from merged data
             using var mergedStream = new MemoryStream(mergedData);
