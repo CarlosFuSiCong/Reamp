@@ -301,8 +301,8 @@ namespace Reamp.Application.Accounts.Agencies.Services
             branch.UpdateDescription(dto.Description);
             branch.UpdateContact(dto.ContactEmail, dto.ContactPhone);
             
-            if (dto.Address != null)
-                branch.UpdateAddress(dto.Address.ToValueObject());
+            // Always update address to allow clearing it with null
+            branch.UpdateAddress(dto.Address?.ToValueObject());
 
             await _unitOfWork.SaveChangesAsync(ct);
 
