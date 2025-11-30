@@ -16,7 +16,9 @@ namespace Reamp.Application.Media.Validators
 
             RuleFor(x => x.ContentType)
                 .NotEmpty().WithMessage("Content type is required")
-                .Must(ct => ct.ToLowerInvariant().StartsWith("image/") || ct.ToLowerInvariant().StartsWith("video/"))
+                .Must(ct => !string.IsNullOrWhiteSpace(ct) && 
+                           (ct.ToLowerInvariant().StartsWith("image/") || 
+                            ct.ToLowerInvariant().StartsWith("video/")))
                 .WithMessage("Content type must be an image or video type");
 
             RuleFor(x => x.TotalSize)

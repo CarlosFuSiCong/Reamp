@@ -329,6 +329,11 @@ namespace Reamp.Api.Controllers.Media
             {
                 return Forbid();
             }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Invalid chunk upload operation");
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading chunk");
