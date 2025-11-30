@@ -242,7 +242,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
 
             var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: false, ct);
-            if (agency == null)
+            if (agency == null || agency.DeletedAtUtc != null)
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
             // Check for slug conflicts before creating
