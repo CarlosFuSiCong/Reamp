@@ -24,7 +24,7 @@ namespace Reamp.Infrastructure.Repositories.Orders
         {
             // Load order with all tasks
             return await _set
-                .Include("_tasks")
+                .Include(x => x.Tasks)
                 .FirstOrDefaultAsync(x => x.Id == id, ct);
         }
 
@@ -35,7 +35,7 @@ namespace Reamp.Infrastructure.Repositories.Orders
             Guid? createdBy = null,
             CancellationToken ct = default)
         {
-            var query = _set.AsNoTracking().Include("_tasks").AsQueryable();
+            var query = _set.AsNoTracking().Include(x => x.Tasks).AsQueryable();
 
             // Apply filters
             if (agencyId.HasValue)
