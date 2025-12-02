@@ -35,7 +35,8 @@ namespace Reamp.Infrastructure.Repositories.Orders
             Guid? createdBy = null,
             CancellationToken ct = default)
         {
-            var query = _set.AsNoTracking().Include(x => x.Tasks).AsQueryable();
+            // Build query without Include to avoid cartesian product in pagination
+            var query = _set.AsNoTracking().AsQueryable();
 
             // Apply filters
             if (agencyId.HasValue)
@@ -50,7 +51,30 @@ namespace Reamp.Infrastructure.Repositories.Orders
             // Order by creation date descending
             query = query.OrderByDescending(x => x.CreatedAtUtc);
 
-            return await ToPagedListAsync(query, page, ct);
+            // Get paginated result first
+            var pagedResult = await ToPagedListAsync(query, page, ct);
+
+            // Load tasks for the paginated orders in a separate query
+            if (pagedResult.Items.Any())
+            {
+                var orderIds = pagedResult.Items.Select(x => x.Id).ToList();
+                var ordersWithTasks = await _set
+                    .AsNoTracking()
+                    .Include(x => x.Tasks)
+                    .Where(x => orderIds.Contains(x.Id))
+                    .ToListAsync(ct);
+
+                // Create a dictionary for fast lookup and preserve original ordering
+                var ordersDict = ordersWithTasks.ToDictionary(x => x.Id);
+                var orderedItems = pagedResult.Items
+                    .Select(x => ordersDict.TryGetValue(x.Id, out var order) ? order : x)
+                    .ToList();
+
+                // Replace items with versions that have tasks loaded, preserving order
+                return new PagedList<ShootOrder>(orderedItems, pagedResult.TotalCount, pagedResult.Page, pagedResult.PageSize);
+            }
+
+            return pagedResult;
         }
 
         public Task UpdateAsync(ShootOrder entity, CancellationToken ct = default)
