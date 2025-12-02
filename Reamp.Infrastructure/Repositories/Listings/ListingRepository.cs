@@ -30,7 +30,38 @@ namespace Reamp.Infrastructure.Repositories.Listings
 
         public Task UpdateAsync(Listing entity, CancellationToken ct = default)
         {
-            _set.Update(entity);
+            // Attach the aggregate root if not tracked
+            var entry = _db.Entry(entity);
+            
+            if (entry.State == EntityState.Detached)
+            {
+                _set.Attach(entity);
+                entry.State = EntityState.Modified;
+            }
+
+            // Manually track child entity states for media refs and agent snapshots
+            // EF needs to know which children are new (Added) vs existing (Modified)
+            
+            // Handle media refs
+            foreach (var mediaRef in entity.MediaRefs)
+            {
+                var mediaEntry = _db.Entry(mediaRef);
+                if (mediaEntry.State == EntityState.Detached)
+                {
+                    mediaEntry.State = EntityState.Added;
+                }
+            }
+
+            // Handle agent snapshots
+            foreach (var agentSnapshot in entity.AgentSnapshots)
+            {
+                var agentEntry = _db.Entry(agentSnapshot);
+                if (agentEntry.State == EntityState.Detached)
+                {
+                    agentEntry.State = EntityState.Added;
+                }
+            }
+
             return Task.CompletedTask;
         }
 
