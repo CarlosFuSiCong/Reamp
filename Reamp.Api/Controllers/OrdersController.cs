@@ -332,10 +332,5 @@ namespace Reamp.Api.Controllers
         }
     }
 
-    // DTO for cancel order request
-    public class CancelOrderDto
-    {
-        public string? Reason { get; set; }
-    }
 }
 

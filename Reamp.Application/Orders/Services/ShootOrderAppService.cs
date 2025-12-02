@@ -3,21 +3,32 @@ using Reamp.Application.Orders.Dtos;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Shoots.Entities;
 using Reamp.Domain.Shoots.Repositories;
+using Reamp.Domain.Accounts.Repositories;
+using Reamp.Domain.Listings.Repositories;
 
 namespace Reamp.Application.Orders.Services
 {
     public sealed class ShootOrderAppService : IShootOrderAppService
     {
         private readonly IShootOrderRepository _repo;
+        private readonly IAgencyRepository _agencyRepo;
+        private readonly IStudioRepository _studioRepo;
+        private readonly IListingRepository _listingRepo;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<ShootOrderAppService> _logger;
 
         public ShootOrderAppService(
             IShootOrderRepository repo,
+            IAgencyRepository agencyRepo,
+            IStudioRepository studioRepo,
+            IListingRepository listingRepo,
             IUnitOfWork uow,
             ILogger<ShootOrderAppService> logger)
         {
             _repo = repo;
+            _agencyRepo = agencyRepo;
+            _studioRepo = studioRepo;
+            _listingRepo = listingRepo;
             _uow = uow;
             _logger = logger;
         }
@@ -25,6 +36,25 @@ namespace Reamp.Application.Orders.Services
         public async Task<OrderDetailDto> PlaceOrderAsync(PlaceOrderDto dto, Guid currentUserId, CancellationToken ct = default)
         {
             _logger.LogInformation("Placing order for listing {ListingId} by user {UserId}", dto.ListingId, currentUserId);
+
+            // Validate foreign keys exist before creating order
+            var agency = await _agencyRepo.GetByIdAsync(dto.AgencyId, asNoTracking: true, ct);
+            if (agency == null)
+            {
+                throw new ArgumentException($"Agency with ID {dto.AgencyId} does not exist", nameof(dto.AgencyId));
+            }
+
+            var studio = await _studioRepo.GetByIdAsync(dto.StudioId, asNoTracking: true, ct);
+            if (studio == null)
+            {
+                throw new ArgumentException($"Studio with ID {dto.StudioId} does not exist", nameof(dto.StudioId));
+            }
+
+            var listing = await _listingRepo.GetByIdAsync(dto.ListingId, asNoTracking: true, ct);
+            if (listing == null)
+            {
+                throw new ArgumentException($"Listing with ID {dto.ListingId} does not exist", nameof(dto.ListingId));
+            }
 
             // Create order
             var order = ShootOrder.Place(
