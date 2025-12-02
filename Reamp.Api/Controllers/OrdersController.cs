@@ -90,6 +90,11 @@ namespace Reamp.Api.Controllers
 
                 return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order list");
+                return Forbid();
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting order list");

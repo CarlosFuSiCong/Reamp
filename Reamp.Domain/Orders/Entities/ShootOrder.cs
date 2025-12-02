@@ -19,6 +19,7 @@ namespace Reamp.Domain.Shoots.Entities
 
         public ShootOrderStatus Status { get; private set; } = ShootOrderStatus.Placed;
         public Guid CreatedBy { get; private set; }
+        public string? CancellationReason { get; private set; }
 
         private readonly List<ShootTask> _tasks = new();
         public IReadOnlyCollection<ShootTask> Tasks => _tasks.AsReadOnly();
@@ -97,11 +98,14 @@ namespace Reamp.Domain.Shoots.Entities
             Status = ShootOrderStatus.Completed; Touch();
         }
 
-        public void Cancel(string reason)
+        public void Cancel(string? reason = null)
         {
             if (Status == ShootOrderStatus.Completed) throw new InvalidOperationException("Cannot cancel completed");
             if (Status == ShootOrderStatus.Cancelled) return;
-            Status = ShootOrderStatus.Cancelled; Touch();
+            
+            Status = ShootOrderStatus.Cancelled;
+            CancellationReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+            Touch();
         }
 
         private void RecalculateTotal() => TotalAmount = _tasks.Sum(t => t.Price ?? 0m);

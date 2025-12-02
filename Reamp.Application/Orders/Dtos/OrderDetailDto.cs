@@ -13,6 +13,7 @@ namespace Reamp.Application.Orders.Dtos
         public ShootOrderStatus Status { get; set; }
         public Guid CreatedBy { get; set; }
         public DateTime CreatedAtUtc { get; set; }
+        public string? CancellationReason { get; set; }
         public List<TaskDetailDto> Tasks { get; set; } = new();
     }
 

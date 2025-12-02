@@ -30,6 +30,7 @@ namespace Reamp.Infrastructure.Configurations.Shoots
             b.Property(x => x.TotalAmount).HasColumnType("decimal(18,2)");
             b.Property(x => x.Status).HasConversion<int>().IsRequired();
             b.Property(x => x.CreatedBy).IsRequired();
+            b.Property(x => x.CancellationReason).HasMaxLength(500);
 
             b.HasIndex(x => x.AgencyId);
             b.HasIndex(x => x.StudioId);

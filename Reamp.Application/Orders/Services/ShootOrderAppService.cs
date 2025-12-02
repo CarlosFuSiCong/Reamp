@@ -280,6 +280,7 @@ namespace Reamp.Application.Orders.Services
                 Status = order.Status,
                 CreatedBy = order.CreatedBy,
                 CreatedAtUtc = order.CreatedAtUtc,
+                CancellationReason = order.CancellationReason,
                 Tasks = order.Tasks.Select(t => new TaskDetailDto
                 {
                     Id = t.Id,
