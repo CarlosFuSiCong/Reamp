@@ -26,7 +26,14 @@ namespace Reamp.Api.Controllers
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim!);
+            
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                _logger.LogWarning("Invalid or missing user ID claim in token");
+                throw new UnauthorizedAccessException("Invalid user authentication");
+            }
+            
+            return userId;
         }
 
         // POST /api/orders - Place new order
@@ -45,10 +52,25 @@ namespace Reamp.Api.Controllers
                     new { id = result.Id },
                     ApiResponse<OrderDetailDto>.Ok(result, "Order placed successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized attempt to place order");
+                return Forbid();
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid argument when placing order");
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Invalid operation when placing order");
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error placing order");
-                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+                return StatusCode(500, ApiResponse<object>.Fail("An error occurred"));
             }
         }
 
