@@ -14,6 +14,7 @@ using Reamp.Application.Accounts.Studios.Validators;
 using Reamp.Application.Authentication;
 using Reamp.Application.Authentication.Services;
 using Reamp.Application.Listings.Services;
+using Reamp.Application.Orders.Services;
 using Reamp.Application.Read.Agencies;
 using Reamp.Application.Read.Clients;
 using Reamp.Application.Read.Listings;
@@ -21,6 +22,7 @@ using Reamp.Application.Read.Staff;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Listings.Repositories;
+using Reamp.Domain.Shoots.Repositories;
 using Reamp.Infrastructure;
 using Reamp.Infrastructure.Identity;
 using Reamp.Infrastructure.Read.EF.Agencies;
@@ -30,6 +32,7 @@ using Reamp.Infrastructure.Read.EF.Staff;
 using Reamp.Infrastructure.Repositories.Accounts;
 using Reamp.Infrastructure.Repositories.Common;
 using Reamp.Infrastructure.Repositories.Listings;
+using Reamp.Infrastructure.Repositories.Orders;
 using Reamp.Shared;
 using Serilog;
 using System.Text;
@@ -183,6 +186,7 @@ namespace Reamp.Api
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<Reamp.Domain.Media.Repositories.IMediaAssetRepository,
                 Reamp.Infrastructure.Repositories.Media.MediaAssetRepository>();
+            builder.Services.AddScoped<IShootOrderRepository, ShootOrderRepository>();
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -198,6 +202,7 @@ namespace Reamp.Api
                 Reamp.Application.Media.Services.ChunkedUploadService>();
             builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaProcessingJob,
                 Reamp.Application.Media.Services.MediaProcessingJob>();
+            builder.Services.AddScoped<IShootOrderAppService, ShootOrderAppService>();
 
             // Background Job Service (Hangfire abstraction)
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
