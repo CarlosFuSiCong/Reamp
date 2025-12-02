@@ -13,6 +13,7 @@ namespace Reamp.Application.Orders.Dtos
         [Required]
         public Guid ListingId { get; set; }
 
+        [StringLength(3, MinimumLength = 3, ErrorMessage = "Currency must be a 3-character ISO code (e.g., AUD, USD)")]
         public string? Currency { get; set; }
     }
 }
