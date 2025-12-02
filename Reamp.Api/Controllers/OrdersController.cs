@@ -81,12 +81,18 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                var result = await _appService.GetByIdAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                var result = await _appService.GetByIdAsync(id, currentUserId, ct);
 
                 if (result == null)
                     return NotFound(ApiResponse<object>.Fail("Order not found"));
 
                 return Ok(ApiResponse<OrderDetailDto>.Ok(result));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (Exception ex)
             {
@@ -101,11 +107,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.AddTaskAsync(id, dto, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.AddTaskAsync(id, dto, currentUserId, ct);
 
                 _logger.LogInformation("Task added to order {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Task added successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -124,11 +136,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.RemoveTaskAsync(id, taskId, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.RemoveTaskAsync(id, taskId, currentUserId, ct);
 
                 _logger.LogInformation("Task {TaskId} removed from order {OrderId}", taskId, id);
 
                 return Ok(ApiResponse.Ok("Task removed successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -147,11 +165,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.AcceptAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.AcceptAsync(id, currentUserId, ct);
 
                 _logger.LogInformation("Order accepted: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order accepted successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -170,11 +194,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.ScheduleAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.ScheduleAsync(id, currentUserId, ct);
 
                 _logger.LogInformation("Order scheduled: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order scheduled successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -193,11 +223,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.StartAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.StartAsync(id, currentUserId, ct);
 
                 _logger.LogInformation("Order started: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order started successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -216,11 +252,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.CompleteAsync(id, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.CompleteAsync(id, currentUserId, ct);
 
                 _logger.LogInformation("Order completed: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order completed successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -239,11 +281,17 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _appService.CancelAsync(id, dto?.Reason, ct);
+                var currentUserId = GetCurrentUserId();
+                await _appService.CancelAsync(id, currentUserId, dto?.Reason, ct);
 
                 _logger.LogInformation("Order cancelled: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order cancelled successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {

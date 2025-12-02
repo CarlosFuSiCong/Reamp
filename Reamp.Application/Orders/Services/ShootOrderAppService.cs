@@ -56,24 +56,43 @@ namespace Reamp.Application.Orders.Services
             return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
         }
 
-        public async Task<OrderDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        public async Task<OrderDetailDto?> GetByIdAsync(Guid id, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogDebug("Getting order {OrderId}", id);
+            _logger.LogDebug("Getting order {OrderId} for user {UserId}", id, currentUserId);
 
             // Load order with all tasks
             var order = await _repo.GetAggregateAsync(id, ct);
 
-            return order == null ? null : MapToDetailDto(order);
+            if (order == null)
+                return null;
+
+            // Verify ownership - only creator can view their own orders
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to access order {OrderId} owned by {OwnerId}", 
+                    currentUserId, id, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to view this order");
+            }
+
+            return MapToDetailDto(order);
         }
 
-        public async Task AddTaskAsync(Guid orderId, AddTaskDto dto, CancellationToken ct = default)
+        public async Task AddTaskAsync(Guid orderId, AddTaskDto dto, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Adding task {TaskType} to order {OrderId}", dto.Type, orderId);
+            _logger.LogInformation("Adding task {TaskType} to order {OrderId} by user {UserId}", dto.Type, orderId, currentUserId);
 
             // Load order
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             // Add task
             order.AddTask(dto.Type, dto.Notes, dto.Price);
@@ -84,14 +103,22 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully added task to order {OrderId}", orderId);
         }
 
-        public async Task RemoveTaskAsync(Guid orderId, Guid taskId, CancellationToken ct = default)
+        public async Task RemoveTaskAsync(Guid orderId, Guid taskId, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Removing task {TaskId} from order {OrderId}", taskId, orderId);
+            _logger.LogInformation("Removing task {TaskId} from order {OrderId} by user {UserId}", taskId, orderId, currentUserId);
 
             // Load order
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             // Remove task
             order.RemoveTask(taskId);
@@ -102,13 +129,21 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully removed task from order {OrderId}", orderId);
         }
 
-        public async Task AcceptAsync(Guid orderId, CancellationToken ct = default)
+        public async Task AcceptAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Accepting order {OrderId}", orderId);
+            _logger.LogInformation("Accepting order {OrderId} by user {UserId}", orderId, currentUserId);
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             order.Accept();
 
@@ -118,13 +153,21 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully accepted order {OrderId}", orderId);
         }
 
-        public async Task ScheduleAsync(Guid orderId, CancellationToken ct = default)
+        public async Task ScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Scheduling order {OrderId}", orderId);
+            _logger.LogInformation("Scheduling order {OrderId} by user {UserId}", orderId, currentUserId);
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             order.MarkScheduled();
 
@@ -134,13 +177,21 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully scheduled order {OrderId}", orderId);
         }
 
-        public async Task StartAsync(Guid orderId, CancellationToken ct = default)
+        public async Task StartAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Starting order {OrderId}", orderId);
+            _logger.LogInformation("Starting order {OrderId} by user {UserId}", orderId, currentUserId);
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             order.Start();
 
@@ -150,13 +201,21 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully started order {OrderId}", orderId);
         }
 
-        public async Task CompleteAsync(Guid orderId, CancellationToken ct = default)
+        public async Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            _logger.LogInformation("Completing order {OrderId}", orderId);
+            _logger.LogInformation("Completing order {OrderId} by user {UserId}", orderId, currentUserId);
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             order.Complete();
 
@@ -166,13 +225,21 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully completed order {OrderId}", orderId);
         }
 
-        public async Task CancelAsync(Guid orderId, string? reason = null, CancellationToken ct = default)
+        public async Task CancelAsync(Guid orderId, Guid currentUserId, string? reason = null, CancellationToken ct = default)
         {
-            _logger.LogInformation("Cancelling order {OrderId} with reason: {Reason}", orderId, reason ?? "N/A");
+            _logger.LogInformation("Cancelling order {OrderId} by user {UserId} with reason: {Reason}", orderId, currentUserId, reason ?? "N/A");
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
                 throw new InvalidOperationException($"Order {orderId} not found");
+
+            // Verify ownership
+            if (order.CreatedBy != currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                    currentUserId, orderId, order.CreatedBy);
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            }
 
             order.Cancel(reason ?? string.Empty);
 
