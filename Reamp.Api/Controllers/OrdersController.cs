@@ -141,6 +141,10 @@ namespace Reamp.Api.Controllers
 
                 return Ok(ApiResponse.Ok("Task added successfully"));
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
@@ -169,6 +173,10 @@ namespace Reamp.Api.Controllers
                 _logger.LogInformation("Task {TaskId} removed from order {OrderId}", taskId, id);
 
                 return Ok(ApiResponse.Ok("Task removed successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -199,6 +207,10 @@ namespace Reamp.Api.Controllers
 
                 return Ok(ApiResponse.Ok("Order accepted successfully"));
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
@@ -227,6 +239,10 @@ namespace Reamp.Api.Controllers
                 _logger.LogInformation("Order scheduled: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order scheduled successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -257,6 +273,10 @@ namespace Reamp.Api.Controllers
 
                 return Ok(ApiResponse.Ok("Order started successfully"));
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
@@ -286,6 +306,10 @@ namespace Reamp.Api.Controllers
 
                 return Ok(ApiResponse.Ok("Order completed successfully"));
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized access attempt to order {OrderId}", id);
@@ -314,6 +338,10 @@ namespace Reamp.Api.Controllers
                 _logger.LogInformation("Order cancelled: {OrderId}", id);
 
                 return Ok(ApiResponse.Ok("Order cancelled successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
             catch (UnauthorizedAccessException ex)
             {

@@ -114,7 +114,7 @@ namespace Reamp.Application.Orders.Services
             // Load order
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -140,7 +140,7 @@ namespace Reamp.Application.Orders.Services
             // Load order
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -165,7 +165,7 @@ namespace Reamp.Application.Orders.Services
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -189,7 +189,7 @@ namespace Reamp.Application.Orders.Services
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -213,7 +213,7 @@ namespace Reamp.Application.Orders.Services
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -237,7 +237,7 @@ namespace Reamp.Application.Orders.Services
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
@@ -261,7 +261,7 @@ namespace Reamp.Application.Orders.Services
 
             var order = await _repo.GetAggregateAsync(orderId, ct);
             if (order == null)
-                throw new InvalidOperationException($"Order {orderId} not found");
+                throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
