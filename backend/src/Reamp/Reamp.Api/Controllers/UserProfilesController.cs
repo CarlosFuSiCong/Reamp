@@ -34,7 +34,7 @@ namespace Reamp.Api.Controllers
             return userId;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetProfile(Guid id, CancellationToken ct)
         {
             var result = await _appService.GetByIdAsync(id, ct);
@@ -56,7 +56,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<UserProfileDto>.Ok(result));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateProfile(
             Guid id,
             [FromBody] UpdateUserProfileDto dto,
@@ -81,7 +81,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<UserProfileDto>.Ok(result, "Profile updated successfully"));
         }
 
-        [HttpPut("{id}/avatar")]
+        [HttpPut("{id:guid}/avatar")]
         public async Task<IActionResult> UpdateAvatar(
             Guid id,
             [FromBody] UpdateAvatarDto dto,

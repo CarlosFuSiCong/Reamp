@@ -59,7 +59,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetOrderDetail(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -71,7 +71,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<OrderDetailDto>.Ok(result));
         }
 
-        [HttpPost("{id}/tasks")]
+        [HttpPost("{id:guid}/tasks")]
         public async Task<IActionResult> AddTask(Guid id, [FromBody] AddTaskDto dto, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -89,7 +89,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Task removed successfully"));
         }
 
-        [HttpPost("{id}/accept")]
+        [HttpPost("{id:guid}/accept")]
         public async Task<IActionResult> AcceptOrder(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -98,7 +98,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Order accepted successfully"));
         }
 
-        [HttpPost("{id}/schedule")]
+        [HttpPost("{id:guid}/schedule")]
         public async Task<IActionResult> ScheduleOrder(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -107,7 +107,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Order scheduled successfully"));
         }
 
-        [HttpPost("{id}/start")]
+        [HttpPost("{id:guid}/start")]
         public async Task<IActionResult> StartOrder(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -116,7 +116,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Order started successfully"));
         }
 
-        [HttpPost("{id}/complete")]
+        [HttpPost("{id:guid}/complete")]
         public async Task<IActionResult> CompleteOrder(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -125,7 +125,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Order completed successfully"));
         }
 
-        [HttpPost("{id}/cancel")]
+        [HttpPost("{id:guid}/cancel")]
         public async Task<IActionResult> CancelOrder(Guid id, [FromBody] CancelOrderDto? dto, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -134,7 +134,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Order cancelled successfully"));
         }
 
-        [HttpPost("{id}/assign-photographer")]
+        [HttpPost("{id:guid}/assign-photographer")]
         public async Task<IActionResult> AssignPhotographer(Guid id, [FromBody] AssignPhotographerDto dto, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -143,7 +143,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Photographer assigned successfully"));
         }
 
-        [HttpDelete("{id}/photographer")]
+        [HttpDelete("{id:guid}/photographer")]
         public async Task<IActionResult> UnassignPhotographer(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -152,7 +152,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Photographer unassigned successfully"));
         }
 
-        [HttpGet("{id}/available-photographers")]
+        [HttpGet("{id:guid}/available-photographers")]
         public async Task<IActionResult> GetAvailablePhotographers(Guid id, CancellationToken ct)
         {
             var photographers = await _appService.GetAvailablePhotographersAsync(id, ct);
@@ -160,7 +160,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<IReadOnlyList<Application.Read.Staff.DTOs.StaffSummaryDto>>.Ok(photographers));
         }
 
-        [HttpPost("{id}/set-schedule")]
+        [HttpPost("{id:guid}/set-schedule")]
         public async Task<IActionResult> SetSchedule(Guid id, [FromBody] SetScheduleDto dto, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
@@ -169,7 +169,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Schedule set successfully"));
         }
 
-        [HttpDelete("{id}/schedule")]
+        [HttpDelete("{id:guid}/schedule")]
         public async Task<IActionResult> ClearSchedule(Guid id, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();

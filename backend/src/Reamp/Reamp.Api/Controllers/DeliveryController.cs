@@ -38,7 +38,7 @@ namespace Reamp.Api.Controllers
                 ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Delivery package created successfully"));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetPackageDetail(Guid id, CancellationToken ct)
         {
             var result = await _appService.GetByIdAsync(id, ct);
@@ -48,21 +48,21 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result));
         }
 
-        [HttpGet("order/{orderId}")]
+        [HttpGet("order/{orderId:guid}")]
         public async Task<IActionResult> GetPackagesByOrder(Guid orderId, CancellationToken ct)
         {
             var result = await _appService.GetByOrderIdAsync(orderId, ct);
             return Ok(ApiResponse<List<DeliveryPackageListDto>>.Ok(result));
         }
 
-        [HttpGet("listing/{listingId}")]
+        [HttpGet("listing/{listingId:guid}")]
         public async Task<IActionResult> GetPackagesByListing(Guid listingId, CancellationToken ct)
         {
             var result = await _appService.GetByListingIdAsync(listingId, ct);
             return Ok(ApiResponse<List<DeliveryPackageListDto>>.Ok(result));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> UpdatePackage(
             Guid id,
@@ -75,7 +75,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Delivery package updated successfully"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> DeletePackage(Guid id, CancellationToken ct)
         {
@@ -85,7 +85,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse.Ok("Delivery package deleted successfully"));
         }
 
-        [HttpPost("{id}/items")]
+        [HttpPost("{id:guid}/items")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> AddItem(
             Guid id,
@@ -98,7 +98,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Item added successfully"));
         }
 
-        [HttpDelete("{id}/items/{itemId}")]
+        [HttpDelete("{id:guid}/items/{itemId:guid}")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> RemoveItem(Guid id, Guid itemId, CancellationToken ct)
         {
@@ -108,7 +108,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Item removed successfully"));
         }
 
-        [HttpPost("{id}/accesses")]
+        [HttpPost("{id:guid}/accesses")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> AddAccess(
             Guid id,
@@ -121,7 +121,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Access added successfully"));
         }
 
-        [HttpDelete("{id}/accesses/{accessId}")]
+        [HttpDelete("{id:guid}/accesses/{accessId:guid}")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> RemoveAccess(Guid id, Guid accessId, CancellationToken ct)
         {
@@ -131,7 +131,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Access removed successfully"));
         }
 
-        [HttpPost("{id}/publish")]
+        [HttpPost("{id:guid}/publish")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> PublishPackage(Guid id, CancellationToken ct)
         {
@@ -141,7 +141,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Delivery package published successfully"));
         }
 
-        [HttpPost("{id}/revoke")]
+        [HttpPost("{id:guid}/revoke")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> RevokePackage(Guid id, CancellationToken ct)
         {
@@ -151,7 +151,7 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Delivery package revoked successfully"));
         }
 
-        [HttpPost("{id}/verify-password")]
+        [HttpPost("{id:guid}/verify-password")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyPassword(
             Guid id,
@@ -166,7 +166,7 @@ namespace Reamp.Api.Controllers
             return Unauthorized(ApiResponse<bool>.Fail("Invalid password"));
         }
 
-        [HttpPost("{id}/download/{accessId}")]
+        [HttpPost("{id:guid}/download/{accessId:guid}")]
         [AllowAnonymous]
         public async Task<IActionResult> IncrementDownload(Guid id, Guid accessId, CancellationToken ct)
         {
