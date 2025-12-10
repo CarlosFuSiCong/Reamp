@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Reamp.Application.Accounts.Clients.Dtos;
 using Reamp.Domain.Accounts.Entities;
@@ -61,7 +62,23 @@ namespace Reamp.Application.Accounts.Clients.Services
             await _clientRepository.AddAsync(client, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(client, ct);
+            var detailDto = client.Adapt<ClientDetailDto>();
+            var prof = await _userProfileRepository.GetByIdAsync(client.UserProfileId, asNoTracking: true, ct);
+            var ag = await _agencyRepository.GetByIdAsync(client.AgencyId, asNoTracking: true, ct);
+            AgencyBranch? br = null;
+            if (client.AgencyBranchId.HasValue)
+            {
+                br = await _dbContext.Set<AgencyBranch>().AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.Id == client.AgencyBranchId.Value, ct);
+            }
+            
+            detailDto.AgencyName = ag?.Name;
+            detailDto.AgencyBranchName = br?.Name;
+            detailDto.FirstName = prof?.FirstName ?? "";
+            detailDto.LastName = prof?.LastName ?? "";
+            detailDto.DisplayName = prof?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<ClientDetailDto> UpdateAsync(Guid clientId, UpdateClientDto dto, CancellationToken ct = default)
@@ -89,7 +106,23 @@ namespace Reamp.Application.Accounts.Clients.Services
             client.MoveToAgency(dto.AgencyId, dto.AgencyBranchId);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(client, ct);
+            var detailDto = client.Adapt<ClientDetailDto>();
+            var profile = await _userProfileRepository.GetByIdAsync(client.UserProfileId, asNoTracking: true, ct);
+            var ag = await _agencyRepository.GetByIdAsync(client.AgencyId, asNoTracking: true, ct);
+            AgencyBranch? br = null;
+            if (client.AgencyBranchId.HasValue)
+            {
+                br = await _dbContext.Set<AgencyBranch>().AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.Id == client.AgencyBranchId.Value, ct);
+            }
+            
+            detailDto.AgencyName = ag?.Name;
+            detailDto.AgencyBranchName = br?.Name;
+            detailDto.FirstName = profile?.FirstName ?? "";
+            detailDto.LastName = profile?.LastName ?? "";
+            detailDto.DisplayName = profile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<ClientDetailDto?> GetByIdAsync(Guid clientId, CancellationToken ct = default)
@@ -98,7 +131,23 @@ namespace Reamp.Application.Accounts.Clients.Services
             if (client == null || client.DeletedAtUtc != null)
                 return null;
 
-            return await MapToDetailDtoAsync(client, ct);
+            var detailDto = client.Adapt<ClientDetailDto>();
+            var userProfile = await _userProfileRepository.GetByIdAsync(client.UserProfileId, asNoTracking: true, ct);
+            var agency = await _agencyRepository.GetByIdAsync(client.AgencyId, asNoTracking: true, ct);
+            AgencyBranch? branch = null;
+            if (client.AgencyBranchId.HasValue)
+            {
+                branch = await _dbContext.Set<AgencyBranch>().AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.Id == client.AgencyBranchId.Value, ct);
+            }
+            
+            detailDto.AgencyName = agency?.Name;
+            detailDto.AgencyBranchName = branch?.Name;
+            detailDto.FirstName = userProfile?.FirstName ?? "";
+            detailDto.LastName = userProfile?.LastName ?? "";
+            detailDto.DisplayName = userProfile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<ClientDetailDto?> GetByUserProfileIdAsync(Guid userProfileId, CancellationToken ct = default)
@@ -107,7 +156,23 @@ namespace Reamp.Application.Accounts.Clients.Services
             if (client == null || client.DeletedAtUtc != null)
                 return null;
 
-            return await MapToDetailDtoAsync(client, ct);
+            var detailDto = client.Adapt<ClientDetailDto>();
+            var userProfile = await _userProfileRepository.GetByIdAsync(client.UserProfileId, asNoTracking: true, ct);
+            var agency = await _agencyRepository.GetByIdAsync(client.AgencyId, asNoTracking: true, ct);
+            AgencyBranch? branch = null;
+            if (client.AgencyBranchId.HasValue)
+            {
+                branch = await _dbContext.Set<AgencyBranch>().AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.Id == client.AgencyBranchId.Value, ct);
+            }
+            
+            detailDto.AgencyName = agency?.Name;
+            detailDto.AgencyBranchName = branch?.Name;
+            detailDto.FirstName = userProfile?.FirstName ?? "";
+            detailDto.LastName = userProfile?.LastName ?? "";
+            detailDto.DisplayName = userProfile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<IPagedList<ClientListDto>> ListByAgencyAsync(
@@ -173,35 +238,6 @@ namespace Reamp.Application.Accounts.Clients.Services
 
             _clientRepository.Remove(client);
             await _unitOfWork.SaveChangesAsync(ct);
-        }
-
-        private async Task<ClientDetailDto> MapToDetailDtoAsync(Client client, CancellationToken ct)
-        {
-            var userProfile = await _userProfileRepository.GetByIdAsync(client.UserProfileId, asNoTracking: true, ct);
-            var agency = await _agencyRepository.GetByIdAsync(client.AgencyId, asNoTracking: true, ct);
-            
-            AgencyBranch? branch = null;
-            if (client.AgencyBranchId.HasValue)
-            {
-                branch = await _dbContext.Set<AgencyBranch>()
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(b => b.Id == client.AgencyBranchId.Value, ct);
-            }
-
-            return new ClientDetailDto
-            {
-                Id = client.Id,
-                UserProfileId = client.UserProfileId,
-                AgencyId = client.AgencyId,
-                AgencyName = agency?.Name,
-                AgencyBranchId = client.AgencyBranchId,
-                AgencyBranchName = branch?.Name,
-                CreatedAtUtc = client.CreatedAtUtc,
-                UpdatedAtUtc = client.UpdatedAtUtc,
-                FirstName = userProfile?.FirstName ?? "",
-                LastName = userProfile?.LastName ?? "",
-                DisplayName = userProfile?.DisplayName ?? ""
-            };
         }
     }
 }

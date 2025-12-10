@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Reamp.Application.Accounts.Staff.Dtos;
 using Reamp.Domain.Accounts.Entities;
@@ -51,7 +52,16 @@ namespace Reamp.Application.Accounts.Staff.Services
             await _staffRepository.AddAsync(staff, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(staff, ct);
+            var detailDto = staff.Adapt<StaffDetailDto>();
+            var prof = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
+            var st = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
+            
+            detailDto.StudioName = st?.Name;
+            detailDto.FirstName = prof?.FirstName ?? "";
+            detailDto.LastName = prof?.LastName ?? "";
+            detailDto.DisplayName = prof?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<StaffDetailDto> UpdateSkillsAsync(Guid staffId, UpdateStaffSkillsDto dto, CancellationToken ct = default)
@@ -63,7 +73,16 @@ namespace Reamp.Application.Accounts.Staff.Services
             staff.SetSkills(dto.Skills);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return await MapToDetailDtoAsync(staff, ct);
+            var detailDto = staff.Adapt<StaffDetailDto>();
+            var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
+            var st = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
+            
+            detailDto.StudioName = st?.Name;
+            detailDto.FirstName = profile?.FirstName ?? "";
+            detailDto.LastName = profile?.LastName ?? "";
+            detailDto.DisplayName = profile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<StaffDetailDto?> GetByIdAsync(Guid staffId, CancellationToken ct = default)
@@ -72,7 +91,16 @@ namespace Reamp.Application.Accounts.Staff.Services
             if (staff == null || staff.DeletedAtUtc != null)
                 return null;
 
-            return await MapToDetailDtoAsync(staff, ct);
+            var detailDto = staff.Adapt<StaffDetailDto>();
+            var userProfile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
+            var studio = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
+            
+            detailDto.StudioName = studio?.Name;
+            detailDto.FirstName = userProfile?.FirstName ?? "";
+            detailDto.LastName = userProfile?.LastName ?? "";
+            detailDto.DisplayName = userProfile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<StaffDetailDto?> GetByUserProfileIdAsync(Guid userProfileId, CancellationToken ct = default)
@@ -81,7 +109,16 @@ namespace Reamp.Application.Accounts.Staff.Services
             if (staff == null || staff.DeletedAtUtc != null)
                 return null;
 
-            return await MapToDetailDtoAsync(staff, ct);
+            var detailDto = staff.Adapt<StaffDetailDto>();
+            var userProfile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
+            var studio = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
+            
+            detailDto.StudioName = studio?.Name;
+            detailDto.FirstName = userProfile?.FirstName ?? "";
+            detailDto.LastName = userProfile?.LastName ?? "";
+            detailDto.DisplayName = userProfile?.DisplayName ?? "";
+            
+            return detailDto;
         }
 
         public async Task<IPagedList<StaffListDto>> ListByStudioAsync(
@@ -143,28 +180,6 @@ namespace Reamp.Application.Accounts.Staff.Services
 
             _staffRepository.Remove(staff);
             await _unitOfWork.SaveChangesAsync(ct);
-        }
-
-        private async Task<StaffDetailDto> MapToDetailDtoAsync(Domain.Accounts.Entities.Staff staff, CancellationToken ct)
-        {
-            var userProfile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
-            var studio = await _dbContext.Set<Studio>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
-
-            return new StaffDetailDto
-            {
-                Id = staff.Id,
-                UserProfileId = staff.UserProfileId,
-                StudioId = staff.StudioId,
-                StudioName = studio?.Name,
-                Skills = staff.Skills,
-                CreatedAtUtc = staff.CreatedAtUtc,
-                UpdatedAtUtc = staff.UpdatedAtUtc,
-                FirstName = userProfile?.FirstName ?? "",
-                LastName = userProfile?.LastName ?? "",
-                DisplayName = userProfile?.DisplayName ?? ""
-            };
         }
     }
 }
