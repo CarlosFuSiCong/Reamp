@@ -10,15 +10,15 @@ namespace Reamp.Domain.Accounts.Entities
 {
     public sealed class Agency : AuditableEntity
     {
-        public string Name { get; private set; }
-        public Slug Slug { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public Slug Slug { get; private set; } = null!;
         public string? Description { get; private set; }
 
         public Guid? LogoAssetId { get; private set; }
         public Guid CreatedBy { get; private set; }
 
-        public string ContactEmail { get; private set; }
-        public string ContactPhone { get; private set; }
+        public string ContactEmail { get; private set; } = string.Empty;
+        public string ContactPhone { get; private set; } = string.Empty;
 
         private readonly List<AgencyBranch> _branches = new();
         public IReadOnlyCollection<AgencyBranch> Branches => _branches.AsReadOnly();

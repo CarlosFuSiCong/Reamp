@@ -12,14 +12,14 @@ namespace Reamp.Domain.Accounts.Entities
     {
         public Guid AgencyId { get; private set; }
 
-        public string Name { get; private set; }
-        public Slug Slug { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public Slug Slug { get; private set; } = null!;
         public string? Description { get; private set; }
 
         public Guid CreatedBy { get; private set; }
 
-        public string ContactEmail { get; private set; }
-        public string ContactPhone { get; private set; }
+        public string ContactEmail { get; private set; } = string.Empty;
+        public string ContactPhone { get; private set; } = string.Empty;
 
         public Address? Address { get; private set; }
 

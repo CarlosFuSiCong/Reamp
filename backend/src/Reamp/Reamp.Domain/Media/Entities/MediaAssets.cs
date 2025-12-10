@@ -100,7 +100,7 @@ namespace Reamp.Domain.Media.Entities
         // ---- Deduplication checksum (64-hex lowercase) ----
         public void SetChecksumSha256(string hex)
         {
-            if (!Regex.IsMatch(hex ?? string.Empty, "^[0-9a-fA-F]{64}$"))
+            if (string.IsNullOrWhiteSpace(hex) || !Regex.IsMatch(hex, "^[0-9a-fA-F]{64}$"))
                 throw new ArgumentException("Checksum must be a valid 64-character hex string.", nameof(hex));
 
             ChecksumSha256 = hex.ToLowerInvariant();
@@ -111,7 +111,7 @@ namespace Reamp.Domain.Media.Entities
             => sizeBytes == SizeBytes
                && !string.IsNullOrWhiteSpace(ChecksumSha256)
                && !string.IsNullOrWhiteSpace(checksumHex)
-               && string.Equals(ChecksumSha256, checksumHex.Trim().ToLowerInvariant(), StringComparison.Ordinal);
+               && string.Equals(ChecksumSha256, checksumHex?.Trim().ToLowerInvariant(), StringComparison.Ordinal);
 
         // ---- Variants (idempotent by Name) ----
         public void AddOrReplaceVariant(

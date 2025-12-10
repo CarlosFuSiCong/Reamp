@@ -12,8 +12,8 @@ namespace Reamp.Domain.Accounts.Entities
     {
         public Guid ApplicationUserId { get; private set; }
 
-        public string FirstName { get; private set; }
-        public string LastName { get; private set; }
+        public string FirstName { get; private set; } = string.Empty;
+        public string LastName { get; private set; } = string.Empty;
         public string DisplayName => $"{FirstName} {LastName}".Trim();
 
         public Guid? AvatarAssetId { get; private set; }
