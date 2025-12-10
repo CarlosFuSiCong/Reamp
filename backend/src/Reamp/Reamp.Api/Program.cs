@@ -46,16 +46,18 @@ namespace Reamp.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ---- Serilog: �� appsettings.json ��ȡ���ã����ӹ���־ ----
+            // Logging
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(builder.Configuration)
                 .CreateLogger();
             builder.Host.UseSerilog();
 
+            // API & Swagger
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // CORS
             builder.Services.AddCors(o =>
                 o.AddPolicy("dev", p => p
                     .WithOrigins("http://localhost:3000")
@@ -65,7 +67,7 @@ namespace Reamp.Api
                 )
             );
 
-            // DbContext
+            // Database
             var conn = builder.Configuration.GetConnectionString("SqlServerConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(conn, sql =>
@@ -75,16 +77,15 @@ namespace Reamp.Api
                 })
             );
 
-            // Hangfire (Background Jobs)
+            // Background Jobs
             builder.Services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseSqlServerStorage(conn));
-
             builder.Services.AddHangfireServer();
 
-            // SignalR
+            // Real-time
             builder.Services.AddSignalR();
 
             // Identity
@@ -93,20 +94,18 @@ namespace Reamp.Api
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            // JWT Settings
+            // Configuration
             var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
             if (jwtSettings == null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
                 throw new InvalidOperationException("JWT settings are not configured properly.");
 
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-
-            // Cloudinary Settings
             builder.Services.Configure<Reamp.Infrastructure.Configuration.CloudinarySettings>(
                 builder.Configuration.GetSection("CloudinarySettings"));
             builder.Services.Configure<Reamp.Infrastructure.Configuration.MediaUploadSettings>(
                 builder.Configuration.GetSection("MediaUploadSettings"));
 
-            // JWT Authentication
+            // Authentication
             builder.Services
                 .AddAuthentication(options =>
                 {
@@ -124,10 +123,9 @@ namespace Reamp.Api
                         ValidIssuer = jwtSettings.Issuer,
                         ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                        ClockSkew = TimeSpan.Zero // No tolerance for expiration
+                        ClockSkew = TimeSpan.Zero
                     };
 
-                    // Log JWT events for debugging (optional)
                     options.Events = new JwtBearerEvents
                     {
                         OnAuthenticationFailed = context =>
@@ -143,44 +141,33 @@ namespace Reamp.Api
                     };
                 });
 
-            // Authorization Policies
+            // Authorization
             builder.Services.AddAuthorization(options =>
             {
-                // Admin only
                 options.AddPolicy(AuthPolicies.RequireAdminRole, policy =>
                     policy.RequireRole("Admin"));
-
-                // Staff only
                 options.AddPolicy(AuthPolicies.RequireStaffRole, policy =>
                     policy.RequireRole("Staff"));
-
-                // Client only
                 options.AddPolicy(AuthPolicies.RequireClientRole, policy =>
                     policy.RequireRole("Client"));
-
-                // User only
                 options.AddPolicy(AuthPolicies.RequireUserRole, policy =>
                     policy.RequireRole("User"));
-
-                // Staff or Admin
                 options.AddPolicy(AuthPolicies.RequireStaffOrAdmin, policy =>
                     policy.RequireRole("Staff", "Admin"));
-
-                // Client or Admin
                 options.AddPolicy(AuthPolicies.RequireClientOrAdmin, policy =>
                     policy.RequireRole("Client", "Admin"));
             });
 
-            // FluentValidation
+            // Validation
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<CreateStudioDtoValidator>();
 
-            // Mapster
+            // Object Mapping
             var mapsterConfig = TypeAdapterConfig.GlobalSettings;
             Reamp.Application.Common.Mappings.MappingConfig.RegisterMappings();
             builder.Services.AddSingleton(mapsterConfig);
 
-            // UoW + �ִ�
+            // Repositories
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             builder.Services.AddScoped<IAgencyRepository, AgencyRepository>();
             builder.Services.AddScoped<IAgencyBranchRepository, AgencyBranchRepository>();
@@ -215,8 +202,6 @@ namespace Reamp.Api
                 Reamp.Application.Delivery.Services.DeliveryPackageAppService>();
             builder.Services.AddScoped<Reamp.Application.UserProfiles.Services.IUserProfileAppService,
                 Reamp.Application.UserProfiles.Services.UserProfileAppService>();
-
-            // Background Job Service (Hangfire abstraction)
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
                 Reamp.Infrastructure.Services.Jobs.HangfireBackgroundJobService>();
 
@@ -225,11 +210,9 @@ namespace Reamp.Api
                 Reamp.Infrastructure.Services.Media.CloudinaryService>();
             builder.Services.AddSingleton<Reamp.Infrastructure.Services.Media.IUploadSessionStore,
                 Reamp.Infrastructure.Services.Media.InMemoryUploadSessionStore>();
-            
-            // P1 Fix: Background service to clean up abandoned chunked upload sessions
             builder.Services.AddHostedService<Reamp.Infrastructure.Services.Media.UploadSessionCleanupService>();
 
-            // Read Services  
+            // Read Services
             builder.Services.AddScoped<IAgencyReadService, EfAgencyReadService>();
             builder.Services.AddScoped<IClientReadService, EfClientReadService>();
             builder.Services.AddScoped<IStaffReadService, EfStaffReadService>();
@@ -237,7 +220,6 @@ namespace Reamp.Api
 
             var app = builder.Build();
 
-            // Serilog ������־��������ʱ/״̬��ȣ�
             app.UseSerilogRequestLogging();
 
             if (app.Environment.IsDevelopment())
@@ -246,19 +228,16 @@ namespace Reamp.Api
                 app.UseSwaggerUI();
                 app.UseCors("dev");
 
-                // Auto migration in development
                 using var scope = app.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 db.Database.Migrate();
             }
 
             app.UseHttpsRedirection();
-            
-            // Authentication must come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Global exception handling middleware
+            // Global exception handling
             app.Use(async (ctx, next) =>
             {
                 try 
@@ -288,12 +267,10 @@ namespace Reamp.Api
                 }
             });
 
-            // Hangfire Dashboard (restricted to Development environment for security)
             if (app.Environment.IsDevelopment())
             {
                 app.UseHangfireDashboard("/hangfire");
             }
-            // For Production: Consider adding authentication via DashboardOptions with IDashboardAuthorizationFilter
 
             app.MapControllers();
             app.MapHub<Reamp.Api.Hubs.UploadProgressHub>("/hubs/upload-progress");
