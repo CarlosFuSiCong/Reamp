@@ -35,6 +35,7 @@ using Reamp.Infrastructure.Repositories.Common;
 using Reamp.Infrastructure.Repositories.Listings;
 using Reamp.Infrastructure.Repositories.Orders;
 using Reamp.Shared;
+using Reamp.Shared.Middlewares;
 using Serilog;
 using System.Text;
 
@@ -236,36 +237,7 @@ namespace Reamp.Api
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // Global exception handling
-            app.Use(async (ctx, next) =>
-            {
-                try 
-                { 
-                    await next(); 
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await ctx.Response.WriteAsJsonAsync(ApiResponse.Fail(ex.Message));
-                }
-                catch (ArgumentException ex)
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await ctx.Response.WriteAsJsonAsync(ApiResponse.Fail(ex.Message, "Invalid request"));
-                }
-                catch (InvalidOperationException ex)
-                {
-                    ctx.Response.StatusCode = StatusCodes.Status409Conflict;
-                    await ctx.Response.WriteAsJsonAsync(ApiResponse.Fail(ex.Message, "Operation conflict"));
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Unhandled exception occurred");
-                    ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                    await ctx.Response.WriteAsJsonAsync(ApiResponse.Fail("An unexpected error occurred", "Internal server error"));
-                }
-            });
+            app.UseMiddleware<GlobalExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
