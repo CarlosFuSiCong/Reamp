@@ -180,5 +180,41 @@ namespace Reamp.Api.Controllers
             return NoContent();
         }
 
+        // Add media to listing - requires Client or Admin
+        [HttpPost("{id:guid}/media")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        public async Task<IActionResult> AddMedia([FromRoute] Guid id, [FromBody] AddMediaDto dto, CancellationToken ct)
+        {
+            var mediaRefId = await _appService.AddMediaAsync(id, dto, ct);
+            return Ok(new { mediaRefId });
+        }
+
+        // Remove media from listing - requires Client or Admin
+        [HttpDelete("{id:guid}/media/{mediaRefId:guid}")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        public async Task<IActionResult> RemoveMedia([FromRoute] Guid id, [FromRoute] Guid mediaRefId, CancellationToken ct)
+        {
+            await _appService.RemoveMediaAsync(id, mediaRefId, ct);
+            return NoContent();
+        }
+
+        // Soft delete listing - requires Client or Admin
+        [HttpDelete("{id:guid}")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
+        {
+            await _appService.DeleteAsync(id, ct);
+            return NoContent();
+        }
+
+        // Restore deleted listing - requires Client or Admin (changed from Admin only)
+        [HttpPost("{id:guid}/restore")]
+        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        public async Task<IActionResult> Restore([FromRoute] Guid id, CancellationToken ct)
+        {
+            await _appService.RestoreAsync(id, ct);
+            return NoContent();
+        }
+
     }
 }

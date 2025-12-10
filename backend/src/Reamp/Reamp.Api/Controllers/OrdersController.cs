@@ -149,5 +149,72 @@ namespace Reamp.Api.Controllers
 
             return Ok(ApiResponse.Ok("Order cancelled successfully"));
         }
+
+        [HttpPost("{id}/assign-photographer")]
+        public async Task<IActionResult> AssignPhotographer(Guid id, [FromBody] AssignPhotographerDto dto, CancellationToken ct)
+        {
+            var currentUserId = GetCurrentUserId();
+            await _appService.AssignPhotographerAsync(id, dto, currentUserId, ct);
+
+            _logger.LogInformation("Photographer assigned to order {OrderId}", id);
+
+            return Ok(ApiResponse.Ok("Photographer assigned successfully"));
+        }
+
+        [HttpDelete("{id}/photographer")]
+        public async Task<IActionResult> UnassignPhotographer(Guid id, CancellationToken ct)
+        {
+            var currentUserId = GetCurrentUserId();
+            await _appService.UnassignPhotographerAsync(id, currentUserId, ct);
+
+            _logger.LogInformation("Photographer unassigned from order {OrderId}", id);
+
+            return Ok(ApiResponse.Ok("Photographer unassigned successfully"));
+        }
+
+        [HttpGet("{id}/available-photographers")]
+        public async Task<IActionResult> GetAvailablePhotographers(Guid id, CancellationToken ct)
+        {
+            var photographers = await _appService.GetAvailablePhotographersAsync(id, ct);
+
+            return Ok(ApiResponse<IReadOnlyList<Application.Read.Staff.DTOs.StaffSummaryDto>>.Ok(photographers));
+        }
+
+        [HttpPost("{id}/set-schedule")]
+        public async Task<IActionResult> SetSchedule(Guid id, [FromBody] SetScheduleDto dto, CancellationToken ct)
+        {
+            var currentUserId = GetCurrentUserId();
+            await _appService.SetScheduleAsync(id, dto, currentUserId, ct);
+
+            _logger.LogInformation("Schedule set for order {OrderId}", id);
+
+            return Ok(ApiResponse.Ok("Schedule set successfully"));
+        }
+
+        [HttpDelete("{id}/schedule")]
+        public async Task<IActionResult> ClearSchedule(Guid id, CancellationToken ct)
+        {
+            var currentUserId = GetCurrentUserId();
+            await _appService.ClearScheduleAsync(id, currentUserId, ct);
+
+            _logger.LogInformation("Schedule cleared for order {OrderId}", id);
+
+            return Ok(ApiResponse.Ok("Schedule cleared successfully"));
+        }
+
+        [HttpGet("filtered")]
+        public async Task<IActionResult> GetFilteredList(
+            [FromQuery] OrderFilterDto filter,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var currentUserId = GetCurrentUserId();
+            var pageRequest = new PageRequest(page, pageSize);
+
+            var result = await _appService.GetFilteredListAsync(filter, pageRequest, currentUserId, ct);
+
+            return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
+        }
     }
 }

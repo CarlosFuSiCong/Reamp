@@ -1,11 +1,16 @@
 using Microsoft.Extensions.Logging;
 using Mapster;
 using Reamp.Application.Orders.Dtos;
+using Reamp.Application.Read.Staff;
+using Reamp.Application.Read.Staff.DTOs;
+using Reamp.Application.Read.Shared;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Shoots.Entities;
 using Reamp.Domain.Shoots.Repositories;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Listings.Repositories;
+using Reamp.Domain.Accounts.Enums;
+using PageRequest = Reamp.Domain.Common.Abstractions.PageRequest;
 
 namespace Reamp.Application.Orders.Services
 {
@@ -15,6 +20,8 @@ namespace Reamp.Application.Orders.Services
         private readonly IAgencyRepository _agencyRepo;
         private readonly IStudioRepository _studioRepo;
         private readonly IListingRepository _listingRepo;
+        private readonly IStaffRepository _staffRepo;
+        private readonly IStaffReadService _staffReadService;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<ShootOrderAppService> _logger;
 
@@ -23,6 +30,8 @@ namespace Reamp.Application.Orders.Services
             IAgencyRepository agencyRepo,
             IStudioRepository studioRepo,
             IListingRepository listingRepo,
+            IStaffRepository staffRepo,
+            IStaffReadService staffReadService,
             IUnitOfWork uow,
             ILogger<ShootOrderAppService> logger)
         {
@@ -30,6 +39,8 @@ namespace Reamp.Application.Orders.Services
             _agencyRepo = agencyRepo;
             _studioRepo = studioRepo;
             _listingRepo = listingRepo;
+            _staffRepo = staffRepo;
+            _staffReadService = staffReadService;
             _uow = uow;
             _logger = logger;
         }
@@ -277,6 +288,132 @@ namespace Reamp.Application.Orders.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Successfully cancelled order {OrderId}", orderId);
+        }
+
+        public async Task AssignPhotographerAsync(Guid orderId, AssignPhotographerDto dto, Guid currentUserId, CancellationToken ct = default)
+        {
+            _logger.LogInformation("Assigning photographer {PhotographerId} to order {OrderId}", dto.PhotographerId, orderId);
+
+            var order = await _repo.GetAggregateAsync(orderId, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CreatedBy != currentUserId)
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+
+            // Verify photographer exists and belongs to the studio
+            var staff = await _staffRepo.GetByIdAsync(dto.PhotographerId, asNoTracking: true, ct);
+            if (staff == null || staff.StudioId != order.StudioId)
+                throw new ArgumentException("Invalid photographer for this studio");
+
+            // Verify photographer has Photographer skill
+            if ((staff.Skills & StaffSkills.Photographer) == 0)
+                throw new ArgumentException("Staff member is not a photographer");
+
+            order.AssignPhotographer(dto.PhotographerId);
+
+            await _repo.UpdateAsync(order, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully assigned photographer {PhotographerId} to order {OrderId}", dto.PhotographerId, orderId);
+        }
+
+        public async Task UnassignPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
+        {
+            _logger.LogInformation("Unassigning photographer from order {OrderId}", orderId);
+
+            var order = await _repo.GetAggregateAsync(orderId, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CreatedBy != currentUserId)
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+
+            order.UnassignPhotographer();
+
+            await _repo.UpdateAsync(order, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully unassigned photographer from order {OrderId}", orderId);
+        }
+
+        public async Task<IReadOnlyList<StaffSummaryDto>> GetAvailablePhotographersAsync(Guid orderId, CancellationToken ct = default)
+        {
+            _logger.LogDebug("Getting available photographers for order {OrderId}", orderId);
+
+            var order = await _repo.GetByIdAsync(orderId, asNoTracking: true, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            // Get all photographers from the studio
+            var photographers = await _staffReadService.ListByStudioAsync(
+                order.StudioId,
+                search: null,
+                hasSkill: StaffSkills.Photographer,
+                pageRequest: new Reamp.Application.Read.Shared.PageRequest { Page = 1, PageSize = 100 }, // Get up to 100 photographers
+                ct: ct);
+
+            return photographers.Items.ToList();
+        }
+
+        public async Task SetScheduleAsync(Guid orderId, SetScheduleDto dto, Guid currentUserId, CancellationToken ct = default)
+        {
+            _logger.LogInformation("Setting schedule for order {OrderId}: start={Start}, end={End}", 
+                orderId, dto.ScheduledStartUtc, dto.ScheduledEndUtc);
+
+            var order = await _repo.GetAggregateAsync(orderId, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CreatedBy != currentUserId)
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+
+            order.SetSchedule(dto.ScheduledStartUtc, dto.ScheduledEndUtc, dto.Notes);
+
+            await _repo.UpdateAsync(order, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully set schedule for order {OrderId}", orderId);
+        }
+
+        public async Task ClearScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
+        {
+            _logger.LogInformation("Clearing schedule for order {OrderId}", orderId);
+
+            var order = await _repo.GetAggregateAsync(orderId, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CreatedBy != currentUserId)
+                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+
+            order.ClearSchedule();
+
+            await _repo.UpdateAsync(order, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully cleared schedule for order {OrderId}", orderId);
+        }
+
+        public async Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default)
+        {
+            _logger.LogDebug("Getting filtered order list for user {UserId}", currentUserId);
+
+            var orders = await _repo.ListFilteredAsync(
+                pageRequest,
+                agencyId: filter.AgencyId,
+                studioId: filter.StudioId,
+                listingId: filter.ListingId,
+                photographerId: filter.PhotographerId,
+                status: filter.Status,
+                dateFrom: filter.DateFrom,
+                dateTo: filter.DateTo,
+                createdBy: currentUserId,
+                ct: ct);
+
+            var dtos = orders.Items.Adapt<List<OrderListDto>>();
+
+            return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
         }
 
         private class PagedList<T> : IPagedList<T>

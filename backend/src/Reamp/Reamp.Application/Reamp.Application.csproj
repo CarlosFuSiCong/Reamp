@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Reamp.Infrastructure\Reamp.Infrastructure.csproj" />
+    <ProjectReference Include="..\Reamp.Application.Read\Reamp.Application.Read.csproj" />
   </ItemGroup>
 
 </Project>

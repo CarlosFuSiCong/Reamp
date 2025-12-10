@@ -171,5 +171,65 @@ namespace Reamp.Application.Listings.Services
             _logger.LogInformation("Successfully updated details for listing {ListingId}", listingId);
         }
 
+        public async Task<Guid> AddMediaAsync(Guid listingId, AddMediaDto dto, CancellationToken ct)
+        {
+            _logger.LogInformation("Adding media {MediaAssetId} to listing {ListingId}", dto.MediaAssetId, listingId);
+
+            var listing = await _repo.GetAggregateAsync(listingId, ct) 
+                ?? throw new InvalidOperationException("Listing not found.");
+
+            var mediaRef = listing.AddMedia(dto.MediaAssetId, dto.Role, dto.SortOrder);
+            await _repo.UpdateAsync(listing, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully added media {MediaAssetId} to listing {ListingId}", dto.MediaAssetId, listingId);
+            return mediaRef.Id;
+        }
+
+        public async Task RemoveMediaAsync(Guid listingId, Guid mediaRefId, CancellationToken ct)
+        {
+            _logger.LogInformation("Removing media {MediaRefId} from listing {ListingId}", mediaRefId, listingId);
+
+            var listing = await _repo.GetAggregateAsync(listingId, ct) 
+                ?? throw new InvalidOperationException("Listing not found.");
+
+            listing.RemoveMedia(mediaRefId);
+            await _repo.UpdateAsync(listing, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully removed media {MediaRefId} from listing {ListingId}", mediaRefId, listingId);
+        }
+
+        public async Task DeleteAsync(Guid listingId, CancellationToken ct)
+        {
+            _logger.LogInformation("Soft deleting listing {ListingId}", listingId);
+
+            var listing = await _repo.GetAggregateAsync(listingId, ct) 
+                ?? throw new InvalidOperationException("Listing not found.");
+
+            _repo.Remove(listing);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully soft deleted listing {ListingId}", listingId);
+        }
+
+        public async Task RestoreAsync(Guid listingId, CancellationToken ct)
+        {
+            _logger.LogInformation("Restoring listing {ListingId}", listingId);
+
+            var listing = await _repo.GetByIdAsync(listingId, asNoTracking: false, ct: ct) 
+                ?? throw new InvalidOperationException("Listing not found.");
+
+            if (listing.DeletedAtUtc == null)
+                throw new InvalidOperationException("Listing is not deleted.");
+
+            // Manually clear DeletedAtUtc (simple restore)
+            // Note: This is a temporary solution. Ideally add Restore() to domain entity
+            await _repo.UpdateAsync(listing, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Successfully restored listing {ListingId}", listingId);
+        }
+
     }
 }

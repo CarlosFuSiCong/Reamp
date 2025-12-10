@@ -21,5 +21,13 @@ namespace Reamp.Application.Listings.Services
         Task ArchiveAsync(Guid listingId, CancellationToken ct);
         Task UpdateDetailsAsync(Guid listingId, UpdateListingDetailsDto dto, CancellationToken ct);
         Task SetCoverAsync(Guid listingId, Guid mediaId, CancellationToken ct);
+        
+        // Media Management
+        Task<Guid> AddMediaAsync(Guid listingId, AddMediaDto dto, CancellationToken ct);
+        Task RemoveMediaAsync(Guid listingId, Guid mediaRefId, CancellationToken ct);
+        
+        // Soft Delete Management
+        Task DeleteAsync(Guid listingId, CancellationToken ct);
+        Task RestoreAsync(Guid listingId, CancellationToken ct);
     }
 }

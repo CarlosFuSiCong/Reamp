@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Shoots.Entities;
+using Reamp.Domain.Shoots.Enums;
 using Reamp.Domain.Shoots.Repositories;
 using Reamp.Infrastructure.Repositories.Common;
 
@@ -71,6 +72,68 @@ namespace Reamp.Infrastructure.Repositories.Orders
                     .ToList();
 
                 // Replace items with versions that have tasks loaded, preserving order
+                return new PagedList<ShootOrder>(orderedItems, pagedResult.TotalCount, pagedResult.Page, pagedResult.PageSize);
+            }
+
+            return pagedResult;
+        }
+
+        public async Task<IPagedList<ShootOrder>> ListFilteredAsync(
+            PageRequest page,
+            Guid? agencyId = null,
+            Guid? studioId = null,
+            Guid? listingId = null,
+            Guid? photographerId = null,
+            ShootOrderStatus? status = null,
+            DateTime? dateFrom = null,
+            DateTime? dateTo = null,
+            Guid? createdBy = null,
+            CancellationToken ct = default)
+        {
+            var query = _set.AsNoTracking().AsQueryable();
+
+            if (agencyId.HasValue)
+                query = query.Where(x => x.AgencyId == agencyId.Value);
+
+            if (studioId.HasValue)
+                query = query.Where(x => x.StudioId == studioId.Value);
+
+            if (listingId.HasValue)
+                query = query.Where(x => x.ListingId == listingId.Value);
+
+            if (photographerId.HasValue)
+                query = query.Where(x => x.AssignedPhotographerId == photographerId.Value);
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            if (dateFrom.HasValue)
+                query = query.Where(x => x.CreatedAtUtc >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                query = query.Where(x => x.CreatedAtUtc <= dateTo.Value);
+
+            if (createdBy.HasValue)
+                query = query.Where(x => x.CreatedBy == createdBy.Value);
+
+            query = query.OrderByDescending(x => x.CreatedAtUtc);
+
+            var pagedResult = await ToPagedListAsync(query, page, ct);
+
+            if (pagedResult.Items.Any())
+            {
+                var orderIds = pagedResult.Items.Select(x => x.Id).ToList();
+                var ordersWithTasks = await _set
+                    .AsNoTracking()
+                    .Include(x => x.Tasks)
+                    .Where(x => orderIds.Contains(x.Id))
+                    .ToListAsync(ct);
+
+                var ordersDict = ordersWithTasks.ToDictionary(x => x.Id);
+                var orderedItems = pagedResult.Items
+                    .Select(x => ordersDict.TryGetValue(x.Id, out var order) ? order : x)
+                    .ToList();
+
                 return new PagedList<ShootOrder>(orderedItems, pagedResult.TotalCount, pagedResult.Page, pagedResult.PageSize);
             }
 
