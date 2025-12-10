@@ -206,6 +206,10 @@ namespace Reamp.Api
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
                 Reamp.Infrastructure.Services.Jobs.HangfireBackgroundJobService>();
 
+            // Query Services
+            builder.Services.AddScoped<Reamp.Application.Common.Services.IAccountQueryService,
+                Reamp.Application.Common.Services.AccountQueryService>();
+
             // Media Services
             builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 
                 Reamp.Infrastructure.Services.Media.CloudinaryService>();

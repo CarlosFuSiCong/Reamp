@@ -1,10 +1,9 @@
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 using Reamp.Application.Accounts.Clients.Dtos;
+using Reamp.Application.Common.Services;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Infrastructure;
 
 namespace Reamp.Application.Accounts.Clients.Services
 {
@@ -13,21 +12,24 @@ namespace Reamp.Application.Accounts.Clients.Services
         private readonly IClientRepository _clientRepository;
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IAgencyRepository _agencyRepository;
+        private readonly IAgencyBranchRepository _branchRepository;
+        private readonly IAccountQueryService _queryService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ApplicationDbContext _dbContext;
 
         public ClientAppService(
             IClientRepository clientRepository,
             IUserProfileRepository userProfileRepository,
             IAgencyRepository agencyRepository,
-            IUnitOfWork unitOfWork,
-            ApplicationDbContext dbContext)
+            IAgencyBranchRepository branchRepository,
+            IAccountQueryService queryService,
+            IUnitOfWork unitOfWork)
         {
             _clientRepository = clientRepository;
             _userProfileRepository = userProfileRepository;
             _agencyRepository = agencyRepository;
+            _branchRepository = branchRepository;
+            _queryService = queryService;
             _unitOfWork = unitOfWork;
-            _dbContext = dbContext;
         }
 
         public async Task<ClientDetailDto> CreateAsync(CreateClientDto dto, CancellationToken ct = default)
