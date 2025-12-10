@@ -22,5 +22,18 @@ namespace Reamp.Domain.Accounts.Repositories
             PageRequest page,
             string? search = null,
             CancellationToken ct = default);
+
+        Task<AgencyBranch?> GetByIdAndAgencyAsync(
+            Guid id,
+            Guid agencyId,
+            bool asNoTracking = true,
+            CancellationToken ct = default);
+
+        Task<int> CountByAgencyAsync(Guid agencyId, CancellationToken ct = default);
+
+        Task<List<AgencyBranch>> GetByAgencyAsync(
+            Guid agencyId,
+            bool asNoTracking = true,
+            CancellationToken ct = default);
     }
 }

@@ -25,5 +25,10 @@ namespace Reamp.Domain.Accounts.Repositories
         Task<bool> ExistsByApplicationUserIdAsync(
             Guid appUserId,
             CancellationToken ct = default);
+
+        Task<List<UserProfile>> SearchAsync(
+            string keyword,
+            int limit = 20,
+            CancellationToken ct = default);
     }
 }

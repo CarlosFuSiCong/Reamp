@@ -24,5 +24,7 @@ namespace Reamp.Domain.Accounts.Repositories
             PageRequest page,
             string? search = null,
             CancellationToken ct = default);
+
+        Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
     }
 }

@@ -37,5 +37,32 @@ namespace Reamp.Infrastructure.Repositories.Accounts
             q = q.OrderBy(b => b.Name);
             return await ToPagedListAsync(q, page, ct);
         }
+
+        public async Task<AgencyBranch?> GetByIdAndAgencyAsync(
+            Guid id,
+            Guid agencyId,
+            bool asNoTracking = true,
+            CancellationToken ct = default)
+        {
+            IQueryable<AgencyBranch> q = _set.Where(b => b.Id == id && b.AgencyId == agencyId && b.DeletedAtUtc == null);
+            if (asNoTracking) q = q.AsNoTracking();
+            return await q.FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<int> CountByAgencyAsync(Guid agencyId, CancellationToken ct = default)
+        {
+            return await _set.CountAsync(b => b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+        }
+
+        public async Task<List<AgencyBranch>> GetByAgencyAsync(
+            Guid agencyId,
+            bool asNoTracking = true,
+            CancellationToken ct = default)
+        {
+            IQueryable<AgencyBranch> q = _set.Where(b => b.AgencyId == agencyId && b.DeletedAtUtc == null)
+                .OrderBy(b => b.Name);
+            if (asNoTracking) q = q.AsNoTracking();
+            return await q.ToListAsync(ct);
+        }
     }
 }

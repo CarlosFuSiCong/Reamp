@@ -48,5 +48,20 @@ namespace Reamp.Infrastructure.Repositories.Accounts
         {
             return _set.IgnoreQueryFilters().AnyAsync(p => p.ApplicationUserId == appUserId, ct);
         }
+
+        public async Task<List<UserProfile>> SearchAsync(
+            string keyword,
+            int limit = 20,
+            CancellationToken ct = default)
+        {
+            var lowerKeyword = keyword.ToLower();
+            return await _set
+                .AsNoTracking()
+                .Where(p => p.DeletedAtUtc == null &&
+                           (p.FirstName.ToLower().Contains(lowerKeyword) ||
+                            p.LastName.ToLower().Contains(lowerKeyword)))
+                .Take(limit)
+                .ToListAsync(ct);
+        }
     }
 }
