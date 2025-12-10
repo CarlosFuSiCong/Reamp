@@ -207,6 +207,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<IShootOrderAppService, ShootOrderAppService>();
             builder.Services.AddScoped<Reamp.Application.Delivery.Services.IDeliveryPackageAppService,
                 Reamp.Application.Delivery.Services.DeliveryPackageAppService>();
+            builder.Services.AddScoped<Reamp.Application.UserProfiles.Services.IUserProfileAppService,
+                Reamp.Application.UserProfiles.Services.UserProfileAppService>();
 
             // Background Job Service (Hangfire abstraction)
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
