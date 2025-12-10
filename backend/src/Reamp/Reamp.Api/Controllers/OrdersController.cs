@@ -39,8 +39,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             var result = await _appService.PlaceOrderAsync(dto, currentUserId, ct);
 
-            _logger.LogInformation("Order placed: {OrderId} by user {UserId}", result.Id, currentUserId);
-
             return CreatedAtAction(
                 nameof(GetOrderDetail),
                 new { id = result.Id },
@@ -79,8 +77,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.AddTaskAsync(id, dto, currentUserId, ct);
 
-            _logger.LogInformation("Task added to order {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Task added successfully"));
         }
 
@@ -89,8 +85,6 @@ namespace Reamp.Api.Controllers
         {
             var currentUserId = GetCurrentUserId();
             await _appService.RemoveTaskAsync(id, taskId, currentUserId, ct);
-
-            _logger.LogInformation("Task {TaskId} removed from order {OrderId}", taskId, id);
 
             return Ok(ApiResponse.Ok("Task removed successfully"));
         }
@@ -101,8 +95,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.AcceptAsync(id, currentUserId, ct);
 
-            _logger.LogInformation("Order accepted: {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Order accepted successfully"));
         }
 
@@ -111,8 +103,6 @@ namespace Reamp.Api.Controllers
         {
             var currentUserId = GetCurrentUserId();
             await _appService.ScheduleAsync(id, currentUserId, ct);
-
-            _logger.LogInformation("Order scheduled: {OrderId}", id);
 
             return Ok(ApiResponse.Ok("Order scheduled successfully"));
         }
@@ -123,8 +113,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.StartAsync(id, currentUserId, ct);
 
-            _logger.LogInformation("Order started: {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Order started successfully"));
         }
 
@@ -133,8 +121,6 @@ namespace Reamp.Api.Controllers
         {
             var currentUserId = GetCurrentUserId();
             await _appService.CompleteAsync(id, currentUserId, ct);
-
-            _logger.LogInformation("Order completed: {OrderId}", id);
 
             return Ok(ApiResponse.Ok("Order completed successfully"));
         }
@@ -145,8 +131,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.CancelAsync(id, currentUserId, dto?.Reason, ct);
 
-            _logger.LogInformation("Order cancelled: {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Order cancelled successfully"));
         }
 
@@ -156,8 +140,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.AssignPhotographerAsync(id, dto, currentUserId, ct);
 
-            _logger.LogInformation("Photographer assigned to order {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Photographer assigned successfully"));
         }
 
@@ -166,8 +148,6 @@ namespace Reamp.Api.Controllers
         {
             var currentUserId = GetCurrentUserId();
             await _appService.UnassignPhotographerAsync(id, currentUserId, ct);
-
-            _logger.LogInformation("Photographer unassigned from order {OrderId}", id);
 
             return Ok(ApiResponse.Ok("Photographer unassigned successfully"));
         }
@@ -186,8 +166,6 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             await _appService.SetScheduleAsync(id, dto, currentUserId, ct);
 
-            _logger.LogInformation("Schedule set for order {OrderId}", id);
-
             return Ok(ApiResponse.Ok("Schedule set successfully"));
         }
 
@@ -196,8 +174,6 @@ namespace Reamp.Api.Controllers
         {
             var currentUserId = GetCurrentUserId();
             await _appService.ClearScheduleAsync(id, currentUserId, ct);
-
-            _logger.LogInformation("Schedule cleared for order {OrderId}", id);
 
             return Ok(ApiResponse.Ok("Schedule cleared successfully"));
         }
