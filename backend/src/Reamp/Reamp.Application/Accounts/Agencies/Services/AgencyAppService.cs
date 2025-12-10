@@ -1,28 +1,30 @@
 using Mapster;
 using Reamp.Application.Accounts.Agencies.Dtos;
+using Reamp.Application.Common.Services;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Common.ValueObjects;
-using Reamp.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace Reamp.Application.Accounts.Agencies.Services
 {
     public sealed class AgencyAppService : IAgencyAppService
     {
         private readonly IAgencyRepository _agencyRepository;
+        private readonly IAgencyBranchRepository _branchRepository;
+        private readonly IAccountQueryService _queryService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ApplicationDbContext _dbContext;
 
         public AgencyAppService(
             IAgencyRepository agencyRepository,
-            IUnitOfWork unitOfWork,
-            ApplicationDbContext dbContext)
+            IAgencyBranchRepository branchRepository,
+            IAccountQueryService queryService,
+            IUnitOfWork unitOfWork)
         {
             _agencyRepository = agencyRepository;
+            _branchRepository = branchRepository;
+            _queryService = queryService;
             _unitOfWork = unitOfWork;
-            _dbContext = dbContext;
         }
 
         public async Task<AgencyDetailDto> CreateAsync(
@@ -90,8 +92,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            var branchCount = await _dbContext.Set<AgencyBranch>()
-                .CountAsync(b => b.AgencyId == agency.Id && b.DeletedAtUtc == null, ct);
+            var branchCount = await _branchRepository.CountByAgencyAsync(agency.Id, ct);
 
             var detailDto = agency.Adapt<AgencyDetailDto>();
             detailDto.BranchCount = branchCount;
@@ -100,43 +101,25 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
         public async Task<AgencyDetailDto?> GetByIdAsync(Guid agencyId, CancellationToken ct = default)
         {
-            var result = await _dbContext.Set<Agency>()
-                .AsNoTracking()
-                .Where(a => a.Id == agencyId && a.DeletedAtUtc == null)
-                .Select(a => new
-                {
-                    Agency = a,
-                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null)
-                })
-                .FirstOrDefaultAsync(ct);
-
-            if (result == null)
+            var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: true, ct);
+            if (agency == null)
                 return null;
 
-            var detailDto = result.Agency.Adapt<AgencyDetailDto>();
-            detailDto.BranchCount = result.BranchCount;
+            var detailDto = agency.Adapt<AgencyDetailDto>();
+            detailDto.BranchCount = await _branchRepository.CountByAgencyAsync(agencyId, ct);
             return detailDto;
         }
 
         public async Task<AgencyDetailDto?> GetBySlugAsync(string slug, CancellationToken ct = default)
         {
             var agencySlug = Slug.From(slug);
+            var agency = await _agencyRepository.GetBySlugAsync(agencySlug, asNoTracking: true, ct);
             
-            var result = await _dbContext.Set<Agency>()
-                .AsNoTracking()
-                .Where(a => a.Slug.Value == agencySlug.Value && a.DeletedAtUtc == null)
-                .Select(a => new
-                {
-                    Agency = a,
-                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null)
-                })
-                .FirstOrDefaultAsync(ct);
-
-            if (result == null)
+            if (agency == null)
                 return null;
 
-            var detailDto = result.Agency.Adapt<AgencyDetailDto>();
-            detailDto.BranchCount = result.BranchCount;
+            var detailDto = agency.Adapt<AgencyDetailDto>();
+            detailDto.BranchCount = await _branchRepository.CountByAgencyAsync(agency.Id, ct);
             return detailDto;
         }
 
@@ -145,42 +128,22 @@ namespace Reamp.Application.Accounts.Agencies.Services
             string? search = null,
             CancellationToken ct = default)
         {
-            var query = _dbContext.Set<Agency>()
-                .AsNoTracking()
-                .Where(a => a.DeletedAtUtc == null);
-
-            if (!string.IsNullOrWhiteSpace(search))
+            var pagedAgencies = await _agencyRepository.ListAsync(pageRequest, search, ct);
+            
+            var dtos = new List<AgencyListDto>();
+            foreach (var agency in pagedAgencies.Items)
             {
-                var s = search.Trim().ToLower();
-                query = query.Where(a => a.Name.ToLower().Contains(s) || a.Slug.Value.Contains(s));
+                var branchCount = await _branchRepository.CountByAgencyAsync(agency.Id, ct);
+                var dto = agency.Adapt<AgencyListDto>();
+                dto.BranchCount = branchCount;
+                dtos.Add(dto);
             }
 
-            var totalCount = await query.CountAsync(ct);
-
-            var items = await query
-                .OrderBy(a => a.Name)
-                .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
-                .Take(pageRequest.PageSize)
-                .Select(a => new AgencyListDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Slug = a.Slug.Value,
-                    Description = a.Description,
-                    LogoAssetId = a.LogoAssetId,
-                    LogoUrl = null,
-                    ContactEmail = a.ContactEmail,
-                    ContactPhone = a.ContactPhone,
-                    BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null),
-                    CreatedAtUtc = a.CreatedAtUtc
-                })
-                .ToListAsync(ct);
-
             return new PagedList<AgencyListDto>(
-                items,
-                totalCount,
-                pageRequest.Page,
-                pageRequest.PageSize
+                dtos,
+                pagedAgencies.TotalCount,
+                pagedAgencies.Page,
+                pagedAgencies.PageSize
             );
         }
 
@@ -207,8 +170,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            var branchCount = await _dbContext.Set<AgencyBranch>()
-                .CountAsync(b => b.AgencyId == agency.Id && b.DeletedAtUtc == null, ct);
+            var branchCount = await _branchRepository.CountByAgencyAsync(agency.Id, ct);
 
             var detailDto = agency.Adapt<AgencyDetailDto>();
             detailDto.BranchCount = branchCount;
@@ -236,8 +198,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
 
             // Check for slug conflicts before creating
             var newSlug = Slug.From(dto.Name);
-            var existingBranch = await _dbContext.Set<AgencyBranch>()
-                .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug.Value == newSlug.Value && b.DeletedAtUtc == null, ct);
+            var existingBranch = await _branchRepository.GetBySlugAsync(agencyId, newSlug, asNoTracking: true, ct);
 
             if (existingBranch != null)
                 throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
@@ -263,14 +224,10 @@ namespace Reamp.Application.Accounts.Agencies.Services
             CancellationToken ct = default)
         {
             // Check if parent agency exists and is not deleted
-            var agencyExists = await _dbContext.Set<Agency>()
-                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
-
-            if (!agencyExists)
+            if (!await _queryService.AgencyExistsAsync(agencyId, ct))
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
-            var branch = await _dbContext.Set<AgencyBranch>()
-                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+            var branch = await _branchRepository.GetByIdAndAgencyAsync(branchId, agencyId, asNoTracking: false, ct);
 
             if (branch == null)
                 throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");
@@ -279,8 +236,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
             var newSlug = Slug.From(dto.Name);
             if (newSlug.Value != branch.Slug.Value)
             {
-                var existingBranch = await _dbContext.Set<AgencyBranch>()
-                    .FirstOrDefaultAsync(b => b.AgencyId == agencyId && b.Slug.Value == newSlug.Value && b.DeletedAtUtc == null, ct);
+                var existingBranch = await _branchRepository.GetBySlugAsync(agencyId, newSlug, asNoTracking: true, ct);
 
                 if (existingBranch != null && existingBranch.Id != branchId)
                     throw new InvalidOperationException($"A branch with name '{dto.Name}' already exists in this agency.");
@@ -303,16 +259,10 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid branchId,
             CancellationToken ct = default)
         {
-            // Check if parent agency exists and is not deleted
-            var agencyExists = await _dbContext.Set<Agency>()
-                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
-
-            if (!agencyExists)
+            if (!await _queryService.AgencyExistsAsync(agencyId, ct))
                 return null;
 
-            var branch = await _dbContext.Set<AgencyBranch>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+            var branch = await _branchRepository.GetByIdAndAgencyAsync(branchId, agencyId, asNoTracking: true, ct);
 
             return branch == null ? null : MapToBranchDetailDto(branch);
         }
@@ -321,18 +271,10 @@ namespace Reamp.Application.Accounts.Agencies.Services
             Guid agencyId,
             CancellationToken ct = default)
         {
-            // Check if parent agency exists and is not deleted
-            var agencyExists = await _dbContext.Set<Agency>()
-                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
-
-            if (!agencyExists)
+            if (!await _queryService.AgencyExistsAsync(agencyId, ct))
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
-            var branches = await _dbContext.Set<AgencyBranch>()
-                .AsNoTracking()
-                .Where(b => b.AgencyId == agencyId && b.DeletedAtUtc == null)
-                .OrderBy(b => b.Name)
-                .ToListAsync(ct);
+            var branches = await _branchRepository.GetByAgencyAsync(agencyId, asNoTracking: true, ct);
 
             return branches.Select(MapToBranchDetailDto).ToList();
         }
@@ -343,14 +285,10 @@ namespace Reamp.Application.Accounts.Agencies.Services
             CancellationToken ct = default)
         {
             // Check if parent agency exists and is not deleted
-            var agencyExists = await _dbContext.Set<Agency>()
-                .AnyAsync(a => a.Id == agencyId && a.DeletedAtUtc == null, ct);
-
-            if (!agencyExists)
+            if (!await _queryService.AgencyExistsAsync(agencyId, ct))
                 throw new KeyNotFoundException($"Agency with ID {agencyId} not found.");
 
-            var branch = await _dbContext.Set<AgencyBranch>()
-                .FirstOrDefaultAsync(b => b.Id == branchId && b.AgencyId == agencyId && b.DeletedAtUtc == null, ct);
+            var branch = await _branchRepository.GetByIdAndAgencyAsync(branchId, agencyId, asNoTracking: false, ct);
 
             if (branch == null)
                 throw new KeyNotFoundException($"Branch with ID {branchId} not found in Agency {agencyId}.");

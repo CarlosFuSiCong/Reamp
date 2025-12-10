@@ -1,11 +1,9 @@
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 using Reamp.Application.Accounts.Staff.Dtos;
-using Reamp.Domain.Accounts.Entities;
+using Reamp.Application.Common.Services;
 using Reamp.Domain.Accounts.Enums;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Infrastructure;
 
 namespace Reamp.Application.Accounts.Staff.Services
 {
@@ -13,37 +11,30 @@ namespace Reamp.Application.Accounts.Staff.Services
     {
         private readonly IStaffRepository _staffRepository;
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IAccountQueryService _queryService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ApplicationDbContext _dbContext;
 
         public StaffAppService(
             IStaffRepository staffRepository,
             IUserProfileRepository userProfileRepository,
-            IUnitOfWork unitOfWork,
-            ApplicationDbContext dbContext)
+            IAccountQueryService queryService,
+            IUnitOfWork unitOfWork)
         {
             _staffRepository = staffRepository;
             _userProfileRepository = userProfileRepository;
+            _queryService = queryService;
             _unitOfWork = unitOfWork;
-            _dbContext = dbContext;
         }
 
         public async Task<StaffDetailDto> CreateAsync(CreateStaffDto dto, CancellationToken ct = default)
         {
-            // Validate UserProfile exists
             var userProfile = await _userProfileRepository.GetByIdAsync(dto.UserProfileId, asNoTracking: true, ct);
             if (userProfile == null || userProfile.DeletedAtUtc != null)
                 throw new KeyNotFoundException($"UserProfile with ID {dto.UserProfileId} not found.");
 
-            // Validate Studio exists and is not deleted
-            var studio = await _dbContext.Set<Studio>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == dto.StudioId && s.DeletedAtUtc == null, ct);
-            
-            if (studio == null)
+            if (!await _queryService.StudioExistsAsync(dto.StudioId, ct))
                 throw new KeyNotFoundException($"Studio with ID {dto.StudioId} not found.");
 
-            // Check if staff already exists for this UserProfile
             var existingStaff = await _staffRepository.GetByUserProfileIdAsync(dto.UserProfileId, asNoTracking: true, ct);
             if (existingStaff != null && existingStaff.DeletedAtUtc == null)
                 throw new InvalidOperationException($"A staff member already exists for UserProfile {dto.UserProfileId}.");
@@ -52,16 +43,7 @@ namespace Reamp.Application.Accounts.Staff.Services
             await _staffRepository.AddAsync(staff, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            var detailDto = staff.Adapt<StaffDetailDto>();
-            var prof = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
-            var st = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
-            
-            detailDto.StudioName = st?.Name;
-            detailDto.FirstName = prof?.FirstName ?? "";
-            detailDto.LastName = prof?.LastName ?? "";
-            detailDto.DisplayName = prof?.DisplayName ?? "";
-            
-            return detailDto;
+            return await BuildStaffDetailDtoAsync(staff, ct);
         }
 
         public async Task<StaffDetailDto> UpdateSkillsAsync(Guid staffId, UpdateStaffSkillsDto dto, CancellationToken ct = default)
@@ -73,16 +55,7 @@ namespace Reamp.Application.Accounts.Staff.Services
             staff.SetSkills(dto.Skills);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            var detailDto = staff.Adapt<StaffDetailDto>();
-            var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
-            var st = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
-            
-            detailDto.StudioName = st?.Name;
-            detailDto.FirstName = profile?.FirstName ?? "";
-            detailDto.LastName = profile?.LastName ?? "";
-            detailDto.DisplayName = profile?.DisplayName ?? "";
-            
-            return detailDto;
+            return await BuildStaffDetailDtoAsync(staff, ct);
         }
 
         public async Task<StaffDetailDto?> GetByIdAsync(Guid staffId, CancellationToken ct = default)
@@ -91,16 +64,7 @@ namespace Reamp.Application.Accounts.Staff.Services
             if (staff == null || staff.DeletedAtUtc != null)
                 return null;
 
-            var detailDto = staff.Adapt<StaffDetailDto>();
-            var userProfile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
-            var studio = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
-            
-            detailDto.StudioName = studio?.Name;
-            detailDto.FirstName = userProfile?.FirstName ?? "";
-            detailDto.LastName = userProfile?.LastName ?? "";
-            detailDto.DisplayName = userProfile?.DisplayName ?? "";
-            
-            return detailDto;
+            return await BuildStaffDetailDtoAsync(staff, ct);
         }
 
         public async Task<StaffDetailDto?> GetByUserProfileIdAsync(Guid userProfileId, CancellationToken ct = default)
@@ -109,16 +73,7 @@ namespace Reamp.Application.Accounts.Staff.Services
             if (staff == null || staff.DeletedAtUtc != null)
                 return null;
 
-            var detailDto = staff.Adapt<StaffDetailDto>();
-            var userProfile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct);
-            var studio = await _dbContext.Set<Studio>().AsNoTracking().FirstOrDefaultAsync(s => s.Id == staff.StudioId, ct);
-            
-            detailDto.StudioName = studio?.Name;
-            detailDto.FirstName = userProfile?.FirstName ?? "";
-            detailDto.LastName = userProfile?.LastName ?? "";
-            detailDto.DisplayName = userProfile?.DisplayName ?? "";
-            
-            return detailDto;
+            return await BuildStaffDetailDtoAsync(staff, ct);
         }
 
         public async Task<IPagedList<StaffListDto>> ListByStudioAsync(
@@ -127,42 +82,37 @@ namespace Reamp.Application.Accounts.Staff.Services
             StaffSkills? hasSkill = null,
             CancellationToken ct = default)
         {
-            // Validate Studio exists
-            var studioExists = await _dbContext.Set<Studio>()
-                .AnyAsync(s => s.Id == studioId && s.DeletedAtUtc == null, ct);
-
-            if (!studioExists)
+            if (!await _queryService.StudioExistsAsync(studioId, ct))
                 throw new KeyNotFoundException($"Studio with ID {studioId} not found.");
 
             var pagedStaff = await _staffRepository.ListByStudioAsync(studioId, pageRequest, hasSkill, ct);
+            var staffList = await _queryService.GetStaffByStudioAsync(studioId, hasSkill, ct);
 
-            var staffList = await _dbContext.Set<Domain.Accounts.Entities.Staff>()
-                .AsNoTracking()
-                .Where(s => s.StudioId == studioId && s.DeletedAtUtc == null)
-                .Where(s => !hasSkill.HasValue || (s.Skills & hasSkill.Value) != 0)
+            var pagedStaffList = staffList
                 .OrderByDescending(s => s.CreatedAtUtc)
                 .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
                 .Take(pageRequest.PageSize)
-                .Select(s => new
-                {
-                    Staff = s,
-                    UserProfile = _dbContext.Set<UserProfile>().FirstOrDefault(u => u.Id == s.UserProfileId),
-                    Studio = _dbContext.Set<Studio>().FirstOrDefault(st => st.Id == s.StudioId)
-                })
-                .ToListAsync(ct);
+                .ToList();
 
-            var dtos = staffList.Select(item => new StaffListDto
+            var dtos = new List<StaffListDto>();
+            foreach (var staff in pagedStaffList)
             {
-                Id = item.Staff.Id,
-                UserProfileId = item.Staff.UserProfileId,
-                FirstName = item.UserProfile?.FirstName ?? "",
-                LastName = item.UserProfile?.LastName ?? "",
-                DisplayName = item.UserProfile?.DisplayName ?? "",
-                StudioId = item.Staff.StudioId,
-                StudioName = item.Studio?.Name,
-                Skills = item.Staff.Skills,
-                CreatedAtUtc = item.Staff.CreatedAtUtc
-            }).ToList();
+                var userProfile = await _queryService.GetUserProfileAsync(staff.UserProfileId, ct);
+                var studio = await _queryService.GetStudioAsync(staff.StudioId, ct);
+
+                dtos.Add(new StaffListDto
+                {
+                    Id = staff.Id,
+                    UserProfileId = staff.UserProfileId,
+                    FirstName = userProfile?.FirstName ?? "",
+                    LastName = userProfile?.LastName ?? "",
+                    DisplayName = userProfile?.DisplayName ?? "",
+                    StudioId = staff.StudioId,
+                    StudioName = studio?.Name,
+                    Skills = staff.Skills,
+                    CreatedAtUtc = staff.CreatedAtUtc
+                });
+            }
 
             return new PagedList<StaffListDto>(
                 dtos,
@@ -181,8 +131,19 @@ namespace Reamp.Application.Accounts.Staff.Services
             _staffRepository.Remove(staff);
             await _unitOfWork.SaveChangesAsync(ct);
         }
+
+        private async Task<StaffDetailDto> BuildStaffDetailDtoAsync(Domain.Accounts.Entities.Staff staff, CancellationToken ct)
+        {
+            var detailDto = staff.Adapt<StaffDetailDto>();
+            var userProfile = await _queryService.GetUserProfileAsync(staff.UserProfileId, ct);
+            var studio = await _queryService.GetStudioAsync(staff.StudioId, ct);
+            
+            detailDto.StudioName = studio?.Name;
+            detailDto.FirstName = userProfile?.FirstName ?? "";
+            detailDto.LastName = userProfile?.LastName ?? "";
+            detailDto.DisplayName = userProfile?.DisplayName ?? "";
+            
+            return detailDto;
+        }
     }
 }
-
-
-
