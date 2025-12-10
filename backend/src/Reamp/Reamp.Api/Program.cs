@@ -187,6 +187,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<Reamp.Domain.Media.Repositories.IMediaAssetRepository,
                 Reamp.Infrastructure.Repositories.Media.MediaAssetRepository>();
             builder.Services.AddScoped<IShootOrderRepository, ShootOrderRepository>();
+            builder.Services.AddScoped<Reamp.Domain.Delivery.Repositories.IDeliveryPackageRepository,
+                Reamp.Infrastructure.Repositories.Delivery.DeliveryPackageRepository>();
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -203,6 +205,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<Reamp.Application.Media.Services.IMediaProcessingJob,
                 Reamp.Application.Media.Services.MediaProcessingJob>();
             builder.Services.AddScoped<IShootOrderAppService, ShootOrderAppService>();
+            builder.Services.AddScoped<Reamp.Application.Delivery.Services.IDeliveryPackageAppService,
+                Reamp.Application.Delivery.Services.DeliveryPackageAppService>();
 
             // Background Job Service (Hangfire abstraction)
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
