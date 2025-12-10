@@ -1,28 +1,23 @@
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Reamp.Application.UserProfiles.Dtos;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Infrastructure;
 
 namespace Reamp.Application.UserProfiles.Services
 {
     public sealed class UserProfileAppService : IUserProfileAppService
     {
         private readonly IUserProfileRepository _profileRepo;
-        private readonly ApplicationDbContext _dbContext;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<UserProfileAppService> _logger;
 
         public UserProfileAppService(
             IUserProfileRepository profileRepo,
-            ApplicationDbContext dbContext,
             IUnitOfWork uow,
             ILogger<UserProfileAppService> logger)
         {
             _profileRepo = profileRepo;
-            _dbContext = dbContext;
             _uow = uow;
             _logger = logger;
         }
@@ -78,19 +73,10 @@ namespace Reamp.Application.UserProfiles.Services
             if (string.IsNullOrWhiteSpace(keyword))
                 return new List<UserProfileDto>();
 
-            keyword = keyword.Trim().ToLower();
-            limit = Math.Min(limit, 100); // Max 100 results
+            keyword = keyword.Trim();
+            limit = Math.Min(limit, 100);
 
-            var profiles = await _dbContext.Set<Domain.Accounts.Entities.UserProfile>()
-                .AsNoTracking()
-                .Where(p => p.DeletedAtUtc == null &&
-                           (p.FirstName.ToLower().Contains(keyword) ||
-                            p.LastName.ToLower().Contains(keyword)))
-                .OrderBy(p => p.FirstName)
-                .ThenBy(p => p.LastName)
-                .Take(limit)
-                .ToListAsync(ct);
-
+            var profiles = await _profileRepo.SearchAsync(keyword, limit, ct);
             return profiles.Adapt<List<UserProfileDto>>();
         }
     }
