@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mapster;
 using Reamp.Application.Orders.Dtos;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Shoots.Entities;
@@ -70,7 +71,7 @@ namespace Reamp.Application.Orders.Services
 
             _logger.LogInformation("Successfully placed order {OrderId}", order.Id);
 
-            return MapToDetailDto(order);
+            return order.Adapt<OrderDetailDto>();
         }
 
         public async Task<IPagedList<OrderListDto>> GetListAsync(PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default)
@@ -80,7 +81,7 @@ namespace Reamp.Application.Orders.Services
             // Get orders for current user
             var orders = await _repo.ListAsync(pageRequest, createdBy: currentUserId, ct: ct);
 
-            var dtos = orders.Items.Select(MapToListDto).ToList();
+            var dtos = orders.Items.Adapt<List<OrderListDto>>();
 
             return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
         }
@@ -103,7 +104,7 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to view this order");
             }
 
-            return MapToDetailDto(order);
+            return order.Adapt<OrderDetailDto>();
         }
 
         public async Task AddTaskAsync(Guid orderId, AddTaskDto dto, Guid currentUserId, CancellationToken ct = default)
@@ -276,50 +277,6 @@ namespace Reamp.Application.Orders.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Successfully cancelled order {OrderId}", orderId);
-        }
-
-        private static OrderListDto MapToListDto(ShootOrder order)
-        {
-            return new OrderListDto
-            {
-                Id = order.Id,
-                AgencyId = order.AgencyId,
-                StudioId = order.StudioId,
-                ListingId = order.ListingId,
-                Currency = order.Currency,
-                TotalAmount = order.TotalAmount,
-                Status = order.Status,
-                CreatedAtUtc = order.CreatedAtUtc,
-                TaskCount = order.Tasks.Count
-            };
-        }
-
-        private static OrderDetailDto MapToDetailDto(ShootOrder order)
-        {
-            return new OrderDetailDto
-            {
-                Id = order.Id,
-                AgencyId = order.AgencyId,
-                StudioId = order.StudioId,
-                ListingId = order.ListingId,
-                Currency = order.Currency,
-                TotalAmount = order.TotalAmount,
-                Status = order.Status,
-                CreatedBy = order.CreatedBy,
-                CreatedAtUtc = order.CreatedAtUtc,
-                CancellationReason = order.CancellationReason,
-                Tasks = order.Tasks.Select(t => new TaskDetailDto
-                {
-                    Id = t.Id,
-                    Type = t.Type,
-                    Status = t.Status,
-                    Price = t.Price,
-                    Notes = t.Notes,
-                    ScheduledStartUtc = t.ScheduledStartUtc,
-                    ScheduledEndUtc = t.ScheduledEndUtc,
-                    AssigneeUserId = t.AssigneeUserId
-                }).ToList()
-            };
         }
 
         private class PagedList<T> : IPagedList<T>

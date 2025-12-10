@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.Extensions.Logging;
 using Reamp.Application.Delivery.Dtos;
 using Reamp.Domain.Common.Abstractions;
@@ -40,25 +41,25 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package created with ID: {PackageId}", package.Id);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var package = await _deliveryRepo.GetByIdWithDetailsAsync(id, ct);
-            return package == null ? null : MapToDetailDto(package);
+            return package?.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByOrderIdAsync(orderId, ct);
-            return packages.Select(MapToListDto).ToList();
+            return packages.Adapt<List<DeliveryPackageListDto>>();
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByListingIdAsync(Guid listingId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByListingIdAsync(listingId, ct);
-            return packages.Select(MapToListDto).ToList();
+            return packages.Adapt<List<DeliveryPackageListDto>>();
         }
 
         public async Task<DeliveryPackageDetailDto> UpdateAsync(Guid id, UpdateDeliveryPackageDto dto, CancellationToken ct = default)
@@ -90,7 +91,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} updated", id);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -115,7 +116,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item added to delivery package {PackageId}", packageId);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveItemAsync(Guid packageId, Guid itemId, CancellationToken ct = default)
@@ -124,7 +125,6 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            // Use reflection to remove item from private collection
             var itemsField = typeof(DeliveryPackage).GetField("_items", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
@@ -141,7 +141,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item {ItemId} removed from delivery package {PackageId}", itemId, packageId);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> AddAccessAsync(Guid packageId, AddDeliveryAccessDto dto, CancellationToken ct = default)
@@ -167,7 +167,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access added to delivery package {PackageId}", packageId);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveAccessAsync(Guid packageId, Guid accessId, CancellationToken ct = default)
@@ -176,7 +176,6 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            // Use reflection to remove access from private collection
             var accessesField = typeof(DeliveryPackage).GetField("_accesses",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
@@ -193,7 +192,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access {AccessId} removed from delivery package {PackageId}", accessId, packageId);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> PublishAsync(Guid id, CancellationToken ct = default)
@@ -206,7 +205,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} published", id);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> RevokeAsync(Guid id, CancellationToken ct = default)
@@ -219,7 +218,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} revoked", id);
-            return MapToDetailDto(package);
+            return package.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<bool> VerifyAccessPasswordAsync(Guid packageId, string password, CancellationToken ct = default)
@@ -259,54 +258,6 @@ namespace Reamp.Application.Delivery.Services
             var bytes = Encoding.UTF8.GetBytes(password);
             var hash = sha256.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
-        }
-
-        private static DeliveryPackageDetailDto MapToDetailDto(DeliveryPackage package)
-        {
-            return new DeliveryPackageDetailDto
-            {
-                Id = package.Id,
-                OrderId = package.OrderId,
-                ListingId = package.ListingId,
-                Title = package.Title,
-                Status = package.Status,
-                WatermarkEnabled = package.WatermarkEnabled,
-                ExpiresAtUtc = package.ExpiresAtUtc,
-                Items = package.Items.Select(i => new DeliveryItemDto
-                {
-                    Id = i.Id,
-                    MediaAssetId = i.MediaAssetId,
-                    VariantName = i.VariantName,
-                    SortOrder = i.SortOrder
-                }).ToList(),
-                Accesses = package.Accesses.Select(a => new DeliveryAccessDto
-                {
-                    Id = a.Id,
-                    Type = a.Type,
-                    RecipientEmail = a.RecipientEmail,
-                    RecipientName = a.RecipientName,
-                    MaxDownloads = a.MaxDownloads,
-                    Downloads = a.Downloads,
-                    HasPassword = !string.IsNullOrWhiteSpace(a.PasswordHash)
-                }).ToList(),
-                CreatedAtUtc = package.CreatedAtUtc,
-                UpdatedAtUtc = package.UpdatedAtUtc
-            };
-        }
-
-        private static DeliveryPackageListDto MapToListDto(DeliveryPackage package)
-        {
-            return new DeliveryPackageListDto
-            {
-                Id = package.Id,
-                OrderId = package.OrderId,
-                ListingId = package.ListingId,
-                Title = package.Title,
-                Status = package.Status,
-                ItemCount = package.Items.Count,
-                ExpiresAtUtc = package.ExpiresAtUtc,
-                CreatedAtUtc = package.CreatedAtUtc
-            };
         }
     }
 }
