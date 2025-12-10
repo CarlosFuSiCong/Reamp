@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Reamp.Application.UserProfiles.Dtos;
@@ -29,13 +30,13 @@ namespace Reamp.Application.UserProfiles.Services
         public async Task<UserProfileDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var profile = await _profileRepo.GetByIdAsync(id, false, true, ct);
-            return profile == null ? null : MapToDto(profile);
+            return profile?.Adapt<UserProfileDto>();
         }
 
         public async Task<UserProfileDto?> GetByApplicationUserIdAsync(Guid applicationUserId, CancellationToken ct = default)
         {
             var profile = await _profileRepo.GetByApplicationUserIdAsync(applicationUserId, false, true, ct);
-            return profile == null ? null : MapToDto(profile);
+            return profile?.Adapt<UserProfileDto>();
         }
 
         public async Task<UserProfileDto> UpdateAsync(Guid id, UpdateUserProfileDto dto, CancellationToken ct = default)
@@ -48,7 +49,7 @@ namespace Reamp.Application.UserProfiles.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User profile {ProfileId} updated", id);
-            return MapToDto(profile);
+            return profile.Adapt<UserProfileDto>();
         }
 
         public async Task<UserProfileDto> UpdateAvatarAsync(Guid id, Guid? avatarAssetId, CancellationToken ct = default)
@@ -69,7 +70,7 @@ namespace Reamp.Application.UserProfiles.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User profile {ProfileId} avatar updated", id);
-            return MapToDto(profile);
+            return profile.Adapt<UserProfileDto>();
         }
 
         public async Task<List<UserProfileDto>> SearchAsync(string keyword, int limit = 20, CancellationToken ct = default)
@@ -90,24 +91,7 @@ namespace Reamp.Application.UserProfiles.Services
                 .Take(limit)
                 .ToListAsync(ct);
 
-            return profiles.Select(MapToDto).ToList();
-        }
-
-        private static UserProfileDto MapToDto(Domain.Accounts.Entities.UserProfile profile)
-        {
-            return new UserProfileDto
-            {
-                Id = profile.Id,
-                ApplicationUserId = profile.ApplicationUserId,
-                FirstName = profile.FirstName,
-                LastName = profile.LastName,
-                DisplayName = profile.DisplayName,
-                AvatarAssetId = profile.AvatarAssetId,
-                Role = profile.Role,
-                Status = profile.Status,
-                CreatedAtUtc = profile.CreatedAtUtc,
-                UpdatedAtUtc = profile.UpdatedAtUtc
-            };
+            return profiles.Adapt<List<UserProfileDto>>();
         }
     }
 }

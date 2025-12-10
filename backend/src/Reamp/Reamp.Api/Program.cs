@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.SqlServer;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -173,6 +174,11 @@ namespace Reamp.Api
             // FluentValidation
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<CreateStudioDtoValidator>();
+
+            // Mapster
+            var mapsterConfig = TypeAdapterConfig.GlobalSettings;
+            Reamp.Application.Common.Mappings.MappingConfig.RegisterMappings();
+            builder.Services.AddSingleton(mapsterConfig);
 
             // UoW + �ִ�
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
