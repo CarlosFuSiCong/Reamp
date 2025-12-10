@@ -253,7 +253,6 @@ namespace Reamp.Application.Delivery.Services
             }
         }
 
-        // Helper method to hash password
         private static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
@@ -262,7 +261,6 @@ namespace Reamp.Application.Delivery.Services
             return Convert.ToBase64String(hash);
         }
 
-        // Mapping methods
         private static DeliveryPackageDetailDto MapToDetailDto(DeliveryPackage package)
         {
             return new DeliveryPackageDetailDto

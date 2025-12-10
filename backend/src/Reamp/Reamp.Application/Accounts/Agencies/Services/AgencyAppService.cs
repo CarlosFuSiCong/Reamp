@@ -160,7 +160,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
                     Slug = a.Slug.Value,
                     Description = a.Description,
                     LogoAssetId = a.LogoAssetId,
-                    LogoUrl = null, // TODO: Map from MediaAsset when needed
+                    LogoUrl = null,
                     ContactEmail = a.ContactEmail,
                     ContactPhone = a.ContactPhone,
                     BranchCount = a.Branches.Count(b => b.DeletedAtUtc == null),
@@ -220,7 +220,7 @@ namespace Reamp.Application.Accounts.Agencies.Services
                 Slug = agency.Slug.Value,
                 Description = agency.Description,
                 LogoAssetId = agency.LogoAssetId,
-                LogoUrl = null, // TODO: Map from MediaAsset when needed
+                LogoUrl = null,
                 ContactEmail = agency.ContactEmail,
                 ContactPhone = agency.ContactPhone,
                 CreatedBy = agency.CreatedBy,

@@ -80,7 +80,6 @@ namespace Reamp.Application.Orders.Services
             // Get orders for current user
             var orders = await _repo.ListAsync(pageRequest, createdBy: currentUserId, ct: ct);
 
-            // Map to DTOs
             var dtos = orders.Items.Select(MapToListDto).ToList();
 
             return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
@@ -279,7 +278,6 @@ namespace Reamp.Application.Orders.Services
             _logger.LogInformation("Successfully cancelled order {OrderId}", orderId);
         }
 
-        // Map entity to list DTO
         private static OrderListDto MapToListDto(ShootOrder order)
         {
             return new OrderListDto
@@ -296,7 +294,6 @@ namespace Reamp.Application.Orders.Services
             };
         }
 
-        // Map entity to detail DTO
         private static OrderDetailDto MapToDetailDto(ShootOrder order)
         {
             return new OrderDetailDto
@@ -325,7 +322,6 @@ namespace Reamp.Application.Orders.Services
             };
         }
 
-        // Helper class for paged list mapping
         private class PagedList<T> : IPagedList<T>
         {
             public PagedList(IReadOnlyList<T> items, int totalCount, int page, int pageSize)
