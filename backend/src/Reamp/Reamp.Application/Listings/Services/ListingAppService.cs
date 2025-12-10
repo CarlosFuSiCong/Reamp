@@ -188,6 +188,8 @@ namespace Reamp.Application.Listings.Services
             if (listing.DeletedAtUtc == null)
                 throw new InvalidOperationException("Listing is not deleted.");
 
+            listing.Restore();
+            
             await _repo.UpdateAsync(listing, ct);
             await _uow.SaveChangesAsync(ct);
         }

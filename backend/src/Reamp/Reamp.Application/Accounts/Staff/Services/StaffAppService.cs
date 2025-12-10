@@ -86,16 +86,9 @@ namespace Reamp.Application.Accounts.Staff.Services
                 throw new KeyNotFoundException($"Studio with ID {studioId} not found.");
 
             var pagedStaff = await _staffRepository.ListByStudioAsync(studioId, pageRequest, hasSkill, ct);
-            var staffList = await _queryService.GetStaffByStudioAsync(studioId, hasSkill, ct);
-
-            var pagedStaffList = staffList
-                .OrderByDescending(s => s.CreatedAtUtc)
-                .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
-                .Take(pageRequest.PageSize)
-                .ToList();
 
             var dtos = new List<StaffListDto>();
-            foreach (var staff in pagedStaffList)
+            foreach (var staff in pagedStaff.Items)
             {
                 var userProfile = await _queryService.GetUserProfileAsync(staff.UserProfileId, ct);
                 var studio = await _queryService.GetStudioAsync(staff.StudioId, ct);
