@@ -25,6 +25,14 @@ namespace Reamp.Infrastructure.Repositories.Listings
             return await q.FirstOrDefaultAsync(x => x.Id == id, ct);
         }
 
+        public async Task<Listing?> GetByIdAsync(Guid id, bool asNoTracking = true, bool includeDeleted = false, CancellationToken ct = default)
+        {
+            var q = _set.AsQueryable();
+            if (includeDeleted) q = q.IgnoreQueryFilters();
+            if (asNoTracking) q = q.AsNoTracking();
+            return await q.FirstOrDefaultAsync(x => x.Id == id, ct);
+        }
+
         public Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
             => _set.AsNoTracking().AnyAsync(x => x.Id == id, ct);
 

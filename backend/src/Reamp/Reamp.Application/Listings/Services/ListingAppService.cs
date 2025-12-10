@@ -182,7 +182,7 @@ namespace Reamp.Application.Listings.Services
 
         public async Task RestoreAsync(Guid listingId, CancellationToken ct)
         {
-            var listing = await _repo.GetByIdAsync(listingId, asNoTracking: false, ct: ct) 
+            var listing = await _repo.GetByIdAsync(listingId, asNoTracking: false, includeDeleted: true, ct: ct) 
                 ?? throw new InvalidOperationException("Listing not found.");
 
             if (listing.DeletedAtUtc == null)

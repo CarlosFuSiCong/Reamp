@@ -68,26 +68,7 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {id} not found");
 
-            if (!string.IsNullOrWhiteSpace(dto.Title))
-            {
-                // Use reflection to update private setter
-                var titleProperty = typeof(DeliveryPackage).GetProperty(nameof(DeliveryPackage.Title));
-                titleProperty?.SetValue(package, dto.Title.Trim());
-            }
-
-            if (dto.WatermarkEnabled.HasValue)
-            {
-                var watermarkProperty = typeof(DeliveryPackage).GetProperty(nameof(DeliveryPackage.WatermarkEnabled));
-                watermarkProperty?.SetValue(package, dto.WatermarkEnabled.Value);
-            }
-
-            if (dto.ExpiresAtUtc.HasValue)
-            {
-                var expiresProperty = typeof(DeliveryPackage).GetProperty(nameof(DeliveryPackage.ExpiresAtUtc));
-                expiresProperty?.SetValue(package, dto.ExpiresAtUtc.Value);
-            }
-
-            package.MarkUpdated();
+            package.UpdateDetails(dto.Title, dto.WatermarkEnabled, dto.ExpiresAtUtc);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} updated", id);
@@ -125,19 +106,7 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            var itemsField = typeof(DeliveryPackage).GetField("_items", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
-            if (itemsField?.GetValue(package) is List<DeliveryItem> items)
-            {
-                var itemToRemove = items.FirstOrDefault(i => i.Id == itemId);
-                if (itemToRemove != null)
-                {
-                    items.Remove(itemToRemove);
-                    package.MarkUpdated();
-                }
-            }
-
+            package.RemoveItem(itemId);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item {ItemId} removed from delivery package {PackageId}", itemId, packageId);
@@ -176,19 +145,7 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            var accessesField = typeof(DeliveryPackage).GetField("_accesses",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            if (accessesField?.GetValue(package) is List<DeliveryAccess> accesses)
-            {
-                var accessToRemove = accesses.FirstOrDefault(a => a.Id == accessId);
-                if (accessToRemove != null)
-                {
-                    accesses.Remove(accessToRemove);
-                    package.MarkUpdated();
-                }
-            }
-
+            package.RemoveAccess(accessId);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access {AccessId} removed from delivery package {PackageId}", accessId, packageId);
@@ -242,14 +199,14 @@ namespace Reamp.Application.Delivery.Services
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
             var access = package.Accesses.FirstOrDefault(a => a.Id == accessId);
-            if (access != null)
-            {
-                access.IncrementDownloads();
-                await _uow.SaveChangesAsync(ct);
+            if (access == null)
+                throw new KeyNotFoundException($"Access with ID {accessId} not found in package {packageId}");
 
-                _logger.LogInformation("Download count incremented for access {AccessId} in package {PackageId}",
-                    accessId, packageId);
-            }
+            access.IncrementDownloads();
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Download count incremented for access {AccessId} in package {PackageId}",
+                accessId, packageId);
         }
 
         private static string HashPassword(string password)
