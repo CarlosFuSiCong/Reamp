@@ -11,12 +11,12 @@ namespace Reamp.Domain.Common.ValueObjects
     {
         private static readonly Regex CountryRegex = new("^[A-Z]{2}$", RegexOptions.Compiled);
 
-        public string Line1 { get; private set; }
+        public string Line1 { get; private set; } = string.Empty;
         public string? Line2 { get; private set; }
-        public string City { get; private set; }
-        public string State { get; private set; }
-        public string Postcode { get; private set; }
-        public string Country { get; private set; }    // ISO 3166-1 alpha-2, e.g. "AU"
+        public string City { get; private set; } = string.Empty;
+        public string State { get; private set; } = string.Empty;
+        public string Postcode { get; private set; } = string.Empty;
+        public string Country { get; private set; } = string.Empty;    // ISO 3166-1 alpha-2, e.g. "AU"
         public double? Latitude { get; private set; }
         public double? Longitude { get; private set; }
 

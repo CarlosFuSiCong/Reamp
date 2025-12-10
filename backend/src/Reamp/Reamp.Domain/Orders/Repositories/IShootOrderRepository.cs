@@ -1,5 +1,6 @@
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Shoots.Entities;
+using Reamp.Domain.Shoots.Enums;
 
 namespace Reamp.Domain.Shoots.Repositories
 {
@@ -13,6 +14,19 @@ namespace Reamp.Domain.Shoots.Repositories
             PageRequest page,
             Guid? agencyId = null,
             Guid? studioId = null,
+            Guid? createdBy = null,
+            CancellationToken ct = default);
+
+        // Advanced filtered list
+        Task<IPagedList<ShootOrder>> ListFilteredAsync(
+            PageRequest page,
+            Guid? agencyId = null,
+            Guid? studioId = null,
+            Guid? listingId = null,
+            Guid? photographerId = null,
+            ShootOrderStatus? status = null,
+            DateTime? dateFrom = null,
+            DateTime? dateTo = null,
             Guid? createdBy = null,
             CancellationToken ct = default);
 

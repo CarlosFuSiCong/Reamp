@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.*" />
@@ -21,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Reamp.Infrastructure\Reamp.Infrastructure.csproj" />
+    <ProjectReference Include="..\Reamp.Application.Read\Reamp.Application.Read.csproj" />
   </ItemGroup>
 
 </Project>

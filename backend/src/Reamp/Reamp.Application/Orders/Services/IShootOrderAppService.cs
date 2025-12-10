@@ -1,4 +1,5 @@
 using Reamp.Application.Orders.Dtos;
+using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Domain.Common.Abstractions;
 
 namespace Reamp.Application.Orders.Services
@@ -17,6 +18,18 @@ namespace Reamp.Application.Orders.Services
         Task StartAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task CancelAsync(Guid orderId, Guid currentUserId, string? reason = null, CancellationToken ct = default);
+        
+        // Photographer Assignment
+        Task AssignPhotographerAsync(Guid orderId, AssignPhotographerDto dto, Guid currentUserId, CancellationToken ct = default);
+        Task UnassignPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
+        Task<IReadOnlyList<StaffSummaryDto>> GetAvailablePhotographersAsync(Guid orderId, CancellationToken ct = default);
+        
+        // Scheduling
+        Task SetScheduleAsync(Guid orderId, SetScheduleDto dto, Guid currentUserId, CancellationToken ct = default);
+        Task ClearScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
+        
+        // Advanced Query
+        Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);
     }
 }
 

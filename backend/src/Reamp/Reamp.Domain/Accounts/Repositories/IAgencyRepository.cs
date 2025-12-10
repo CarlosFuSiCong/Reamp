@@ -28,5 +28,7 @@ namespace Reamp.Domain.Accounts.Repositories
         Task<IReadOnlyList<AgencyBranch>> ListBranchesAsync(
             Guid agencyId,
             CancellationToken ct = default);
+
+        Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
     }
 }

@@ -13,6 +13,7 @@ namespace Reamp.Domain.Shoots.Entities
         public Guid AgencyId { get; private set; }   // Ordering agency
         public Guid StudioId { get; private set; }   // Executing studio
         public Guid ListingId { get; private set; }  // Linked listing
+        public Guid? AssignedPhotographerId { get; private set; }  // Assigned photographer (Staff)
 
         public string Currency { get; private set; } = "AUD";
         public decimal TotalAmount { get; private set; }
@@ -20,6 +21,11 @@ namespace Reamp.Domain.Shoots.Entities
         public ShootOrderStatus Status { get; private set; } = ShootOrderStatus.Placed;
         public Guid CreatedBy { get; private set; }
         public string? CancellationReason { get; private set; }
+
+        // Scheduling
+        public DateTime? ScheduledStartUtc { get; private set; }
+        public DateTime? ScheduledEndUtc { get; private set; }
+        public string? SchedulingNotes { get; private set; }
 
         private readonly List<ShootTask> _tasks = new();
         public IReadOnlyCollection<ShootTask> Tasks => _tasks.AsReadOnly();
@@ -105,6 +111,47 @@ namespace Reamp.Domain.Shoots.Entities
             
             Status = ShootOrderStatus.Cancelled;
             CancellationReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+            Touch();
+        }
+
+        // Photographer Assignment
+        public void AssignPhotographer(Guid photographerId)
+        {
+            if (photographerId == Guid.Empty) throw new ArgumentException("PhotographerId required", nameof(photographerId));
+            EnsureNotFinal();
+            AssignedPhotographerId = photographerId;
+            Touch();
+        }
+
+        public void UnassignPhotographer()
+        {
+            EnsureNotFinal();
+            AssignedPhotographerId = null;
+            Touch();
+        }
+
+        // Scheduling
+        public void SetSchedule(DateTime scheduledStartUtc, DateTime? scheduledEndUtc = null, string? notes = null)
+        {
+            if (scheduledStartUtc < DateTime.UtcNow.AddMinutes(-5)) // Allow 5 min buffer
+                throw new ArgumentException("Cannot schedule in the past", nameof(scheduledStartUtc));
+            
+            if (scheduledEndUtc.HasValue && scheduledEndUtc.Value <= scheduledStartUtc)
+                throw new ArgumentException("End time must be after start time", nameof(scheduledEndUtc));
+
+            EnsureNotFinal();
+            ScheduledStartUtc = scheduledStartUtc;
+            ScheduledEndUtc = scheduledEndUtc;
+            SchedulingNotes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+            Touch();
+        }
+
+        public void ClearSchedule()
+        {
+            EnsureNotFinal();
+            ScheduledStartUtc = null;
+            ScheduledEndUtc = null;
+            SchedulingNotes = null;
             Touch();
         }
 

@@ -40,5 +40,10 @@ namespace Reamp.Infrastructure.Repositories.Accounts
             q = q.OrderBy(st => st.Name);
             return await ToPagedListAsync(q, page, ct);
         }
+
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
+        {
+            return await _set.AnyAsync(s => s.Id == id && s.DeletedAtUtc == null, ct);
+        }
     }
 }

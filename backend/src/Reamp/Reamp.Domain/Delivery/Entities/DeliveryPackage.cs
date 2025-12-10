@@ -79,5 +79,39 @@ namespace Reamp.Domain.Delivery.Entities
             Touch();
             return acc;
         }
+
+        public void UpdateDetails(string? title = null, bool? watermarkEnabled = null, DateTime? expiresAtUtc = null)
+        {
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title.Trim();
+
+            if (watermarkEnabled.HasValue)
+                WatermarkEnabled = watermarkEnabled.Value;
+
+            if (expiresAtUtc.HasValue)
+                ExpiresAtUtc = expiresAtUtc.Value;
+
+            Touch();
+        }
+
+        public void RemoveItem(Guid itemId)
+        {
+            var item = _items.FirstOrDefault(i => i.Id == itemId);
+            if (item == null)
+                throw new KeyNotFoundException($"Item with ID {itemId} not found in this package");
+
+            _items.Remove(item);
+            Touch();
+        }
+
+        public void RemoveAccess(Guid accessId)
+        {
+            var access = _accesses.FirstOrDefault(a => a.Id == accessId);
+            if (access == null)
+                throw new KeyNotFoundException($"Access with ID {accessId} not found in this package");
+
+            _accesses.Remove(access);
+            Touch();
+        }
     }
 }

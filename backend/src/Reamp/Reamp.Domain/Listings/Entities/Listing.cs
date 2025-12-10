@@ -71,6 +71,30 @@ namespace Reamp.Domain.Listings.Entities
         }
 
 
+        public ListingMediaRef AddMedia(Guid mediaAssetId, ListingMediaRole role, int sortOrder = 0)
+        {
+            if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId is required", nameof(mediaAssetId));
+            
+            // Check if media already exists
+            if (_mediaRefs.Any(m => m.MediaAssetId == mediaAssetId))
+                throw new InvalidOperationException($"Media {mediaAssetId} is already associated with this listing.");
+
+            var mediaRef = new ListingMediaRef(Id, mediaAssetId, role, sortOrder);
+            _mediaRefs.Add(mediaRef);
+            Touch();
+            return mediaRef;
+        }
+
+        public void RemoveMedia(Guid mediaRefId)
+        {
+            var mediaRef = _mediaRefs.FirstOrDefault(m => m.Id == mediaRefId);
+            if (mediaRef == null)
+                throw new InvalidOperationException($"Media reference {mediaRefId} not found.");
+
+            _mediaRefs.Remove(mediaRef);
+            Touch();
+        }
+
         public void SetCover(Guid mediaId)
         {
             var target = _mediaRefs.FirstOrDefault(m => m.Id == mediaId) ?? throw new InvalidOperationException("Media not found.");
@@ -83,7 +107,6 @@ namespace Reamp.Domain.Listings.Entities
             var target = _mediaRefs.FirstOrDefault(m => m.Id == mediaId) ?? throw new InvalidOperationException("Media not found.");
             target.SetVisible(isVisible);
         }
-
 
         public void ReorderMedia(IReadOnlyDictionary<Guid, int> orders)
         {

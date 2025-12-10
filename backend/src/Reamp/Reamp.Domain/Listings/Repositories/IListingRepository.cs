@@ -10,7 +10,7 @@ namespace Reamp.Domain.Listings.Repositories
 {
     public interface IListingRepository : IRepository<Listing>
     {
-        new Task<Listing?> GetByIdAsync(Guid id, bool asNoTracking = true, CancellationToken ct = default);
+        Task<Listing?> GetByIdAsync(Guid id, bool asNoTracking = true, bool includeDeleted = false, CancellationToken ct = default);
         Task<Listing?> GetAggregateAsync(Guid id, CancellationToken ct = default);
         Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
         Task UpdateAsync(Listing entity, CancellationToken ct = default);

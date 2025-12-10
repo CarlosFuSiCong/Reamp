@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Reamp.Domain.Common.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Reamp.Infrastructure.Extensions
 {
@@ -41,3 +36,4 @@ namespace Reamp.Infrastructure.Extensions
         }
     }
 }
+

@@ -194,7 +194,7 @@ namespace Reamp.Api.Controllers.Media
                 await _mediaAssetAppService.TriggerProcessingAsync(id, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
-                    null,
+                    data: new { },
                     "Processing triggered successfully"));
             }
             catch (KeyNotFoundException ex)
@@ -226,7 +226,7 @@ namespace Reamp.Api.Controllers.Media
                 await _mediaAssetAppService.DeleteAsync(id, studioId, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
-                    null,
+                    data: new { },
                     "Media deleted successfully"));
             }
             catch (KeyNotFoundException ex)
@@ -330,7 +330,7 @@ namespace Reamp.Api.Controllers.Media
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
@@ -376,7 +376,7 @@ namespace Reamp.Api.Controllers.Media
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
@@ -405,7 +405,7 @@ namespace Reamp.Api.Controllers.Media
 
                 return Ok(ApiResponse<UploadSessionDto>.Ok(session));
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
@@ -426,14 +426,14 @@ namespace Reamp.Api.Controllers.Media
                 await _chunkedUploadService.CancelUploadAsync(sessionId, currentUserId, ct);
 
                 return Ok(ApiResponse<object>.Ok(
-                    null,
+                    data: new { },
                     "Upload cancelled successfully"));
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
