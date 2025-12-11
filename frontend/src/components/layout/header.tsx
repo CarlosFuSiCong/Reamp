@@ -2,7 +2,7 @@
 
 import { Bell, ChevronDown, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Button } from "@/components/ui/button";
