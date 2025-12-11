@@ -16,7 +16,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   const { isAuthenticated: isAuth, user } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuth || !isAuthenticated()) {
+    if (!isAuth && !isAuthenticated()) {
       router.push("/login");
       return;
     }
