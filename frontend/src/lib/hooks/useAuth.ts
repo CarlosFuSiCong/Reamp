@@ -4,6 +4,19 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
 import { UserRole } from "@/types";
 
+function getRedirectPath(role: UserRole): string {
+  switch (role) {
+    case UserRole.Admin:
+      return "/admin/dashboard";
+    case UserRole.Client:
+      return "/agent/dashboard";
+    case UserRole.Staff:
+      return "/studio/dashboard";
+    default:
+      return "/";
+  }
+}
+
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -21,7 +34,10 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/profile");
+      
+      // Redirect based on user role
+      const redirectPath = getRedirectPath(userInfo.role);
+      router.push(redirectPath);
     },
   });
 
@@ -37,7 +53,10 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/profile");
+      
+      // Redirect based on user role
+      const redirectPath = getRedirectPath(userInfo.role);
+      router.push(redirectPath);
     },
   });
 

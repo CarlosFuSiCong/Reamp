@@ -365,6 +365,9 @@ FodyWeavers.xsd
 # Task management file
 TASKS.md
 
+# Test accounts documentation (contains sensitive information)
+TEST-ACCOUNTS.md
+
 # Environment variables and secrets
 .env
 .env.local
