@@ -44,74 +44,74 @@ export interface UserProfile {
 
 // Enums
 export enum UserRole {
-  Admin = 'Admin',
-  Agent = 'Agent',
-  Photographer = 'Photographer',
-  Client = 'Client'
+  Admin = "Admin",
+  Agent = "Agent",
+  Photographer = "Photographer",
+  Client = "Client",
 }
 
 export enum AccountStatus {
-  Active = 'Active',
-  Inactive = 'Inactive',
-  Suspended = 'Suspended'
+  Active = "Active",
+  Inactive = "Inactive",
+  Suspended = "Suspended",
 }
 
 export enum StaffRole {
-  Owner = 'Owner',
-  Manager = 'Manager',
-  Photographer = 'Photographer',
-  Editor = 'Editor'
+  Owner = "Owner",
+  Manager = "Manager",
+  Photographer = "Photographer",
+  Editor = "Editor",
 }
 
 export enum ListingType {
-  ForSale = 'ForSale',
-  ForRent = 'ForRent',
-  ForLease = 'ForLease'
+  ForSale = "ForSale",
+  ForRent = "ForRent",
+  ForLease = "ForLease",
 }
 
 export enum PropertyType {
-  House = 'House',
-  Apartment = 'Apartment',
-  Townhouse = 'Townhouse',
-  Villa = 'Villa',
-  Land = 'Land',
-  Commercial = 'Commercial',
-  Industrial = 'Industrial',
-  Rural = 'Rural'
+  House = "House",
+  Apartment = "Apartment",
+  Townhouse = "Townhouse",
+  Villa = "Villa",
+  Land = "Land",
+  Commercial = "Commercial",
+  Industrial = "Industrial",
+  Rural = "Rural",
 }
 
 export enum ListingStatus {
-  Draft = 'Draft',
-  Active = 'Active',
-  Archived = 'Archived'
+  Draft = "Draft",
+  Active = "Active",
+  Archived = "Archived",
 }
 
 export enum OrderStatus {
-  Pending = 'Pending',
-  Accepted = 'Accepted',
-  Scheduled = 'Scheduled',
-  InProgress = 'InProgress',
-  Completed = 'Completed',
-  Cancelled = 'Cancelled'
+  Pending = "Pending",
+  Accepted = "Accepted",
+  Scheduled = "Scheduled",
+  InProgress = "InProgress",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
 }
 
 export enum TaskStatus {
-  Pending = 'Pending',
-  InProgress = 'InProgress',
-  Completed = 'Completed'
+  Pending = "Pending",
+  InProgress = "InProgress",
+  Completed = "Completed",
 }
 
 export enum DeliveryStatus {
-  Draft = 'Draft',
-  Published = 'Published',
-  Revoked = 'Revoked',
-  Expired = 'Expired'
+  Draft = "Draft",
+  Published = "Published",
+  Revoked = "Revoked",
+  Expired = "Expired",
 }
 
 export enum AccessType {
-  Public = 'Public',
-  Password = 'Password',
-  Email = 'Email'
+  Public = "Public",
+  Password = "Password",
+  Email = "Email",
 }
 
 // Address Value Object
@@ -371,4 +371,3 @@ export interface CreateDeliveryPackageDto {
   watermarkEnabled: boolean;
   expiresAtUtc?: string;
 }
-

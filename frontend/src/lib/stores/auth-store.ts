@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { User } from '@/types';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { User } from "@/types";
 
 interface AuthState {
   user: User | null;
@@ -28,9 +28,8 @@ export const useAuthStore = create<AuthState>()(
         }),
     }),
     {
-      name: 'reamp-auth-storage',
+      name: "reamp-auth-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
-
