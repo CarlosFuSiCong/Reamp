@@ -1,68 +1,29 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Home, ShoppingCart, Users, Clock, Plus } from "lucide-react";
-import Link from "next/link";
-import { listingsApi, ordersApi } from "@/lib/api";
-import { PageHeader } from "@/components/shared/page-header";
-import { LoadingState } from "@/components/shared/loading-state";
-import { ErrorState } from "@/components/shared/error-state";
-import { StatsCard, ActivityTimeline, Activity } from "@/components/dashboard";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OrderStatus, ListingStatus } from "@/types";
+import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
+import { StatsCard, ActivityTimeline, QuickActions } from "@/components/dashboard";
+import { useDashboardStats } from "@/lib/hooks/use-dashboard-stats";
+import { generateRecentActivities } from "@/lib/utils/activity-utils";
 
 export default function AgentDashboardPage() {
-  const { data: listingsData, isLoading: loadingListings, error: listingsError } = useQuery({
-    queryKey: ["listings", { page: 1, pageSize: 100 }],
-    queryFn: () => listingsApi.list({ page: 1, pageSize: 100 }),
-  });
+  const { stats, listings, orders, isLoading, error } = useDashboardStats();
 
-  const { data: ordersData, isLoading: loadingOrders, error: ordersError } = useQuery({
-    queryKey: ["orders", { page: 1, pageSize: 100 }],
-    queryFn: () => ordersApi.list({ page: 1, pageSize: 100 }),
-  });
-
-  if (loadingListings || loadingOrders) {
+  if (isLoading) {
     return <LoadingState message="Loading dashboard..." />;
   }
 
-  if (listingsError || ordersError) {
+  if (error) {
     return <ErrorState message="Failed to load dashboard data" />;
   }
 
-  const listings = listingsData?.items || [];
-  const orders = ordersData?.items || [];
-  
-  const totalListings = listings.filter(l => l.status === ListingStatus.Active).length;
-  const activeOrders = orders.filter(o => 
-    o.status === OrderStatus.Placed || o.status === OrderStatus.Accepted
-  ).length;
-  const pendingListings = listings.filter(l => l.status === ListingStatus.Pending).length;
+  const recentActivities = generateRecentActivities(listings, orders, 5);
 
-  const now = Date.now();
-  
-  const recentActivities: Activity[] = [
-    ...orders.slice(0, 3).map(order => ({
-      id: order.id,
-      type: "order" as const,
-      title: "New Order Created",
-      description: `Order ${order.id.substring(0, 8)} has been created`,
-      timestamp: new Date(order.createdAtUtc).toLocaleString(),
-      sortKey: new Date(order.createdAtUtc).getTime(),
-    })),
-    ...listings.slice(0, 2).map(listing => ({
-      id: listing.id,
-      type: "listing" as const,
-      title: "Listing Updated",
-      description: listing.title,
-      timestamp: "Just now",
-      sortKey: now,
-    })),
-  ]
-    .sort((a, b) => b.sortKey - a.sortKey)
-    .slice(0, 5)
-    .map(({ sortKey, ...activity }) => activity);
+  const quickActions = [
+    { href: "/agent/listings/new", label: "Create New Listing", icon: Plus },
+    { href: "/agent/orders/new", label: "Create New Order", icon: Plus },
+    { href: "/agent/listings", label: "View All Listings", icon: Home },
+  ];
 
   return (
     <div>
@@ -74,57 +35,32 @@ export default function AgentDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatsCard
           title="Total Listings"
-          value={totalListings}
+          value={stats.totalListings}
           icon={Home}
           description="Active properties"
         />
         <StatsCard
           title="Active Orders"
-          value={activeOrders}
+          value={stats.activeOrders}
           icon={ShoppingCart}
           description="In progress"
         />
         <StatsCard
           title="Clients"
-          value={0}
+          value={stats.totalClients}
           icon={Users}
           description="Total clients"
         />
         <StatsCard
           title="Pending Review"
-          value={pendingListings}
+          value={stats.pendingListings}
           icon={Clock}
           description="Awaiting approval"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Link href="/agent/listings/new">
-              <Button className="w-full justify-start" variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Listing
-              </Button>
-            </Link>
-            <Link href="/agent/orders/new">
-              <Button className="w-full justify-start" variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Order
-              </Button>
-            </Link>
-            <Link href="/agent/listings">
-              <Button className="w-full justify-start" variant="outline">
-                <Home className="mr-2 h-4 w-4" />
-                View All Listings
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
+        <QuickActions actions={quickActions} />
         <ActivityTimeline activities={recentActivities} />
       </div>
     </div>
