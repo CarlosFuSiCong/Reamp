@@ -51,21 +51,32 @@ namespace Reamp.Api.Controllers
 
             var response = await _authService.RegisterAsync(dto, ct);
 
+            Guid userId;
             try
             {
                 var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
                 
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out userId))
                 {
-                    return BadRequest(ApiResponse.Fail("Invalid token generated"));
+                    _logger.LogError("Invalid token generated during registration for email: {Email}", dto.Email);
+                    return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to process authentication token"));
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to decode token during registration for email: {Email}", dto.Email);
+                return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to decode authentication token"));
+            }
 
+            try
+            {
                 var userInfo = await _authService.GetUserInfoAsync(userId, ct);
                 if (userInfo == null)
                 {
-                    return NotFound(ApiResponse.Fail("User not found"));
+                    _logger.LogError("User info not found after registration for userId: {UserId}", userId);
+                    return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to retrieve user information"));
                 }
 
                 SetTokenCookies(response);
@@ -75,7 +86,7 @@ namespace Reamp.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to decode token or fetch user info for email: {Email}", dto.Email);
+                _logger.LogError(ex, "Failed to fetch user info during registration for userId: {UserId}", userId);
                 return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to retrieve user information"));
             }
         }
@@ -88,21 +99,32 @@ namespace Reamp.Api.Controllers
 
             var response = await _authService.LoginAsync(dto, ct);
 
+            Guid userId;
             try
             {
                 var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
                 
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out userId))
                 {
-                    return BadRequest(ApiResponse.Fail("Invalid token generated"));
+                    _logger.LogError("Invalid token generated during login for email: {Email}", dto.Email);
+                    return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to process authentication token"));
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to decode token during login for email: {Email}", dto.Email);
+                return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to decode authentication token"));
+            }
 
+            try
+            {
                 var userInfo = await _authService.GetUserInfoAsync(userId, ct);
                 if (userInfo == null)
                 {
-                    return NotFound(ApiResponse.Fail("User not found"));
+                    _logger.LogError("User info not found after login for userId: {UserId}", userId);
+                    return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to retrieve user information"));
                 }
 
                 SetTokenCookies(response);
@@ -112,7 +134,7 @@ namespace Reamp.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to decode token or fetch user info for email: {Email}", dto.Email);
+                _logger.LogError(ex, "Failed to fetch user info during login for userId: {UserId}", userId);
                 return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to retrieve user information"));
             }
         }
