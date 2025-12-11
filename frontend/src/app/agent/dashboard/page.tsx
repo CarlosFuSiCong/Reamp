@@ -37,6 +37,8 @@ export default function AgentDashboardPage() {
   const activeOrders = orders.filter(o => o.status === "Pending" || o.status === "Accepted").length;
   const pendingListings = listings.filter(l => l.status === "Draft" || l.status === "PendingReview").length;
 
+  const now = Date.now();
+  
   const recentActivities: Activity[] = [
     ...orders.slice(0, 3).map(order => ({
       id: order.id,
@@ -44,6 +46,7 @@ export default function AgentDashboardPage() {
       title: "New Order Created",
       description: `Order ${order.id.substring(0, 8)} has been created`,
       timestamp: new Date(order.createdAtUtc).toLocaleString(),
+      sortKey: new Date(order.createdAtUtc).getTime(),
     })),
     ...listings.slice(0, 2).map(listing => ({
       id: listing.id,
@@ -51,8 +54,12 @@ export default function AgentDashboardPage() {
       title: "Listing Updated",
       description: listing.title,
       timestamp: "Just now",
+      sortKey: now,
     })),
-  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5);
+  ]
+    .sort((a, b) => b.sortKey - a.sortKey)
+    .slice(0, 5)
+    .map(({ sortKey, ...activity }) => activity);
 
   return (
     <div>
