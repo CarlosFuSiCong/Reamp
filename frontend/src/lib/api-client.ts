@@ -33,6 +33,19 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Track ongoing refresh to prevent race conditions
+let isRefreshing = false;
+let refreshSubscribers: ((error?: Error) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (error?: Error) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(error?: Error) {
+  refreshSubscribers.forEach((cb) => cb(error));
+  refreshSubscribers = [];
+}
+
 // Response interceptor
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
@@ -61,6 +74,27 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - token expired
     if (error.response?.status === 401) {
+      const originalRequest = error.config;
+
+      if (!originalRequest) {
+        return Promise.reject(error);
+      }
+
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((err?: Error) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(apiClient.request(originalRequest));
+            }
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
         await axios.post(
           `${API_URL}/api/auth/refresh`,
@@ -68,10 +102,13 @@ apiClient.interceptors.response.use(
           { withCredentials: true }
         );
 
-        if (error.config) {
-          return apiClient.request(error.config);
-        }
+        isRefreshing = false;
+        onRefreshed();
+        return apiClient.request(originalRequest);
       } catch (refreshError) {
+        isRefreshing = false;
+        onRefreshed(refreshError as Error);
+        
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

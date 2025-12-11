@@ -15,8 +15,9 @@ export function middleware(request: NextRequest) {
   }
 
   const authStorage = request.cookies.get("reamp-auth-storage")?.value;
+  const accessToken = request.cookies.get("accessToken")?.value;
   
-  if (!authStorage) {
+  if (!authStorage && !accessToken) {
     const url = new URL("/login", request.url);
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);

@@ -53,24 +53,31 @@ namespace Reamp.Api.Controllers
 
             SetTokenCookies(response);
 
-            // Decode token to get userId
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
-            
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            try
             {
-                return BadRequest(ApiResponse.Fail("Invalid token generated"));
-            }
+                var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+                
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                {
+                    return BadRequest(ApiResponse.Fail("Invalid token generated"));
+                }
 
-            var userInfo = await _authService.GetUserInfoAsync(userId, ct);
-            if (userInfo == null)
+                var userInfo = await _authService.GetUserInfoAsync(userId, ct);
+                if (userInfo == null)
+                {
+                    return NotFound(ApiResponse.Fail("User not found"));
+                }
+
+                _logger.LogInformation("User registered successfully: {Email}", dto.Email);
+                return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Registration successful"));
+            }
+            catch (Exception ex)
             {
-                return NotFound(ApiResponse.Fail("User not found"));
+                _logger.LogError(ex, "Failed to decode token or fetch user info for email: {Email}", dto.Email);
+                return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to retrieve user information"));
             }
-
-            _logger.LogInformation("User registered successfully: {Email}", dto.Email);
-            return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Registration successful"));
         }
 
         // Login user
@@ -83,24 +90,31 @@ namespace Reamp.Api.Controllers
 
             SetTokenCookies(response);
 
-            // Decode token to get userId
-            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
-            
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            try
             {
-                return BadRequest(ApiResponse.Fail("Invalid token generated"));
-            }
+                var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(response.AccessToken);
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+                
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                {
+                    return BadRequest(ApiResponse.Fail("Invalid token generated"));
+                }
 
-            var userInfo = await _authService.GetUserInfoAsync(userId, ct);
-            if (userInfo == null)
+                var userInfo = await _authService.GetUserInfoAsync(userId, ct);
+                if (userInfo == null)
+                {
+                    return NotFound(ApiResponse.Fail("User not found"));
+                }
+
+                _logger.LogInformation("User logged in successfully: {Email}", dto.Email);
+                return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Login successful"));
+            }
+            catch (Exception ex)
             {
-                return NotFound(ApiResponse.Fail("User not found"));
+                _logger.LogError(ex, "Failed to decode token or fetch user info for email: {Email}", dto.Email);
+                return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to retrieve user information"));
             }
-
-            _logger.LogInformation("User logged in successfully: {Email}", dto.Email);
-            return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Login successful"));
         }
 
         // Get current user info (requires authentication)
