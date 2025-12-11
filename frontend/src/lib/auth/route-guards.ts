@@ -1,9 +1,10 @@
 import { UserRole } from "@/types/enums";
-import { getCookie } from "@/lib/utils/cookies";
+import { getCookie, deleteCookie } from "@/lib/utils/cookies";
 
 export function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return !!getCookie("accessToken");
+  const authStorage = getCookie("reamp-auth-storage");
+  return !!authStorage;
 }
 
 export function getUserRole(): UserRole | null {
@@ -109,8 +110,6 @@ export function isTokenExpired(token: string): boolean {
 
 export function clearAuth(): void {
   if (typeof window === "undefined") return;
-  const { deleteCookie } = require("@/lib/utils/cookies");
-  deleteCookie("accessToken");
   deleteCookie("reamp-auth-storage");
 }
 

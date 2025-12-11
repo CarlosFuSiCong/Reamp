@@ -11,69 +11,65 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: async () => {
-      try {
-        const profile = await profilesApi.getMe();
-        const userData = {
-          id: profile.applicationUserId,
-          email: "",
-          role: profile.role,
-          createdAt: profile.createdAtUtc,
-          updatedAt: profile.updatedAtUtc,
-        };
-        setUser(userData);
-        queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async (userInfo) => {
+      const userData = {
+        id: userInfo.userId,
+        email: userInfo.email,
+        role: userInfo.role as UserRole,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setUser(userData);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
 
-        switch (profile.role) {
-          case UserRole.Client:
-            router.push("/client/dashboard");
-            break;
-          case UserRole.Staff:
-            router.push("/staff/dashboard");
-            break;
-          case UserRole.Admin:
-            router.push("/admin/dashboard");
-            break;
-          default:
-            router.push("/");
-        }
-      } catch (error) {
-        router.push("/");
+      switch (userInfo.role as UserRole) {
+        case UserRole.Client:
+          router.push("/client/dashboard");
+          break;
+        case UserRole.Staff:
+          router.push("/staff/dashboard");
+          break;
+        case UserRole.Admin:
+          router.push("/admin/dashboard");
+          break;
+        default:
+          router.push("/");
       }
+    },
+    onError: () => {
+      router.push("/");
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: async () => {
-      try {
-        const profile = await profilesApi.getMe();
-        const userData = {
-          id: profile.applicationUserId,
-          email: "",
-          role: profile.role,
-          createdAt: profile.createdAtUtc,
-          updatedAt: profile.updatedAtUtc,
-        };
-        setUser(userData);
-        queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async (userInfo) => {
+      const userData = {
+        id: userInfo.userId,
+        email: userInfo.email,
+        role: userInfo.role as UserRole,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setUser(userData);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
 
-        switch (profile.role) {
-          case UserRole.Client:
-            router.push("/client/dashboard");
-            break;
-          case UserRole.Staff:
-            router.push("/staff/dashboard");
-            break;
-          case UserRole.Admin:
-            router.push("/admin/dashboard");
-            break;
-          default:
-            router.push("/");
-        }
-      } catch (error) {
-        router.push("/");
+      switch (userInfo.role as UserRole) {
+        case UserRole.Client:
+          router.push("/client/dashboard");
+          break;
+        case UserRole.Staff:
+          router.push("/staff/dashboard");
+          break;
+        case UserRole.Admin:
+          router.push("/admin/dashboard");
+          break;
+        default:
+          router.push("/");
       }
+    },
+    onError: () => {
+      router.push("/");
     },
   });
 
