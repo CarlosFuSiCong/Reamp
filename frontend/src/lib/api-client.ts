@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { ApiError } from "@/types";
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import { ApiError, ApiResponse } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 30000;
@@ -17,8 +17,13 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add any custom headers here
-    // JWT token is handled by HttpOnly cookie, no need to add manually
+    // Add access token from localStorage
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
 
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.log("API Request:", {
@@ -37,16 +42,22 @@ apiClient.interceptors.request.use(
 
 // Response interceptor
 apiClient.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse<ApiResponse>) => {
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.log("API Response:", {
         status: response.status,
         data: response.data,
       });
     }
+
+    // Unwrap ApiResponse and return only the data field
+    if (response.data && typeof response.data === "object" && "data" in response.data) {
+      response.data = response.data.data as typeof response.data;
+    }
+
     return response;
   },
-  async (error: AxiosError<ApiError>) => {
+  async (error: AxiosError<ApiResponse>) => {
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.error("API Error:", {
         status: error.response?.status,
