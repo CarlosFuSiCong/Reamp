@@ -51,8 +51,6 @@ namespace Reamp.Api.Controllers
 
             var response = await _authService.RegisterAsync(dto, ct);
 
-            SetTokenCookies(response);
-
             try
             {
                 var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
@@ -69,6 +67,8 @@ namespace Reamp.Api.Controllers
                 {
                     return NotFound(ApiResponse.Fail("User not found"));
                 }
+
+                SetTokenCookies(response);
 
                 _logger.LogInformation("User registered successfully: {Email}", dto.Email);
                 return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Registration successful"));
@@ -88,8 +88,6 @@ namespace Reamp.Api.Controllers
 
             var response = await _authService.LoginAsync(dto, ct);
 
-            SetTokenCookies(response);
-
             try
             {
                 var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
@@ -106,6 +104,8 @@ namespace Reamp.Api.Controllers
                 {
                     return NotFound(ApiResponse.Fail("User not found"));
                 }
+
+                SetTokenCookies(response);
 
                 _logger.LogInformation("User logged in successfully: {Email}", dto.Email);
                 return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Login successful"));
