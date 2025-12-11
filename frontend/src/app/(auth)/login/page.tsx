@@ -34,8 +34,11 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setErrorMessage("");
+      console.log("Attempting login with:", data.email);
       await login(data);
+      console.log("Login successful");
     } catch (error: any) {
+      console.error("Login error:", error);
       const message = error?.message || "Login failed. Please try again.";
       const errors = error?.errors;
       
