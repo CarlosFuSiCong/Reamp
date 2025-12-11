@@ -8,6 +8,15 @@ export interface User {
   updatedAt: string;
 }
 
+export interface UserInfoDto {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  role: UserRole;
+}
+
 export interface UserProfile {
   id: string;
   applicationUserId: string;
