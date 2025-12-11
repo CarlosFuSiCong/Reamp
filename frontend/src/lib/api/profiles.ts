@@ -35,6 +35,6 @@ export const profilesApi = {
   },
 
   async changePassword(data: ChangePasswordDto): Promise<void> {
-    await apiClient.put("/api/auth/change-password", data);
+    await apiClient.put("/api/auth/password", data);
   },
 };
