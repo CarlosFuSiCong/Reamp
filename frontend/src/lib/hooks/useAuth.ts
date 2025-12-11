@@ -23,9 +23,6 @@ export function useAuth() {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       router.push("/profile");
     },
-    onError: () => {
-      router.push("/");
-    },
   });
 
   const registerMutation = useMutation({
@@ -41,9 +38,6 @@ export function useAuth() {
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
       router.push("/profile");
-    },
-    onError: () => {
-      router.push("/");
     },
   });
 
