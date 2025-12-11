@@ -36,6 +36,10 @@ export function ProfileInfoForm({
   const [formData, setFormData] = useState(initialData);
 
   useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
+
+  useEffect(() => {
     if (isSuccess) {
       setIsEditing(false);
     }
