@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Listings.Enums;
+using Reamp.Domain.Listings.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Reamp.Application.Read.Listings.DTOs
 {
     public sealed record ListingDetailDto(
-        Guid Id, string Title, string Description, decimal Price, string Currency,
+        Guid Id, Guid OwnerAgencyId, string Title, string Description, decimal Price, string Currency,
         ListingStatus Status, ListingType ListingType, PropertyType PropertyType,
         int Bedrooms, int Bathrooms, int ParkingSpaces,
         double? FloorAreaSqm, double? LandAreaSqm,

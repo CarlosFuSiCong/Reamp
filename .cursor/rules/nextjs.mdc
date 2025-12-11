@@ -1,0 +1,120 @@
+---
+applyTo:
+  - "frontend/**/*.{ts,tsx,js,jsx}"
+  - "frontend/**/*.{css,scss}"
+  - "!frontend/node_modules/**"
+  - "!frontend/.next/**"
+---
+# Cursor Project Rules
+
+You are helping me develop a React/Next.js app with TypeScript.
+
+When working in this repository (writing, refactoring, or generating code),
+ALWAYS follow these rules unless I explicitly say otherwise.
+
+---
+
+## 1. Branch & Feature Workflow
+
+- Assume new work is done on a **feature branch**.
+- When I ask for a new feature, structure changes so they could cleanly live on a new branch.
+- Suggest clear, simple English commit messages, e.g.:
+  - "add user auth form with zod validation"
+  - "refactor file upload modal into reusable component"
+
+---
+
+## 2. Reusable UI & Components
+
+- Extract reusable UI patterns into **standalone components** or hooks.
+- If a pattern appears more than once, propose a shared component/hook instead of duplication.
+- Keep components small, focused, and easy to test.
+
+---
+
+## 3. Code Style, Naming & Comments
+
+- Prefer **self-explanatory code** over heavy comments.
+- Use comments only for:
+  - Non-obvious decisions
+  - Workarounds, TODOs, and important caveats
+- Use **simple English** for:
+  - Commit messages
+  - Comments
+  - Variable and function names
+- Use **kebab-case** for file names, for example:
+  - `use-auth.ts`
+  - `user-profile-form.tsx`
+  - `project-settings-page.tsx`
+- **Always format code with Prettier**:
+  - Run `npm run format` or `pnpm format` before committing
+  - Project uses: double quotes, semicolons, 100 char line width, 2 space indentation
+  - Prettier config is in `.prettierrc` - follow it strictly
+
+---
+
+## 4. State, Config & Data Fetching
+
+- Centralize shared logic and configuration:
+  - Global or shared state
+  - Enums, labels, and constants
+  - Environment-dependent config
+  - Data-fetching hooks
+- Prefer **hooks and modules in shared folders** (e.g. `hooks/`, `lib/`, `config/`) instead of scattering logic across components.
+
+- Use **TanStack Query** for all server state and data fetching:
+  - Use `useQuery` and `useMutation` with clear, stable query keys.
+  - Always handle loading, error, and success states explicitly.
+  - Co-locate query keys and hooks when it improves maintainability.
+
+---
+
+## 5. Forms & Validation
+
+- Use **React Hook Form + Zod** for all forms and validation logic.
+- Define a Zod schema for each form:
+  - Place it near the form component, or in a shared `schemas/` folder if reused.
+- Ensure validation errors are:
+  - Mapped to fields correctly
+  - Displayed clearly in the UI (shadcn/ui form components where applicable)
+
+---
+
+## 6. UI Library & Styling
+
+- Build UI primarily with **shadcn/ui** components.
+- Use Tailwind utility classes where needed, but keep styling:
+  - Minimal
+  - Consistent
+  - Easy to maintain
+- Prefer composition and props over deeply nested custom CSS.
+
+---
+
+## 7. Error Handling & User Feedback
+
+- Always implement clear UX states:
+  - **Loading:** spinners, skeletons, or placeholders
+  - **Empty:** friendly empty states where data may be missing
+  - **Error:** user-friendly messages (never raw stack traces)
+
+- Use **toast notifications** for important feedback:
+  - Success (e.g. "Saved successfully")
+  - Failure (e.g. "Failed to save, please try again")
+- When appropriate, provide retry actions or guidance in error states.
+
+---
+
+## 8. General Principles
+
+- Prefer clarity over cleverness; explicit code is better than magic.
+- Keep responsibilities separated:
+  - Data fetching and mutations in hooks
+  - Presentation in components
+  - Validation in schemas
+- When there are multiple reasonable approaches:
+  - Briefly explain the trade-offs
+  - Choose the option that improves readability and maintainability.
+
+When generating or modifying code in this repo, follow these rules by default and
+point out if my request conflicts with them.
