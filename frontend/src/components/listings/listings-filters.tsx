@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/select";
 import { SearchInput } from "@/components/shared";
 import { ListingStatus } from "@/types";
+import { listingStatusConfig } from "@/lib/utils/enum-labels";
 
 interface ListingsFiltersProps {
   searchKeyword: string;
@@ -41,10 +42,11 @@ export function ListingsFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value={ListingStatus.Draft.toString()}>Draft</SelectItem>
-          <SelectItem value={ListingStatus.Active.toString()}>Active</SelectItem>
-          <SelectItem value={ListingStatus.Pending.toString()}>Pending</SelectItem>
-          <SelectItem value={ListingStatus.Archived.toString()}>Archived</SelectItem>
+          {Object.entries(listingStatusConfig).map(([key, config]) => (
+            <SelectItem key={key} value={key}>
+              {config.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

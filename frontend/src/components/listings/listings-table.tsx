@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/shared";
 import { Listing, ListingStatus } from "@/types";
+import { getListingTypeLabel } from "@/lib/utils/enum-labels";
 import { MoreHorizontal, Edit, Eye, Archive, Trash } from "lucide-react";
 
 interface ListingsTableProps {
@@ -65,8 +66,8 @@ export function ListingsTable({
               <TableCell>
                 {listing.currency} {listing.price.toLocaleString()}
               </TableCell>
-              <TableCell className="capitalize">
-                {listing.listingType === 1 ? "For Sale" : "For Rent"}
+              <TableCell>
+                {getListingTypeLabel(listing.listingType)}
               </TableCell>
               <TableCell>
                 <StatusBadge status={listing.status} type="listing" />
