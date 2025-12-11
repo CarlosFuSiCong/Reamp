@@ -11,13 +11,8 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async () => {
       try {
-        // Store access token in localStorage for API requests
-        if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", tokenResponse.accessToken);
-        }
-
         const profile = await profilesApi.getMe();
         const userData = {
           id: profile.applicationUserId,
@@ -43,10 +38,6 @@ export function useAuth() {
             router.push("/");
         }
       } catch (error) {
-        // Clear token on profile fetch failure to prevent inconsistent state
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
-        }
         router.push("/");
       }
     },
@@ -54,14 +45,8 @@ export function useAuth() {
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async () => {
       try {
-        // Store access token in localStorage for API requests
-        if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", tokenResponse.accessToken);
-        }
-
-        // Fetch user profile
         const profile = await profilesApi.getMe();
         const userData = {
           id: profile.applicationUserId,
@@ -73,7 +58,6 @@ export function useAuth() {
         setUser(userData);
         queryClient.invalidateQueries({ queryKey: ["user"] });
 
-        // Redirect based on role
         switch (profile.role) {
           case UserRole.Client:
             router.push("/client/dashboard");
@@ -88,10 +72,6 @@ export function useAuth() {
             router.push("/");
         }
       } catch (error) {
-        // Clear token on profile fetch failure to prevent inconsistent state
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
-        }
         router.push("/");
       }
     },
@@ -100,10 +80,6 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
-      // Clear access token
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-      }
       logoutStore();
       queryClient.clear();
       router.push("/login");

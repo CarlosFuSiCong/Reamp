@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { ApiError, ApiResponse } from "@/types";
+import { getCookie } from "@/lib/utils/cookies";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 30000;
@@ -11,15 +12,14 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Important for HttpOnly cookies
+  withCredentials: true,
 });
 
 // Request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add access token from localStorage
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
+      const token = getCookie("accessToken");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -68,29 +68,18 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - token expired
     if (error.response?.status === 401) {
-      // Try to refresh token
       try {
-        const refreshResponse = await axios.post(
+        await axios.post(
           `${API_URL}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
-        // Extract and store the new access token
-        const newAccessToken = refreshResponse.data?.data?.accessToken;
-        if (newAccessToken && typeof window !== "undefined") {
-          localStorage.setItem("accessToken", newAccessToken);
-
-          // Update the original request with new token and retry
-          if (error.config) {
-            error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-            return apiClient.request(error.config);
-          }
+        if (error.config) {
+          return apiClient.request(error.config);
         }
       } catch (refreshError) {
-        // Refresh failed, clear token and redirect to login
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);

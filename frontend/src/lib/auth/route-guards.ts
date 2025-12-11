@@ -1,18 +1,19 @@
 import { UserRole } from "@/types/enums";
+import { getCookie } from "@/lib/utils/cookies";
 
 export function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("accessToken");
+  return !!getCookie("accessToken");
 }
 
 export function getUserRole(): UserRole | null {
   if (typeof window === "undefined") return null;
   
-  const authStorage = localStorage.getItem("reamp-auth-storage");
+  const authStorage = getCookie("reamp-auth-storage");
   if (!authStorage) return null;
   
   try {
-    const parsed = JSON.parse(authStorage);
+    const parsed = JSON.parse(decodeURIComponent(authStorage));
     return parsed.state?.user?.role || null;
   } catch {
     return null;
@@ -108,7 +109,8 @@ export function isTokenExpired(token: string): boolean {
 
 export function clearAuth(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("reamp-auth-storage");
+  const { deleteCookie } = require("@/lib/utils/cookies");
+  deleteCookie("accessToken");
+  deleteCookie("reamp-auth-storage");
 }
 
