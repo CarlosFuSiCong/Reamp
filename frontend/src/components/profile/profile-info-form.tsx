@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ interface ProfileInfoFormProps {
   role: UserRole;
   onSubmit: (data: ProfileFormData) => void;
   isSubmitting?: boolean;
+  isSuccess?: boolean;
 }
 
 export function ProfileInfoForm({ 
@@ -28,15 +29,21 @@ export function ProfileInfoForm({
   email, 
   role, 
   onSubmit, 
-  isSubmitting 
+  isSubmitting,
+  isSuccess
 }: ProfileInfoFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialData);
 
+  useEffect(() => {
+    if (isSuccess) {
+      setIsEditing(false);
+    }
+  }, [isSuccess]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
-    setIsEditing(false);
   };
 
   const handleCancel = () => {

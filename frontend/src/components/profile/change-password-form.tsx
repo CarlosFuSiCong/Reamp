@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,14 +16,21 @@ interface PasswordFormData {
 interface ChangePasswordFormProps {
   onSubmit: (data: PasswordFormData) => void;
   isSubmitting?: boolean;
+  isSuccess?: boolean;
 }
 
-export function ChangePasswordForm({ onSubmit, isSubmitting }: ChangePasswordFormProps) {
+export function ChangePasswordForm({ onSubmit, isSubmitting, isSuccess }: ChangePasswordFormProps) {
   const [formData, setFormData] = useState<PasswordFormData>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    if (isSuccess) {
+      setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    }
+  }, [isSuccess]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +51,6 @@ export function ChangePasswordForm({ onSubmit, isSubmitting }: ChangePasswordFor
     }
 
     onSubmit(formData);
-    setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
   return (

@@ -114,6 +114,7 @@ export default function ProfilePage() {
             role={profile.role}
             onSubmit={(data) => updateProfileMutation.mutate(data)}
             isSubmitting={updateProfileMutation.isPending}
+            isSuccess={updateProfileMutation.isSuccess}
           />
         </TabsContent>
 
@@ -121,6 +122,7 @@ export default function ProfilePage() {
           <ChangePasswordForm
             onSubmit={(data) => changePasswordMutation.mutate(data)}
             isSubmitting={changePasswordMutation.isPending}
+            isSuccess={changePasswordMutation.isSuccess}
           />
         </TabsContent>
       </Tabs>
