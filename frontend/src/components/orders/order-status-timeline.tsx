@@ -20,7 +20,12 @@ export function OrderStatusTimeline({
   currentStatus,
   isCancelled,
 }: OrderStatusTimelineProps) {
-  const currentIndex = orderSteps.findIndex((step) => step.status === currentStatus);
+  let currentIndex = orderSteps.findIndex((step) => step.status === currentStatus);
+  
+  // Handle cancelled status not in orderSteps array
+  if (currentIndex === -1 && isCancelled) {
+    currentIndex = 0;
+  }
 
   return (
     <Card>
