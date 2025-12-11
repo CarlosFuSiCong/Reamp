@@ -70,15 +70,27 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Try to refresh token
       try {
-        await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
+        const refreshResponse = await axios.post(
+          `${API_URL}/api/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
 
-        // Retry the original request
-        if (error.config) {
-          return apiClient.request(error.config);
+        // Extract and store the new access token
+        const newAccessToken = refreshResponse.data?.data?.accessToken;
+        if (newAccessToken && typeof window !== "undefined") {
+          localStorage.setItem("accessToken", newAccessToken);
+
+          // Update the original request with new token and retry
+          if (error.config) {
+            error.config.headers.Authorization = `Bearer ${newAccessToken}`;
+            return apiClient.request(error.config);
+          }
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
+        // Refresh failed, clear token and redirect to login
         if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);

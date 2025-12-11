@@ -43,6 +43,10 @@ export function useAuth() {
             router.push("/");
         }
       } catch (error) {
+        // Clear token on profile fetch failure to prevent inconsistent state
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         router.push("/");
       }
     },
@@ -84,6 +88,10 @@ export function useAuth() {
             router.push("/");
         }
       } catch (error) {
+        // Clear token on profile fetch failure to prevent inconsistent state
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
         router.push("/");
       }
     },
