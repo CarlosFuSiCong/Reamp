@@ -66,7 +66,16 @@ export function redirectIfAuthenticated(redirectTo?: string): boolean {
 }
 
 export function getRoleDashboard(role: UserRole): string {
-  return "/profile";
+  switch (role) {
+    case UserRole.Admin:
+      return "/admin/dashboard";
+    case UserRole.Client:
+      return "/agent/dashboard";
+    case UserRole.Staff:
+      return "/studio/dashboard";
+    default:
+      return "/";
+  }
 }
 
 export function canAccessRoute(pathname: string, role: UserRole): boolean {

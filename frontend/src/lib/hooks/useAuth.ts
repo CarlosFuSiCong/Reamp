@@ -3,6 +3,20 @@ import { authApi, profilesApi } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
 import { UserRole } from "@/types";
+import { toast } from "sonner";
+
+function getRedirectPath(role: UserRole): string {
+  switch (role) {
+    case UserRole.Admin:
+      return "/admin/dashboard";
+    case UserRole.Client:
+      return "/agent/dashboard";
+    case UserRole.Staff:
+      return "/studio/dashboard";
+    default:
+      return "/";
+  }
+}
 
 export function useAuth() {
   const router = useRouter();
@@ -21,7 +35,18 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/profile");
+      
+      toast.success("Login successful", {
+        description: `Welcome back, ${userInfo.email}!`,
+      });
+      
+      const redirectPath = getRedirectPath(userInfo.role);
+      window.location.href = redirectPath;
+    },
+    onError: (error: any) => {
+      toast.error("Login failed", {
+        description: error?.message || "Please check your credentials and try again",
+      });
     },
   });
 
@@ -37,7 +62,18 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      router.push("/profile");
+      
+      toast.success("Registration successful", {
+        description: `Welcome to Reamp, ${userInfo.email}!`,
+      });
+      
+      const redirectPath = getRedirectPath(userInfo.role);
+      window.location.href = redirectPath;
+    },
+    onError: (error: any) => {
+      toast.error("Registration failed", {
+        description: error?.message || "Please check your information and try again",
+      });
     },
   });
 
@@ -46,7 +82,15 @@ export function useAuth() {
     onSuccess: () => {
       logoutStore();
       queryClient.clear();
+      toast.success("Logged out successfully", {
+        description: "See you next time!",
+      });
       router.push("/login");
+    },
+    onError: () => {
+      toast.error("Logout failed", {
+        description: "Please try again",
+      });
     },
   });
 
