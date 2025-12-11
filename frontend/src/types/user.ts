@@ -20,3 +20,24 @@ export interface UserProfile {
   createdAtUtc: string;
   updatedAtUtc: string;
 }
+
+export interface LoginDto {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterDto {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
