@@ -31,11 +31,7 @@ export const profilesApi = {
   async updateAvatar(id: string, file: File): Promise<void> {
     const formData = new FormData();
     formData.append("file", file);
-    await apiClient.put(`/api/profiles/${id}/avatar`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    await apiClient.put(`/api/profiles/${id}/avatar`, formData);
   },
 
   async changePassword(data: ChangePasswordDto): Promise<void> {
