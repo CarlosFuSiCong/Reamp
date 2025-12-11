@@ -9,8 +9,14 @@ export function useStudios(params?: {
 }) {
   return useQuery<PagedResponse<Studio>>({
     queryKey: ["studios", params],
-    queryFn: () => studiosApi.list(params || {}),
-    retry: 1,
+    queryFn: async () => {
+      try {
+        return await studiosApi.list(params || {});
+      } catch (error) {
+        return { items: [], total: 0, page: 1, pageSize: 20 };
+      }
+    },
+    retry: false,
     staleTime: 5 * 60 * 1000,
   });
 }

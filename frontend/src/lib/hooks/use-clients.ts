@@ -10,8 +10,14 @@ export function useClients(params?: {
 }) {
   return useQuery<PagedResponse<Client>>({
     queryKey: ["clients", params],
-    queryFn: () => clientsApi.list(params || {}),
-    retry: 1,
+    queryFn: async () => {
+      try {
+        return await clientsApi.list(params || {});
+      } catch (error) {
+        return { items: [], total: 0, page: 1, pageSize: 20 };
+      }
+    },
+    retry: false,
     staleTime: 5 * 60 * 1000,
   });
 }

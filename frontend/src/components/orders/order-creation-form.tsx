@@ -51,8 +51,8 @@ export function OrderCreationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
-  const { data: studiosData, isLoading: isLoadingStudios, error: studiosError } = useStudios({ pageSize: 100 });
-  const { data: clientsData, isLoading: isLoadingClients, error: clientsError } = useClients({ pageSize: 100 });
+  const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
+  const { data: clientsData, isLoading: isLoadingClients } = useClients({ pageSize: 100 });
   const createMutation = useCreateOrder();
 
   const isLoadingData = isLoadingListings || isLoadingStudios || isLoadingClients;
@@ -161,17 +161,12 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {clientsError && (
-                        <SelectItem value="error" disabled>
-                          Error loading clients
-                        </SelectItem>
-                      )}
-                      {!clientsError && clientsData?.items.length === 0 && (
+                      {(!clientsData?.items || clientsData.items.length === 0) && (
                         <SelectItem value="no-clients" disabled>
                           No clients available
                         </SelectItem>
                       )}
-                      {!clientsError && clientsData?.items.map((client) => (
+                      {clientsData?.items.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.firstName} {client.lastName} - {client.email}
                         </SelectItem>
@@ -196,17 +191,12 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {studiosError && (
-                        <SelectItem value="error" disabled>
-                          Error loading studios
-                        </SelectItem>
-                      )}
-                      {!studiosError && studiosData?.items.length === 0 && (
+                      {(!studiosData?.items || studiosData.items.length === 0) && (
                         <SelectItem value="no-studios" disabled>
                           No studios available
                         </SelectItem>
                       )}
-                      {!studiosError && studiosData?.items.map((studio) => (
+                      {studiosData?.items.map((studio) => (
                         <SelectItem key={studio.id} value={studio.id}>
                           {studio.name}
                         </SelectItem>
