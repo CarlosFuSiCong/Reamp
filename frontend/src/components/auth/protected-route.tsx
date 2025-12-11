@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { UserRole } from "@/types/enums";
-import { isAuthenticated, hasAnyRole, getRoleDashboard } from "@/lib/auth/route-guards";
+import { isAuthenticated, getRoleDashboard } from "@/lib/auth/route-guards";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,13 +21,13 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       return;
     }
 
-    if (requiredRoles?.length && user && !hasAnyRole(requiredRoles)) {
+    if (requiredRoles?.length && user && !requiredRoles.includes(user.role)) {
       router.push(getRoleDashboard(user.role));
     }
   }, [isAuth, user, requiredRoles, router]);
 
   if (!isAuth || !user) return null;
-  if (requiredRoles?.length && !hasAnyRole(requiredRoles)) return null;
+  if (requiredRoles?.length && !requiredRoles.includes(user.role)) return null;
 
   return <>{children}</>;
 }
