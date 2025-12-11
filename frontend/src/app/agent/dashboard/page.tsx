@@ -34,13 +34,11 @@ export default function AgentDashboardPage() {
   const listings = listingsData?.items || [];
   const orders = ordersData?.items || [];
   
-  const totalListings = listings.length;
+  const totalListings = listings.filter(l => l.status === ListingStatus.Active).length;
   const activeOrders = orders.filter(o => 
     o.status === OrderStatus.Placed || o.status === OrderStatus.Accepted
   ).length;
-  const pendingListings = listings.filter(l => 
-    l.status === ListingStatus.Draft || l.status === ListingStatus.Pending
-  ).length;
+  const pendingListings = listings.filter(l => l.status === ListingStatus.Pending).length;
 
   const now = Date.now();
   
