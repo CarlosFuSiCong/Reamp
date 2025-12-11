@@ -10,6 +10,8 @@ export function useStudios(params?: {
   return useQuery<PagedResponse<Studio>>({
     queryKey: ["studios", params],
     queryFn: () => studiosApi.list(params || {}),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -18,5 +20,7 @@ export function useStudio(id: string | null) {
     queryKey: ["studio", id],
     queryFn: () => studiosApi.getById(id!),
     enabled: !!id,
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 }

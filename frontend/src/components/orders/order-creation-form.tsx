@@ -50,10 +50,12 @@ export function OrderCreationForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: listingsData } = useListings({ pageSize: 100 });
-  const { data: studiosData } = useStudios({ pageSize: 100 });
-  const { data: clientsData } = useClients({ pageSize: 100 });
+  const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
+  const { data: studiosData, isLoading: isLoadingStudios, error: studiosError } = useStudios({ pageSize: 100 });
+  const { data: clientsData, isLoading: isLoadingClients, error: clientsError } = useClients({ pageSize: 100 });
   const createMutation = useCreateOrder();
+
+  const isLoadingData = isLoadingListings || isLoadingStudios || isLoadingClients;
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -97,6 +99,17 @@ export function OrderCreationForm() {
     }
   };
 
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading form data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -118,6 +131,11 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      {listingsData?.items.length === 0 && (
+                        <SelectItem value="no-listings" disabled>
+                          No listings available
+                        </SelectItem>
+                      )}
                       {listingsData?.items.map((listing) => (
                         <SelectItem key={listing.id} value={listing.id}>
                           {listing.title} - {listing.city}
@@ -143,7 +161,17 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {clientsData?.items.map((client) => (
+                      {clientsError && (
+                        <SelectItem value="error" disabled>
+                          Error loading clients
+                        </SelectItem>
+                      )}
+                      {!clientsError && clientsData?.items.length === 0 && (
+                        <SelectItem value="no-clients" disabled>
+                          No clients available
+                        </SelectItem>
+                      )}
+                      {!clientsError && clientsData?.items.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.firstName} {client.lastName} - {client.email}
                         </SelectItem>
@@ -168,7 +196,17 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {studiosData?.items.map((studio) => (
+                      {studiosError && (
+                        <SelectItem value="error" disabled>
+                          Error loading studios
+                        </SelectItem>
+                      )}
+                      {!studiosError && studiosData?.items.length === 0 && (
+                        <SelectItem value="no-studios" disabled>
+                          No studios available
+                        </SelectItem>
+                      )}
+                      {!studiosError && studiosData?.items.map((studio) => (
                         <SelectItem key={studio.id} value={studio.id}>
                           {studio.name}
                         </SelectItem>

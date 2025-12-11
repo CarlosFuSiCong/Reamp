@@ -11,6 +11,8 @@ export function useClients(params?: {
   return useQuery<PagedResponse<Client>>({
     queryKey: ["clients", params],
     queryFn: () => clientsApi.list(params || {}),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -19,5 +21,7 @@ export function useClient(id: string | null) {
     queryKey: ["client", id],
     queryFn: () => clientsApi.getById(id!),
     enabled: !!id,
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 }
