@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface HeaderProps {
   breadcrumbs?: { label: string; href?: string }[];
