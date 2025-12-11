@@ -1,20 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { PageHeader } from "@/components/shared/page-header";
-import { LoadingState } from "@/components/shared/loading-state";
-import { ErrorState } from "@/components/shared/error-state";
-import { AvatarUpload } from "@/components/profile/avatar-upload";
-import { ProfileInfoForm } from "@/components/profile/profile-info-form";
-import { ChangePasswordForm } from "@/components/profile/change-password-form";
+import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
+import { AvatarUpload, ProfileInfoForm, ChangePasswordForm } from "@/components/profile";
+import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 
 export default function ProfilePage() {
-  const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
   const { data: profile, isLoading, error } = useQuery({
@@ -38,40 +34,9 @@ export default function ProfilePage() {
     }
   }, [profile]);
 
-  const updateProfileMutation = useMutation({
-    mutationFn: profilesApi.update,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      alert("Profile updated successfully!");
-    },
-    onError: (error: Error) => {
-      alert(`Error: ${error.message || "Failed to update profile"}`);
-    },
-  });
-
-  const updateAvatarMutation = useMutation({
-    mutationFn: (file: File) => {
-      if (!profile?.id) throw new Error("Profile ID not found");
-      return profilesApi.updateAvatar(profile.id, file);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      alert("Avatar updated successfully!");
-    },
-    onError: (error: Error) => {
-      alert(`Error: ${error.message || "Failed to update avatar"}`);
-    },
-  });
-
-  const changePasswordMutation = useMutation({
-    mutationFn: profilesApi.changePassword,
-    onSuccess: () => {
-      alert("Password changed successfully!");
-    },
-    onError: (error: Error) => {
-      alert(`Error: ${error.message || "Failed to change password"}`);
-    },
-  });
+  const updateProfileMutation = useUpdateProfile();
+  const updateAvatarMutation = useUpdateAvatar(profile?.id || "");
+  const changePasswordMutation = useChangePassword();
 
   if (isLoading) {
     return <LoadingState message="Loading profile..." />;
@@ -129,3 +94,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+
