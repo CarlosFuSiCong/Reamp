@@ -129,6 +129,16 @@ namespace Reamp.Api
 
                     options.Events = new JwtBearerEvents
                     {
+                        OnMessageReceived = context =>
+                        {
+                            // Try to read token from cookie first, fallback to Authorization header
+                            var accessToken = context.Request.Cookies["accessToken"];
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        },
                         OnAuthenticationFailed = context =>
                         {
                             Log.Warning("JWT authentication failed: {Error}", context.Exception.Message);

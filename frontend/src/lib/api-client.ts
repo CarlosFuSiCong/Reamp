@@ -11,19 +11,12 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Important for HttpOnly cookies
+  withCredentials: true,
 });
 
 // Request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add access token from localStorage
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
 
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.log("API Request:", {
@@ -39,6 +32,19 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+// Track ongoing refresh to prevent race conditions
+let isRefreshing = false;
+let refreshSubscribers: ((error?: Error) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (error?: Error) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(error?: Error) {
+  refreshSubscribers.forEach((cb) => cb(error));
+  refreshSubscribers = [];
+}
 
 // Response interceptor
 apiClient.interceptors.response.use(
@@ -68,29 +74,42 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - token expired
     if (error.response?.status === 401) {
-      // Try to refresh token
+      const originalRequest = error.config;
+
+      if (!originalRequest) {
+        return Promise.reject(error);
+      }
+
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((err?: Error) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(apiClient.request(originalRequest));
+            }
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
-        const refreshResponse = await axios.post(
+        await axios.post(
           `${API_URL}/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
-        // Extract and store the new access token
-        const newAccessToken = refreshResponse.data?.data?.accessToken;
-        if (newAccessToken && typeof window !== "undefined") {
-          localStorage.setItem("accessToken", newAccessToken);
-
-          // Update the original request with new token and retry
-          if (error.config) {
-            error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-            return apiClient.request(error.config);
-          }
-        }
+        isRefreshing = false;
+        onRefreshed();
+        return apiClient.request(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear token and redirect to login
+        isRefreshing = false;
+        onRefreshed(refreshError as Error);
+        
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);

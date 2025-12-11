@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api-client";
-import { LoginDto, RegisterDto, TokenResponse, UserProfile, PasswordPolicy } from "@/types";
+import { LoginDto, RegisterDto, TokenResponse, UserInfoDto, UserProfile, PasswordPolicy } from "@/types";
 
 export const authApi = {
   async getPasswordPolicy(): Promise<PasswordPolicy> {
@@ -7,19 +7,18 @@ export const authApi = {
     return response.data;
   },
 
-  async login(data: LoginDto): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>("/api/auth/login", data);
+  async login(data: LoginDto): Promise<UserInfoDto> {
+    const response = await apiClient.post<UserInfoDto>("/api/auth/login", data);
     return response.data;
   },
 
-  async register(data: RegisterDto): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>("/api/auth/register", data);
+  async register(data: RegisterDto): Promise<UserInfoDto> {
+    const response = await apiClient.post<UserInfoDto>("/api/auth/register", data);
     return response.data;
   },
 
-  async refresh(): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>("/api/auth/refresh");
-    return response.data;
+  async refresh(): Promise<void> {
+    await apiClient.post("/api/auth/refresh");
   },
 
   async logout(): Promise<void> {
