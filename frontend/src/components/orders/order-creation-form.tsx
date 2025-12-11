@@ -25,14 +25,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useListings, useStudios, useClients, useCreateOrder } from "@/lib/hooks";
+import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
 import { Plus, Trash2 } from "lucide-react";
+import { ordersApi } from "@/lib/api";
 
 const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
-  clientId: z.string().min(1, "Please select a client"),
   studioId: z.string().min(1, "Please select a studio"),
   currency: z.string().default("AUD"),
   tasks: z.array(
@@ -52,10 +52,9 @@ export function OrderCreationForm() {
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
   const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
-  const { data: clientsData, isLoading: isLoadingClients } = useClients({ pageSize: 100 });
   const createMutation = useCreateOrder();
 
-  const isLoadingData = isLoadingListings || isLoadingStudios || isLoadingClients;
+  const isLoadingData = isLoadingListings || isLoadingStudios;
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -85,12 +84,29 @@ export function OrderCreationForm() {
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
     try {
+      // Get the selected listing to retrieve ownerAgencyId
+      const selectedListing = listingsData?.items?.find(l => l.id === values.listingId);
+      if (!selectedListing) {
+        throw new Error("Selected listing not found");
+      }
+
+      // Create the order first
       const result = await createMutation.mutateAsync({
-        agencyId: "", // This should come from user context
+        agencyId: selectedListing.ownerAgencyId,
         studioId: values.studioId,
         listingId: values.listingId,
         currency: values.currency,
       });
+
+      // Add tasks to the order
+      for (const task of values.tasks) {
+        await ordersApi.addTask(result.id, {
+          type: task.taskType,
+          notes: task.description,
+          price: task.unitPrice,
+        });
+      }
+
       router.push(`/agent/orders/${result.id}`);
     } catch (error) {
       console.error("Failed to create order:", error);
@@ -139,36 +155,6 @@ export function OrderCreationForm() {
                       {listingsData?.items.map((listing) => (
                         <SelectItem key={listing.id} value={listing.id}>
                           {listing.title} - {listing.city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="clientId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Client</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a client" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {(!clientsData?.items || clientsData.items.length === 0) && (
-                        <SelectItem value="no-clients" disabled>
-                          No clients available
-                        </SelectItem>
-                      )}
-                      {clientsData?.items.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.firstName} {client.lastName} - {client.email}
                         </SelectItem>
                       ))}
                     </SelectContent>

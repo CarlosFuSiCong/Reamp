@@ -2,6 +2,7 @@ import { ListingStatus, ListingType, PropertyType } from "./enums";
 
 export interface Listing {
   id: string;
+  ownerAgencyId: string;
   title: string;
   description: string;
   price: number;

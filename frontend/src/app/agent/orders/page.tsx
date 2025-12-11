@@ -25,6 +25,16 @@ export default function AgentOrdersPage() {
 
   const cancelMutation = useCancelOrder();
 
+  const handleStatusChange = (newStatus: OrderStatus | "all") => {
+    setStatusFilter(newStatus);
+    setPage(1);
+  };
+
+  const handleSearchChange = (newKeyword: string) => {
+    setSearchKeyword(newKeyword);
+    setPage(1);
+  };
+
   const handleCancel = () => {
     if (selectedOrderId) {
       cancelMutation.mutate({ id: selectedOrderId });
@@ -63,9 +73,9 @@ export default function AgentOrdersPage() {
 
       <OrdersFilters
         searchKeyword={searchKeyword}
-        onSearchChange={setSearchKeyword}
+        onSearchChange={handleSearchChange}
         statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
+        onStatusChange={handleStatusChange}
       />
 
       <OrdersTable
