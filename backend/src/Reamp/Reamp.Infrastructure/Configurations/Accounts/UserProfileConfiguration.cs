@@ -25,7 +25,7 @@ namespace Reamp.Infrastructure.Configurations.Accounts
 
             b.Property(x => x.ApplicationUserId).IsRequired();
             b.Property(x => x.FirstName).IsRequired().HasMaxLength(40);
-            b.Property(x => x.LastName).IsRequired().HasMaxLength(40);
+            b.Property(x => x.LastName).IsRequired(false).HasMaxLength(40);
 
             b.Property(x => x.AvatarAssetId).IsRequired(false);
             b.HasOne<MediaAsset>()
@@ -47,8 +47,6 @@ namespace Reamp.Infrastructure.Configurations.Accounts
             {
                 tb.HasCheckConstraint("CK_UserProfiles_FirstName_NotEmpty",
                     "LEN(LTRIM(RTRIM([FirstName]))) > 0");
-                tb.HasCheckConstraint("CK_UserProfiles_LastName_NotEmpty",
-                    "LEN(LTRIM(RTRIM([LastName]))) > 0");
             });
         }
     }

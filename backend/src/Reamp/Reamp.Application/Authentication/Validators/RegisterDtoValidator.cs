@@ -1,5 +1,6 @@
 using FluentValidation;
 using Reamp.Application.Authentication.Dtos;
+using Reamp.Domain.Accounts.Enums;
 
 namespace Reamp.Application.Authentication.Validators
 {
@@ -23,15 +24,15 @@ namespace Reamp.Application.Authentication.Validators
                 .Equal(x => x.Password).WithMessage("Passwords do not match");
 
             RuleFor(x => x.FirstName)
-                .NotEmpty().WithMessage("First name is required")
-                .MaximumLength(40).WithMessage("First name max length is 40");
+                .MaximumLength(40).WithMessage("First name max length is 40")
+                .When(x => !string.IsNullOrEmpty(x.FirstName));
 
             RuleFor(x => x.LastName)
-                .NotEmpty().WithMessage("Last name is required")
-                .MaximumLength(40).WithMessage("Last name max length is 40");
+                .MaximumLength(40).WithMessage("Last name max length is 40")
+                .When(x => !string.IsNullOrEmpty(x.LastName));
 
             RuleFor(x => x.Role)
-                .IsInEnum().WithMessage("Invalid role");
+                .Equal(UserRole.User).WithMessage("Public registration is only available for general users. Please contact an administrator for other account types.");
         }
     }
 }

@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authApi } from "@/lib/api";
+import { authApi, profilesApi } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
+import { UserRole } from "@/types";
 
 export function useAuth() {
   const router = useRouter();
@@ -10,23 +11,99 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
-      setUser(data.user);
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Store access token in localStorage for API requests
+        if (typeof window !== "undefined") {
+          localStorage.setItem("accessToken", tokenResponse.accessToken);
+        }
+
+        const profile = await profilesApi.getMe();
+        const userData = {
+          id: profile.applicationUserId,
+          email: "",
+          role: profile.role,
+          createdAt: profile.createdAtUtc,
+          updatedAt: profile.updatedAtUtc,
+        };
+        setUser(userData);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+
+        switch (profile.role) {
+          case UserRole.Client:
+            router.push("/client/dashboard");
+            break;
+          case UserRole.Staff:
+            router.push("/staff/dashboard");
+            break;
+          case UserRole.Admin:
+            router.push("/admin/dashboard");
+            break;
+          default:
+            router.push("/");
+        }
+      } catch (error) {
+        // Clear token on profile fetch failure to prevent inconsistent state
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
+        router.push("/");
+      }
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
-      setUser(data.user);
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Store access token in localStorage for API requests
+        if (typeof window !== "undefined") {
+          localStorage.setItem("accessToken", tokenResponse.accessToken);
+        }
+
+        // Fetch user profile
+        const profile = await profilesApi.getMe();
+        const userData = {
+          id: profile.applicationUserId,
+          email: "",
+          role: profile.role,
+          createdAt: profile.createdAtUtc,
+          updatedAt: profile.updatedAtUtc,
+        };
+        setUser(userData);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+
+        // Redirect based on role
+        switch (profile.role) {
+          case UserRole.Client:
+            router.push("/client/dashboard");
+            break;
+          case UserRole.Staff:
+            router.push("/staff/dashboard");
+            break;
+          case UserRole.Admin:
+            router.push("/admin/dashboard");
+            break;
+          default:
+            router.push("/");
+        }
+      } catch (error) {
+        // Clear token on profile fetch failure to prevent inconsistent state
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+        }
+        router.push("/");
+      }
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
+      // Clear access token
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+      }
       logoutStore();
       queryClient.clear();
       router.push("/login");

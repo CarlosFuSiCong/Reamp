@@ -1,31 +1,31 @@
 import apiClient from "@/lib/api-client";
-import { LoginDto, RegisterDto, LoginResponse, UserProfile } from "@/types";
+import { LoginDto, RegisterDto, TokenResponse, UserProfile, PasswordPolicy } from "@/types";
 
 export const authApi = {
-  // Login
-  async login(data: LoginDto): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>("/api/auth/login", data);
+  async getPasswordPolicy(): Promise<PasswordPolicy> {
+    const response = await apiClient.get<PasswordPolicy>("/api/auth/password-policy");
     return response.data;
   },
 
-  // Register
-  async register(data: RegisterDto): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>("/api/auth/register", data);
+  async login(data: LoginDto): Promise<TokenResponse> {
+    const response = await apiClient.post<TokenResponse>("/api/auth/login", data);
     return response.data;
   },
 
-  // Refresh token
-  async refresh(): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>("/api/auth/refresh");
+  async register(data: RegisterDto): Promise<TokenResponse> {
+    const response = await apiClient.post<TokenResponse>("/api/auth/register", data);
     return response.data;
   },
 
-  // Logout
+  async refresh(): Promise<TokenResponse> {
+    const response = await apiClient.post<TokenResponse>("/api/auth/refresh");
+    return response.data;
+  },
+
   async logout(): Promise<void> {
     await apiClient.post("/api/auth/logout");
   },
 
-  // Get current user profile
   async getCurrentUser(): Promise<UserProfile> {
     const response = await apiClient.get<UserProfile>("/api/profiles/me");
     return response.data;

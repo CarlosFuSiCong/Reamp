@@ -30,6 +30,7 @@ namespace Reamp.Shared.Middlewares
             }
             catch (InvalidOperationException ex)
             {
+                Log.Warning(ex, "InvalidOperationException: {Message}", ex.Message);
                 context.Response.StatusCode = StatusCodes.Status409Conflict;
                 await context.Response.WriteAsJsonAsync(ApiResponse.Fail(ex.Message, "Operation conflict"));
             }

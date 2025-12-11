@@ -31,13 +31,22 @@ export interface RegisterDto {
   email: string;
   password: string;
   confirmPassword: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   role: UserRole;
 }
 
-export interface LoginResponse {
+export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
-  user: User;
+  expiresAt: string;
+  tokenType: string;
+}
+
+export interface PasswordPolicy {
+  requiredLength: number;
+  requireNonAlphanumeric: boolean;
+  requireDigit: boolean;
+  requireLowercase: boolean;
+  requireUppercase: boolean;
 }

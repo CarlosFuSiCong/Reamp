@@ -79,11 +79,9 @@ namespace Reamp.Domain.Accounts.Entities
         {
             if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("First name is required.", nameof(firstName));
-            if (string.IsNullOrWhiteSpace(lastName))
-                throw new ArgumentException("Last name is required.", nameof(lastName));
 
             firstName = firstName.Trim();
-            lastName = lastName.Trim();
+            lastName = (lastName ?? string.Empty).Trim();
 
             if (firstName.Length > 40)
                 throw new ArgumentException("First name max length is 40 characters.", nameof(firstName));

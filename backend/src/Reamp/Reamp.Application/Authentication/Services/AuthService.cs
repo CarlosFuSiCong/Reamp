@@ -60,8 +60,8 @@ namespace Reamp.Application.Authentication.Services
             // Create UserProfile
             var profile = UserProfile.Create(
                 applicationUserId: user.Id,
-                firstName: dto.FirstName,
-                lastName: dto.LastName,
+                firstName: dto.FirstName ?? dto.Email.Split('@')[0],
+                lastName: dto.LastName ?? string.Empty,
                 role: dto.Role
             );
 
