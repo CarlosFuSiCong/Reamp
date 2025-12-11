@@ -70,6 +70,8 @@ namespace Reamp.Api.Controllers
                 return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to decode authentication token"));
             }
 
+            SetTokenCookies(response);
+
             try
             {
                 var userInfo = await _authService.GetUserInfoAsync(userId, ct);
@@ -78,8 +80,6 @@ namespace Reamp.Api.Controllers
                     _logger.LogError("User info not found after registration for userId: {UserId}", userId);
                     return StatusCode(500, ApiResponse.Fail("Registration succeeded but failed to retrieve user information"));
                 }
-
-                SetTokenCookies(response);
 
                 _logger.LogInformation("User registered successfully: {Email}", dto.Email);
                 return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Registration successful"));
@@ -118,6 +118,8 @@ namespace Reamp.Api.Controllers
                 return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to decode authentication token"));
             }
 
+            SetTokenCookies(response);
+
             try
             {
                 var userInfo = await _authService.GetUserInfoAsync(userId, ct);
@@ -126,8 +128,6 @@ namespace Reamp.Api.Controllers
                     _logger.LogError("User info not found after login for userId: {UserId}", userId);
                     return StatusCode(500, ApiResponse.Fail("Login succeeded but failed to retrieve user information"));
                 }
-
-                SetTokenCookies(response);
 
                 _logger.LogInformation("User logged in successfully: {Email}", dto.Email);
                 return Ok(ApiResponse<UserInfoDto>.Ok(userInfo, "Login successful"));
