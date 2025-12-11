@@ -1,3 +1,5 @@
+using Reamp.Domain.Accounts.Enums;
+
 namespace Reamp.Application.Authentication.Dtos
 {
     // User information response DTO
@@ -8,7 +10,7 @@ namespace Reamp.Application.Authentication.Dtos
         public string FirstName { get; set; } = default!;
         public string LastName { get; set; } = default!;
         public string DisplayName { get; set; } = default!;
-        public string Role { get; set; } = default!;
+        public UserRole Role { get; set; }
     }
 }
 

@@ -15,14 +15,14 @@ export function useAuth() {
       const userData = {
         id: userInfo.userId,
         email: userInfo.email,
-        role: userInfo.role as UserRole,
+        role: userInfo.role,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
-      switch (userInfo.role as UserRole) {
+      switch (userInfo.role) {
         case UserRole.Client:
           router.push("/client/dashboard");
           break;
@@ -47,14 +47,14 @@ export function useAuth() {
       const userData = {
         id: userInfo.userId,
         email: userInfo.email,
-        role: userInfo.role as UserRole,
+        role: userInfo.role,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
-      switch (userInfo.role as UserRole) {
+      switch (userInfo.role) {
         case UserRole.Client:
           router.push("/client/dashboard");
           break;

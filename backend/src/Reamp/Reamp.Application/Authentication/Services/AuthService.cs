@@ -138,7 +138,7 @@ namespace Reamp.Application.Authentication.Services
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 DisplayName = profile.DisplayName,
-                Role = profile.Role.ToString()
+                Role = profile.Role
             };
         }
 
