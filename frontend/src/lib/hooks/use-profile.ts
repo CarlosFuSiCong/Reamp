@@ -17,11 +17,12 @@ export function useUpdateProfile() {
   });
 }
 
-export function useUpdateAvatar(profileId: string) {
+export function useUpdateAvatar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => profilesApi.updateAvatar(profileId, file),
+    mutationFn: ({ profileId, file }: { profileId: string; file: File }) => 
+      profilesApi.updateAvatar(profileId, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Avatar updated successfully");
@@ -43,3 +44,4 @@ export function useChangePassword() {
     },
   });
 }
+

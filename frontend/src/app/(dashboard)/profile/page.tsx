@@ -35,7 +35,7 @@ export default function ProfilePage() {
   }, [profile]);
 
   const updateProfileMutation = useUpdateProfile();
-  const updateAvatarMutation = useUpdateAvatar(profile?.id || "");
+  const updateAvatarMutation = useUpdateAvatar();
   const changePasswordMutation = useChangePassword();
 
   if (isLoading) {
@@ -69,7 +69,7 @@ export default function ProfilePage() {
           <AvatarUpload
             avatarUrl={profile.avatarAssetId}
             displayName={profile.displayName}
-            onUpload={(file) => updateAvatarMutation.mutate(file)}
+            onUpload={(file) => updateAvatarMutation.mutate({ profileId: profile.id, file })}
             isUploading={updateAvatarMutation.isPending}
           />
 
