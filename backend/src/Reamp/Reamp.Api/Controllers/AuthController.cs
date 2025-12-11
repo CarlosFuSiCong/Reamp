@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Authentication.Dtos;
 using Reamp.Application.Authentication.Services;
@@ -13,11 +14,33 @@ namespace Reamp.Api.Controllers
     {
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
+        private readonly UserManager<Infrastructure.Identity.ApplicationUser> _userManager;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(
+            IAuthService authService, 
+            ILogger<AuthController> logger,
+            UserManager<Infrastructure.Identity.ApplicationUser> userManager)
         {
             _authService = authService;
             _logger = logger;
+            _userManager = userManager;
+        }
+
+        // Get password policy
+        [HttpGet("password-policy")]
+        public IActionResult GetPasswordPolicy()
+        {
+            var options = _userManager.Options.Password;
+            var policy = new PasswordPolicyDto
+            {
+                RequiredLength = options.RequiredLength,
+                RequireNonAlphanumeric = options.RequireNonAlphanumeric,
+                RequireDigit = options.RequireDigit,
+                RequireLowercase = options.RequireLowercase,
+                RequireUppercase = options.RequireUppercase
+            };
+
+            return Ok(ApiResponse<PasswordPolicyDto>.Ok(policy));
         }
 
         // Register new user
