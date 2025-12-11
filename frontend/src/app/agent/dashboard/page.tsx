@@ -7,10 +7,14 @@ import { useDashboardStats } from "@/lib/hooks/use-dashboard-stats";
 import { generateRecentActivities } from "@/lib/utils/activity-utils";
 
 export default function AgentDashboardPage() {
-  const { stats, listings, orders, isLoading } = useDashboardStats();
+  const { stats, listings, orders, isLoading, error } = useDashboardStats();
 
   if (isLoading) {
     return <LoadingState message="Loading dashboard..." />;
+  }
+
+  if (error) {
+    return <ErrorState message="Failed to load dashboard data" />;
   }
 
   const recentActivities = generateRecentActivities(listings, orders, 5);

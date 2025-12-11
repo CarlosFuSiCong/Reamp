@@ -4,12 +4,12 @@ import { ordersApi } from "@/lib/api/orders";
 import { ListingStatus, OrderStatus } from "@/types";
 
 export function useDashboardStats() {
-  const { data: listingsData, isLoading: loadingListings } = useQuery({
+  const { data: listingsData, isLoading: loadingListings, error: listingsError } = useQuery({
     queryKey: ["listings", { page: 1, pageSize: 100 }],
     queryFn: () => listingsApi.list({ page: 1, pageSize: 100 }),
   });
 
-  const { data: ordersData, isLoading: loadingOrders } = useQuery({
+  const { data: ordersData, isLoading: loadingOrders, error: ordersError } = useQuery({
     queryKey: ["orders", { page: 1, pageSize: 100 }],
     queryFn: () => ordersApi.list({ page: 1, pageSize: 100 }),
   });
@@ -31,5 +31,7 @@ export function useDashboardStats() {
     listings,
     orders,
     isLoading: loadingListings || loadingOrders,
+    error: listingsError || ordersError,
   };
 }
+

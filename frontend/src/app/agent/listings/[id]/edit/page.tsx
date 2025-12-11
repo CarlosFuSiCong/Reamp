@@ -98,7 +98,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
         country: listing.country,
       });
     }
-  }, [listing, form]);
+  }, [listing, form.reset]);
 
   const onSubmit = async (data: ListingFormValues) => {
     updateMutation.mutate(
