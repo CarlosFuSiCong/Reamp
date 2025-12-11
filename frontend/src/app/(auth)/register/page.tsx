@@ -7,6 +7,10 @@ import { z } from "zod";
 import { useAuth } from "@/lib/hooks";
 import { UserRole } from "@/types";
 import Link from "next/link";
+import { AuthLayout } from "@/components/auth/auth-layout";
+import { FormField } from "@/components/auth/form-field";
+import { ErrorAlert } from "@/components/auth/error-alert";
+import { SubmitButton } from "@/components/auth/submit-button";
 
 const registerSchema = z
   .object({
@@ -46,11 +50,10 @@ export default function RegisterPage() {
       setErrorMessage("");
       await registerUser(data);
     } catch (error: any) {
-      // Display specific error message from backend
       const message = error?.message || "Registration failed. Please try again.";
       const errors = error?.errors;
       
-      if (errors && errors.length > 0) {
+      if (errors?.length) {
         setErrorMessage(`${message}: ${errors.join(", ")}`);
       } else {
         setErrorMessage(message);
@@ -59,87 +62,57 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
-            </Link>
-          </p>
+    <AuthLayout
+      title="Create your account"
+      subtitle={
+        <>
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            Sign in
+          </Link>
+        </>
+      }
+    >
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <ErrorAlert message={errorMessage || registerError?.message} />
+
+        <div className="space-y-4">
+          <FormField
+            label="Email address"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            error={errors.email?.message}
+            register={register("email")}
+          />
+
+          <FormField
+            label="Password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            error={errors.password?.message}
+            helperText="Must be at least 6 characters and contain a special character (!@#$%^&*)"
+            register={register("password")}
+          />
+
+          <FormField
+            label="Confirm password"
+            name="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            error={errors.confirmPassword?.message}
+            register={register("confirmPassword")}
+          />
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {(errorMessage || registerError) && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{errorMessage || registerError?.message}</p>
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                {...register("email")}
-                type="email"
-                autoComplete="email"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="you@example.com"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                {...register("password")}
-                type="password"
-                autoComplete="new-password"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="••••••••"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 6 characters and contain a special character (!@#$%^&*)
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm password
-              </label>
-              <input
-                {...register("confirmPassword")}
-                type="password"
-                autoComplete="new-password"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="••••••••"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isRegistering}
-            className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
-          >
-            {isRegistering ? "Creating account..." : "Create account"}
-          </button>
-        </form>
-      </div>
-    </div>
+        <SubmitButton isLoading={isRegistering} loadingText="Creating account...">
+          Create account
+        </SubmitButton>
+      </form>
+    </AuthLayout>
   );
 }
