@@ -10,6 +10,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { StatsCard, ActivityTimeline, Activity } from "@/components/dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OrderStatus, ListingStatus } from "@/types";
 
 export default function AgentDashboardPage() {
   const { data: listingsData, isLoading: loadingListings, error: listingsError } = useQuery({
@@ -34,8 +35,12 @@ export default function AgentDashboardPage() {
   const orders = ordersData?.items || [];
   
   const totalListings = listings.length;
-  const activeOrders = orders.filter(o => o.status === "Pending" || o.status === "Accepted").length;
-  const pendingListings = listings.filter(l => l.status === "Draft" || l.status === "PendingReview").length;
+  const activeOrders = orders.filter(o => 
+    o.status === OrderStatus.Placed || o.status === OrderStatus.Accepted
+  ).length;
+  const pendingListings = listings.filter(l => 
+    l.status === ListingStatus.Draft || l.status === ListingStatus.Pending
+  ).length;
 
   const now = Date.now();
   
