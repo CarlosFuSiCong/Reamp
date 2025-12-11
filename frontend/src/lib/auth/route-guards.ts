@@ -66,23 +66,10 @@ export function redirectIfAuthenticated(redirectTo?: string): boolean {
 }
 
 export function getRoleDashboard(role: UserRole): string {
-  switch (role) {
-    case UserRole.Client:
-      return "/agent/dashboard";
-    case UserRole.Staff:
-      return "/photographer/dashboard";
-    case UserRole.Admin:
-      return "/admin/dashboard";
-    default:
-      return "/profile";
-  }
+  return "/profile";
 }
 
 export function canAccessRoute(pathname: string, role: UserRole): boolean {
-  if (pathname.startsWith("/profile")) return true;
-  if (pathname.startsWith("/agent")) return role === UserRole.Client;
-  if (pathname.startsWith("/photographer")) return role === UserRole.Staff;
-  if (pathname.startsWith("/admin")) return role === UserRole.Admin;
   return true;
 }
 

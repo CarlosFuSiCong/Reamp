@@ -21,20 +21,7 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-
-      switch (userInfo.role) {
-        case UserRole.Client:
-          router.push("/client/dashboard");
-          break;
-        case UserRole.Staff:
-          router.push("/staff/dashboard");
-          break;
-        case UserRole.Admin:
-          router.push("/admin/dashboard");
-          break;
-        default:
-          router.push("/");
-      }
+      router.push("/profile");
     },
     onError: () => {
       router.push("/");
@@ -53,20 +40,7 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-
-      switch (userInfo.role) {
-        case UserRole.Client:
-          router.push("/client/dashboard");
-          break;
-        case UserRole.Staff:
-          router.push("/staff/dashboard");
-          break;
-        case UserRole.Admin:
-          router.push("/admin/dashboard");
-          break;
-        default:
-          router.push("/");
-      }
+      router.push("/profile");
     },
     onError: () => {
       router.push("/");
