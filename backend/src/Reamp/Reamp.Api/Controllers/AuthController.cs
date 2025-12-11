@@ -224,18 +224,12 @@ namespace Reamp.Api.Controllers
 
         private void SetTokenCookies(TokenResponse tokenResponse)
         {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Path = "/"
-            };
+            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development";
 
             Response.Cookies.Append("accessToken", tokenResponse.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = isProduction,
                 SameSite = SameSiteMode.Strict,
                 Expires = tokenResponse.ExpiresAt,
                 Path = "/"
@@ -244,7 +238,7 @@ namespace Reamp.Api.Controllers
             Response.Cookies.Append("refreshToken", tokenResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = isProduction,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
                 Path = "/"

@@ -21,7 +21,10 @@ export function setCookie(
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
   
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict;Secure`;
+  const isProduction = typeof window !== "undefined" && window.location.protocol === "https:";
+  const secureFlag = isProduction ? ";Secure" : "";
+  
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict${secureFlag}`;
 }
 
 export function deleteCookie(name: string): void {
