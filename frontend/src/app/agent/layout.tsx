@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Sidebar, Header, SidebarNavItem } from "@/components/layout";
+import { UserRole } from "@/types";
 
 const sidebarItems: SidebarNavItem[] = [
   { title: "Dashboard", href: "/agent/dashboard", icon: LayoutDashboard },
@@ -23,7 +24,7 @@ const sidebarItems: SidebarNavItem[] = [
 
 export default function AgentLayout({ children }: { children: ReactNode }) {
   return (
-    <ProtectedRoute allowedRoles={["Agent"]}>
+    <ProtectedRoute requiredRoles={[UserRole.Client]}>
       <div className="min-h-screen bg-gray-50">
         <div className="flex h-screen">
           <aside className="hidden w-64 border-r bg-background lg:block">

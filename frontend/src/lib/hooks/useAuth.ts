@@ -25,7 +25,9 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: async (userInfo) => {
-      console.log("Login API response:", userInfo);
+      console.log("Login API response (full):", JSON.stringify(userInfo, null, 2));
+      console.log("Role value:", userInfo.role, "Type:", typeof userInfo.role);
+      
       const userData = {
         id: userInfo.userId,
         email: userInfo.email,
@@ -39,7 +41,9 @@ export function useAuth() {
       // Redirect based on user role
       const redirectPath = getRedirectPath(userInfo.role);
       console.log("Redirecting to:", redirectPath, "for role:", userInfo.role);
-      router.push(redirectPath);
+      
+      // Use window.location for more reliable redirect
+      window.location.href = redirectPath;
     },
     onError: (error) => {
       console.error("Login mutation error:", error);
@@ -61,7 +65,9 @@ export function useAuth() {
       
       // Redirect based on user role
       const redirectPath = getRedirectPath(userInfo.role);
-      router.push(redirectPath);
+      
+      // Use window.location for more reliable redirect
+      window.location.href = redirectPath;
     },
   });
 

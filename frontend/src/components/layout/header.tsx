@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, ChevronDown } from "lucide-react";
+import { Bell, ChevronDown, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,15 @@ interface HeaderProps {
 
 export function Header({ breadcrumbs }: HeaderProps) {
   const { user } = useAuthStore();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
@@ -48,8 +58,19 @@ export function Header({ breadcrumbs }: HeaderProps) {
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </div>
+
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleLogout}
+          className="gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
       </div>
     </header>
   );
 }
+
 
