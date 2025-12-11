@@ -16,8 +16,8 @@ export function useAuth() {
         id: userInfo.userId,
         email: userInfo.email,
         role: userInfo.role,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: userInfo.createdAtUtc,
+        updatedAt: userInfo.updatedAtUtc,
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -35,8 +35,8 @@ export function useAuth() {
         id: userInfo.userId,
         email: userInfo.email,
         role: userInfo.role,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: userInfo.createdAtUtc,
+        updatedAt: userInfo.updatedAtUtc,
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });

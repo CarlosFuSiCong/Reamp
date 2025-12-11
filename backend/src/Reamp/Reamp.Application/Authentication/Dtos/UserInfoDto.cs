@@ -11,6 +11,8 @@ namespace Reamp.Application.Authentication.Dtos
         public string LastName { get; set; } = default!;
         public string DisplayName { get; set; } = default!;
         public UserRole Role { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public DateTime UpdatedAtUtc { get; set; }
     }
 }
 

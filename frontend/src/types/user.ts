@@ -15,6 +15,8 @@ export interface UserInfoDto {
   lastName: string;
   displayName: string;
   role: UserRole;
+  createdAtUtc: string;
+  updatedAtUtc: string;
 }
 
 export interface UserProfile {
