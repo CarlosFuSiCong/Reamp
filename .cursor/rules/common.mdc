@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+# Common Development Rules
+
+## 1. Git Workflow
+- Before writing any code, **create a new branch for the current task**.
+- All work for that task must be completed inside the new feature branch.
+
+## 2. Commit Rules (Atomic Commits)
+- Each commit performs **one clear, small, focused change**.
+- Do not mix unrelated changes (e.g., feature + refactor + fix in one commit).
+- Use **simple, short English commit messages**, one line only.
+
+## 3. Comments & Code Style
+- Prefer **self-explanatory code** over long comments.
+- Only add comments for **non-obvious logic / caveats**.
+- Use **simple one-line English comments** when necessary.
+- Avoid long descriptive block comments.
+
+## 4. General Development Principles
+- Write clean, readable, maintainable code.
+- Keep concerns separated (UI vs logic, mapping vs validation, etc.).
+- Follow project formatting rules (Prettier, dotnet format, editorconfig).
