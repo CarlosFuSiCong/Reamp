@@ -1,4 +1,4 @@
-import { ListingStatus, ListingType, PropertyType, OrderStatus, DeliveryStatus } from "@/types";
+import { ListingStatus, ListingType, PropertyType, OrderStatus, DeliveryStatus, ShootTaskType } from "@/types";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 
@@ -46,6 +46,13 @@ export const propertyTypeLabels: Record<PropertyType, string> = {
   [PropertyType.Others]: "Others",
 };
 
+export const taskTypeLabels: Record<ShootTaskType, string> = {
+  [ShootTaskType.None]: "None",
+  [ShootTaskType.Photography]: "Photography",
+  [ShootTaskType.Video]: "Video",
+  [ShootTaskType.Floorplan]: "Floorplan",
+};
+
 export function getListingStatusConfig(status: ListingStatus): StatusConfig {
   return listingStatusConfig[status] || { label: "Unknown", variant: "secondary" };
 }
@@ -64,4 +71,8 @@ export function getListingTypeLabel(type: ListingType): string {
 
 export function getPropertyTypeLabel(type: PropertyType): string {
   return propertyTypeLabels[type] || "Unknown";
+}
+
+export function getTaskTypeLabel(type: ShootTaskType): string {
+  return taskTypeLabels[type] || "Unknown";
 }

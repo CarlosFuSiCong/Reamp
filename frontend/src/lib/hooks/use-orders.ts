@@ -1,47 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ordersApi } from "@/lib/api";
+import { ShootOrder, PagedResponse, OrderStatus } from "@/types";
+import { toast } from "sonner";
 
 export function useOrders(params?: {
   agencyId?: string;
   studioId?: string;
-  status?: string;
+  listingId?: string;
+  status?: OrderStatus;
+  keyword?: string;
   page?: number;
   pageSize?: number;
 }) {
-  const { data, isLoading, error, refetch } = useQuery({
+  return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["orders", params],
-    queryFn: () => ordersApi.list(params || {}),
-    staleTime: 1 * 60 * 1000,
+    queryFn: () => ordersApi.list({
+      ...params,
+      status: params?.status?.toString(),
+    }),
   });
-
-  return {
-    orders: data?.items || [],
-    total: data?.total || 0,
-    page: data?.page || 1,
-    pageSize: data?.pageSize || 20,
-    isLoading,
-    error,
-    refetch,
-  };
 }
 
-export function useOrder(id: string) {
-  const {
-    data: order,
-    isLoading,
-    error,
-  } = useQuery({
+export function useOrder(id: string | null) {
+  return useQuery<ShootOrder>({
     queryKey: ["order", id],
-    queryFn: () => ordersApi.getById(id),
+    queryFn: () => ordersApi.getById(id!),
     enabled: !!id,
-    staleTime: 1 * 60 * 1000,
   });
-
-  return {
-    order,
-    isLoading,
-    error,
-  };
 }
 
 export function useCreateOrder() {
@@ -51,6 +36,10 @@ export function useCreateOrder() {
     mutationFn: ordersApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Order created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to create order");
     },
   });
 }
@@ -63,6 +52,10 @@ export function useCancelOrder() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", variables.id] });
+      toast.success("Order cancelled successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to cancel order");
     },
   });
 }
