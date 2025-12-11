@@ -38,6 +38,11 @@ export function ChangePasswordForm({ onSubmit, isSubmitting }: ChangePasswordFor
       return;
     }
 
+    if (!/[^a-zA-Z0-9]/.test(formData.newPassword)) {
+      alert("Password must contain at least one special character");
+      return;
+    }
+
     onSubmit(formData);
     setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
@@ -72,6 +77,9 @@ export function ChangePasswordForm({ onSubmit, isSubmitting }: ChangePasswordFor
               disabled={isSubmitting}
               required
             />
+            <p className="text-xs text-gray-500">
+              Must be at least 6 characters and contain a special character (!@#$%^&*)
+            </p>
           </div>
 
           <div className="space-y-2">
