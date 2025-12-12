@@ -19,6 +19,7 @@ export interface AdminStats {
 export interface Activity {
   id: string;
   type: string;
+  title: string;
   description: string;
   user?: string;
   timestamp: string;

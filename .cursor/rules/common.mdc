@@ -22,3 +22,8 @@ alwaysApply: true
 - Write clean, readable, maintainable code.
 - Keep concerns separated (UI vs logic, mapping vs validation, etc.).
 - Follow project formatting rules (Prettier, dotnet format, editorconfig).
+
+## 5. Documentation (Important)
+- **Do NOT generate full Markdown documents unless I explicitly request it.**
+- If a task might require a document, **summarize in a few sentences instead**.
+- If generating a long document is necessary, **ask me for confirmation first**.

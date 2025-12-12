@@ -104,6 +104,7 @@ namespace Reamp.Application.Admin.Services
                 {
                     Id = o.Id.ToString(),
                     Type = "order",
+                    Title = "New Order",
                     Description = $"New order placed",
                     Timestamp = o.CreatedAtUtc
                 })
@@ -116,6 +117,7 @@ namespace Reamp.Application.Admin.Services
                 {
                     Id = l.Id.ToString(),
                     Type = "listing",
+                    Title = "New Listing",
                     Description = $"New listing created",
                     Timestamp = l.CreatedAtUtc
                 })
