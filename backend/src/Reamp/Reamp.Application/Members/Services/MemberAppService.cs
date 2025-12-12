@@ -137,7 +137,7 @@ namespace Reamp.Application.Members.Services
             var result = new List<StudioMemberDto>();
             int pageNumber = 1;
             const int pageSize = 1000;
-            int totalFetched = 0;  // Track items fetched from repository
+            int totalFetched = 0;  // Track items fetched from repository (not skipped items)
             int totalCount = 0;
 
             do
@@ -154,6 +154,7 @@ namespace Reamp.Application.Members.Services
                 if (staffList.Items.Count == 0)
                     break;
 
+                int itemsProcessedInPage = 0;
                 foreach (var staff in staffList.Items)
                 {
                     var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
@@ -172,9 +173,12 @@ namespace Reamp.Application.Members.Services
                         Skills = staff.Skills,
                         JoinedAtUtc = staff.CreatedAtUtc
                     });
+                    
+                    itemsProcessedInPage++;
                 }
 
-                totalFetched += staffList.Items.Count;  // Count all fetched items, not just processed
+                // Only count successfully processed items to ensure accurate progress tracking
+                totalFetched += itemsProcessedInPage;
                 pageNumber++;
             }
             while (totalFetched < totalCount);  // Continue until all items fetched

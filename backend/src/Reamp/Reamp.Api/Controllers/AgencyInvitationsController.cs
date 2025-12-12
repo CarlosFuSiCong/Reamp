@@ -31,7 +31,10 @@ namespace Reamp.Api.Controllers
             if (string.IsNullOrEmpty(userIdClaim))
                 throw new UnauthorizedAccessException("User ID claim not found.");
             
-            return Guid.Parse(userIdClaim);
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                throw new UnauthorizedAccessException("User ID claim is malformed.");
+            
+            return userId;
         }
 
         // POST /api/agencies/{agencyId}/invitations - Send agency invitation
