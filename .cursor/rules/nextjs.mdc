@@ -1,5 +1,7 @@
 ---
-description: "frontend/**/*.{ts,tsx,js,jsx}"
+globs: |
+  frontend/**/*.{ts,tsx,js,jsx}
+  frontend/**/global.css
 alwaysApply: false
 ---
 # Next.js Frontend Rules
@@ -9,29 +11,41 @@ Follow these rules when generating or modifying frontend code.
 ## 1. Reusable Components
 - Extract reusable UI patterns into **independent components or hooks**.
 - Avoid duplication; prefer shared utilities.
+- Components should have a **single clear responsibility**.
 
 ## 2. File Naming & Style
 - Use **kebab-case** for file names.
+- Use **PascalCase** for React component names.
 - Follow Prettier formatting strictly (project config in `.prettierrc`).
+- Do not introduce custom formatting rules.
 
 ## 3. State & Data Management
 - Use **TanStack Query** for all server data.
-- Always handle loading, success, and error states.
+- Do not store server data in local React state or global stores.
+- Always handle **loading, success, empty, and error** states.
 - Keep shared config, enums, labels, and logic centralized.
 
 ## 4. Forms & Validation
 - Use **React Hook Form + Zod**.
 - Each form must have a Zod schema.
+- Schemas must be defined outside UI components.
 - Validation errors must display clearly in the UI.
 
 ## 5. UI & Styling
 - Use **shadcn/ui** as the primary component library.
+- Customize via variants or composition, not ad-hoc styling.
 - Keep Tailwind usage minimal, consistent, and readable.
+- Avoid inline styles unless strictly necessary.
 
 ## 6. Error Handling & UX Feedback
 - Use toast notifications for errors and successes.
-- Provide clean loading and empty states.
+- Do not swallow errors silently.
+- Provide clear loading, empty, and error states.
 
 ## 7. Clarity & Maintainability
 - Prefer explicit, readable code over clever one-liners.
-- Separate concerns: hooks for data, components for UI, schemas for validation.
+- Separate concerns:
+  - hooks → data & side effects
+  - components → UI
+  - schemas → validation
+- Avoid deeply nested components or props drilling when possible.

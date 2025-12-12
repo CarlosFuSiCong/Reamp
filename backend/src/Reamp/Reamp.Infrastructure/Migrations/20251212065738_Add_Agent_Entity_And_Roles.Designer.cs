@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Reamp.Infrastructure;
 
@@ -11,9 +12,11 @@ using Reamp.Infrastructure;
 namespace Reamp.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251212065738_Add_Agent_Entity_And_Roles")]
+    partial class Add_Agent_Entity_And_Roles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,76 +354,6 @@ namespace Reamp.Infrastructure.Migrations
                         .HasFilter("[DeletedAtUtc] IS NULL");
 
                     b.ToTable("Clients", (string)null);
-                });
-
-            modelBuilder.Entity("Reamp.Domain.Accounts.Entities.Invitation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeletedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiresAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("InvitedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("InviteeEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid?>("InviteeUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("RespondedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("TargetBranchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TargetEntityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TargetRoleValue")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvitedBy");
-
-                    b.HasIndex("InviteeEmail");
-
-                    b.HasIndex("TargetEntityId", "Type");
-
-                    b.HasIndex("InviteeEmail", "Status", "ExpiresAtUtc");
-
-                    b.ToTable("Invitations", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Invitations_Status_Valid", "[Status] >= 0 AND [Status] <= 4");
-
-                            t.HasCheckConstraint("CK_Invitations_Type_Valid", "[Type] >= 0 AND [Type] <= 1");
-                        });
                 });
 
             modelBuilder.Entity("Reamp.Domain.Accounts.Entities.RefreshToken", b =>
@@ -1501,15 +1434,6 @@ namespace Reamp.Infrastructure.Migrations
                     b.HasOne("Reamp.Domain.Accounts.Entities.UserProfile", null)
                         .WithOne()
                         .HasForeignKey("Reamp.Domain.Accounts.Entities.Client", "UserProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Reamp.Domain.Accounts.Entities.Invitation", b =>
-                {
-                    b.HasOne("Reamp.Domain.Accounts.Entities.UserProfile", null)
-                        .WithMany()
-                        .HasForeignKey("InvitedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

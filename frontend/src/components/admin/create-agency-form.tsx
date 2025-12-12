@@ -102,6 +102,9 @@ export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
             ))}
           </SelectContent>
         </Select>
+        <p className="text-sm text-muted-foreground">
+          The selected user will become the agency owner with full permissions.
+        </p>
         {errors.ownerUserId && <p className="text-sm text-red-600">{errors.ownerUserId.message}</p>}
       </div>
 

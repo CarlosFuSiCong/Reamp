@@ -29,6 +29,7 @@ namespace Reamp.Infrastructure
         public DbSet<Studio> Studios { get; set; } = null!;
         public DbSet<Staff> Staffs { get; set; } = null!;
         public DbSet<Client> Clients { get; set; } = null!;
+        public DbSet<Invitation> Invitations { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
         // Media

@@ -191,6 +191,8 @@ namespace Reamp.Api
             builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
             builder.Services.AddScoped<IClientRepository, ClientRepository>();
             builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+            builder.Services.AddScoped<Reamp.Domain.Accounts.Repositories.IInvitationRepository,
+                Reamp.Infrastructure.Repositories.Accounts.InvitationRepository>();
             builder.Services.AddScoped<IListingRepository, ListingRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<Reamp.Domain.Media.Repositories.IMediaAssetRepository,
@@ -220,6 +222,10 @@ namespace Reamp.Api
                 Reamp.Application.Delivery.Services.DeliveryPackageAppService>();
             builder.Services.AddScoped<Reamp.Application.UserProfiles.Services.IUserProfileAppService,
                 Reamp.Application.UserProfiles.Services.UserProfileAppService>();
+            builder.Services.AddScoped<Reamp.Application.Invitations.Services.IInvitationAppService,
+                Reamp.Application.Invitations.Services.InvitationAppService>();
+            builder.Services.AddScoped<Reamp.Application.Members.Services.IMemberAppService,
+                Reamp.Application.Members.Services.MemberAppService>();
             builder.Services.AddScoped<Reamp.Domain.Common.Services.IBackgroundJobService,
                 Reamp.Infrastructure.Services.Jobs.HangfireBackgroundJobService>();
 

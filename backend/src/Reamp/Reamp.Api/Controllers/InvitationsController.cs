@@ -1,0 +1,204 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Reamp.Application.Invitations.Dtos;
+using Reamp.Application.Invitations.Services;
+using Reamp.Domain.Accounts.Repositories;
+using Reamp.Shared;
+using System.Security.Claims;
+
+namespace Reamp.Api.Controllers
+{
+    [ApiController]
+    [Route("api/invitations")]
+    [Authorize]
+    public sealed class InvitationsController : ControllerBase
+    {
+        private readonly IInvitationAppService _invitationService;
+        private readonly IUserProfileRepository _userProfileRepository;
+        private readonly ILogger<InvitationsController> _logger;
+
+        public InvitationsController(
+            IInvitationAppService invitationService,
+            IUserProfileRepository userProfileRepository,
+            ILogger<InvitationsController> logger)
+        {
+            _invitationService = invitationService;
+            _userProfileRepository = userProfileRepository;
+            _logger = logger;
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found.");
+            
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                throw new UnauthorizedAccessException("User ID claim is malformed.");
+            
+            return userId;
+        }
+
+        private string GetCurrentUserEmail()
+        {
+            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(emailClaim))
+                throw new UnauthorizedAccessException("User email claim not found.");
+            
+            return emailClaim;
+        }
+
+        // GET /api/invitations/me - Get my invitations
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyInvitations(CancellationToken ct)
+        {
+            try
+            {
+                var email = GetCurrentUserEmail();
+                var invitations = await _invitationService.GetMyInvitationsAsync(email, ct);
+
+                return Ok(ApiResponse<List<InvitationListDto>>.Ok(
+                    invitations,
+                    "Your invitations retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user invitations");
+                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while retrieving invitations"));
+            }
+        }
+
+        // GET /api/invitations/{invitationId} - Get invitation details
+        [HttpGet("{invitationId:guid}")]
+        public async Task<IActionResult> GetInvitationById(Guid invitationId, CancellationToken ct)
+        {
+            try
+            {
+                var invitation = await _invitationService.GetInvitationByIdAsync(invitationId, ct);
+
+                if (invitation == null)
+                    return NotFound(ApiResponse<object>.Fail("Invitation not found"));
+
+                // Verify the current user is either the invitee or inviter
+                var currentApplicationUserId = GetCurrentUserId();
+                var currentUserEmail = GetCurrentUserEmail();
+                
+                // Get UserProfileId from ApplicationUserId to check inviter
+                var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(
+                    currentApplicationUserId, 
+                    asNoTracking: true, 
+                    includeDeleted: false, 
+                    ct: ct);
+                
+                bool isInviter = userProfile != null && invitation.InvitedBy == userProfile.Id;
+                // Normalize email to match how invitations are stored (trim + lowercase)
+                var normalizedEmail = currentUserEmail.Trim().ToLowerInvariant();
+                bool isInvitee = invitation.InviteeEmail.Equals(normalizedEmail, StringComparison.Ordinal);
+                
+                if (!isInviter && !isInvitee)
+                    return Forbid();
+
+                return Ok(ApiResponse<InvitationDetailDto>.Ok(
+                    invitation,
+                    "Invitation retrieved successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving invitation: {InvitationId}", invitationId);
+                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while retrieving invitation"));
+            }
+        }
+
+        // POST /api/invitations/{invitationId}/accept - Accept invitation
+        [HttpPost("{invitationId:guid}/accept")]
+        public async Task<IActionResult> AcceptInvitation(Guid invitationId, CancellationToken ct)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                await _invitationService.AcceptInvitationAsync(invitationId, currentUserId, ct);
+
+                _logger.LogInformation(
+                    "Invitation accepted: InvitationId={InvitationId}, UserId={UserId}",
+                    invitationId, currentUserId);
+
+                return Ok(ApiResponse<object>.Ok(
+                    null,
+                    "Invitation accepted successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        // POST /api/invitations/{invitationId}/reject - Reject invitation
+        [HttpPost("{invitationId:guid}/reject")]
+        public async Task<IActionResult> RejectInvitation(Guid invitationId, CancellationToken ct)
+        {
+            try
+            {
+                var userEmail = GetCurrentUserEmail();
+                await _invitationService.RejectInvitationAsync(invitationId, userEmail, ct);
+
+                _logger.LogInformation("Invitation rejected: InvitationId={InvitationId}", invitationId);
+
+                return Ok(ApiResponse<object>.Ok(
+                    null,
+                    "Invitation rejected successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+
+        // POST /api/invitations/{invitationId}/cancel - Cancel invitation (by inviter)
+        [HttpPost("{invitationId:guid}/cancel")]
+        public async Task<IActionResult> CancelInvitation(Guid invitationId, CancellationToken ct)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                await _invitationService.CancelInvitationAsync(invitationId, currentUserId, ct);
+
+                _logger.LogInformation("Invitation cancelled: InvitationId={InvitationId}", invitationId);
+
+                return Ok(ApiResponse<object>.Ok(
+                    null,
+                    "Invitation cancelled successfully"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ApiResponse<object>.Fail(ex.Message));
+            }
+        }
+    }
+}

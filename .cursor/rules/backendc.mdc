@@ -1,5 +1,5 @@
 ---
-description: "backend/**/*.cs"
+globs: backend/**/*.cs, backend/**/*.csproj, backend/**/*.sln
 alwaysApply: false
 ---
 # C# / .NET Backend Rules
@@ -17,21 +17,28 @@ Organize by feature/domain (Users, Orders, Media, etc.).
 ### Controllers
 - No business logic.
 - Bind request → call service → return unified response.
+- Do not interpret business rules or Result status.
+- Do not call `SaveChangesAsync()`.
 
 ### Services
 - Implement business rules.
 - Use repositories; no HttpContext dependency.
+- Perform business validation.
 - Return DTO or Result type.
+- Responsible for calling `SaveChangesAsync()`.
 
 ### Repositories
 - Contain EF Core access only.
 - Use async methods.
+- Return **domain entities or aggregates only**.
+- Never return DTOs or view models.
 
 ## 3. Unified API Response
-- All endpoints return a consistent structure:
+- All endpoints return a consistent structure:  
   `ApiResponse<T> { Success, Code, Message, Data, Errors }`
 
 ## 4. Validation
+
 ### Request Validation
 - Use **FluentValidation** for request DTOs.
 - Validators live inside their feature folders.
@@ -47,9 +54,9 @@ Organize by feature/domain (Users, Orders, Media, etc.).
 - Do not expose sensitive fields.
 
 ## 6. EF Core Rules
-- All queries through repositories.
+- All queries go through repositories.
 - Prefer `AsNoTracking()` for read operations.
-- Explicit decimal/date precision.
+- Explicit decimal and date precision.
 - Use migrations for schema changes.
 
 ## 7. Error Handling & Logging
@@ -58,6 +65,6 @@ Organize by feature/domain (Users, Orders, Media, etc.).
 - Do not log sensitive data.
 
 ## 8. Async & Performance
-- All I/O operations async/await.
+- All I/O operations use async/await.
 - No `.Result` or `.Wait()`.
 - Async methods end with `Async`.
