@@ -83,5 +83,45 @@ namespace Reamp.Api.Controllers
 
             return Ok(ApiResponse.Ok("User role updated successfully"));
         }
+
+        [HttpPost("agencies")]
+        public async Task<IActionResult> CreateAgency(
+            [FromBody] CreateAgencyForAdminDto dto,
+            CancellationToken ct)
+        {
+            _logger.LogInformation("Admin creating agency: {AgencyName}", dto.Name);
+
+            var agency = await _adminService.CreateAgencyAsync(dto, ct);
+
+            return Ok(ApiResponse<AgencySummaryDto>.Ok(agency, "Agency created successfully"));
+        }
+
+        [HttpGet("agencies")]
+        public async Task<IActionResult> GetAgencies(CancellationToken ct)
+        {
+            var agencies = await _adminService.GetAgenciesAsync(ct);
+
+            return Ok(ApiResponse<List<AgencySummaryDto>>.Ok(agencies));
+        }
+
+        [HttpPost("studios")]
+        public async Task<IActionResult> CreateStudio(
+            [FromBody] CreateStudioForAdminDto dto,
+            CancellationToken ct)
+        {
+            _logger.LogInformation("Admin creating studio: {StudioName}", dto.Name);
+
+            var studio = await _adminService.CreateStudioAsync(dto, ct);
+
+            return Ok(ApiResponse<StudioSummaryDto>.Ok(studio, "Studio created successfully"));
+        }
+
+        [HttpGet("studios")]
+        public async Task<IActionResult> GetStudios(CancellationToken ct)
+        {
+            var studios = await _adminService.GetStudiosAsync(ct);
+
+            return Ok(ApiResponse<List<StudioSummaryDto>>.Ok(studios));
+        }
     }
 }

@@ -16,6 +16,8 @@ namespace Reamp.Application.Admin.Services
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IUserProfileRepository _userProfileRepo;
+        private readonly IAgencyRepository _agencyRepo;
+        private readonly IStudioRepository _studioRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<AdminService> _logger;
@@ -23,12 +25,16 @@ namespace Reamp.Application.Admin.Services
         public AdminService(
             ApplicationDbContext dbContext,
             IUserProfileRepository userProfileRepo,
+            IAgencyRepository agencyRepo,
+            IStudioRepository studioRepo,
             UserManager<ApplicationUser> userManager,
             IUnitOfWork uow,
             ILogger<AdminService> logger)
         {
             _dbContext = dbContext;
             _userProfileRepo = userProfileRepo;
+            _agencyRepo = agencyRepo;
+            _studioRepo = studioRepo;
             _userManager = userManager;
             _uow = uow;
             _logger = logger;
@@ -199,6 +205,112 @@ namespace Reamp.Application.Admin.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User {UserId} role updated to {Role}", userId, role);
+        }
+
+        public async Task<AgencySummaryDto> CreateAgencyAsync(CreateAgencyForAdminDto dto, CancellationToken ct)
+        {
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            if (ownerProfile == null)
+            {
+                throw new InvalidOperationException("Owner user not found");
+            }
+
+            var agency = Agency.Create(
+                name: dto.Name,
+                createdBy: dto.OwnerUserId,
+                contactEmail: dto.ContactEmail,
+                contactPhone: dto.ContactPhone,
+                description: dto.Description
+            );
+
+            await _agencyRepo.AddAsync(agency, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Agency {AgencyName} created by admin with owner {OwnerId}", 
+                dto.Name, dto.OwnerUserId);
+
+            return new AgencySummaryDto
+            {
+                Id = agency.Id,
+                Name = agency.Name,
+                Slug = agency.Slug.Value,
+                ContactEmail = agency.ContactEmail,
+                ContactPhone = agency.ContactPhone,
+                CreatedBy = agency.CreatedBy,
+                CreatedAtUtc = agency.CreatedAtUtc
+            };
+        }
+
+        public async Task<List<AgencySummaryDto>> GetAgenciesAsync(CancellationToken ct)
+        {
+            var agencies = await _dbContext.Agencies
+                .OrderByDescending(a => a.CreatedAtUtc)
+                .Select(a => new AgencySummaryDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Slug = a.Slug.Value,
+                    ContactEmail = a.ContactEmail,
+                    ContactPhone = a.ContactPhone,
+                    CreatedBy = a.CreatedBy,
+                    CreatedAtUtc = a.CreatedAtUtc
+                })
+                .ToListAsync(ct);
+
+            return agencies;
+        }
+
+        public async Task<StudioSummaryDto> CreateStudioAsync(CreateStudioForAdminDto dto, CancellationToken ct)
+        {
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            if (ownerProfile == null)
+            {
+                throw new InvalidOperationException("Owner user not found");
+            }
+
+            var studio = Studio.Create(
+                name: dto.Name,
+                createdBy: dto.OwnerUserId,
+                contactEmail: dto.ContactEmail,
+                contactPhone: dto.ContactPhone,
+                description: dto.Description
+            );
+
+            await _studioRepo.AddAsync(studio, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Studio {StudioName} created by admin with owner {OwnerId}", 
+                dto.Name, dto.OwnerUserId);
+
+            return new StudioSummaryDto
+            {
+                Id = studio.Id,
+                Name = studio.Name,
+                Slug = studio.Slug.Value,
+                ContactEmail = studio.ContactEmail,
+                ContactPhone = studio.ContactPhone,
+                CreatedBy = studio.CreatedBy,
+                CreatedAtUtc = studio.CreatedAtUtc
+            };
+        }
+
+        public async Task<List<StudioSummaryDto>> GetStudiosAsync(CancellationToken ct)
+        {
+            var studios = await _dbContext.Studios
+                .OrderByDescending(s => s.CreatedAtUtc)
+                .Select(s => new StudioSummaryDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Slug = s.Slug.Value,
+                    ContactEmail = s.ContactEmail,
+                    ContactPhone = s.ContactPhone,
+                    CreatedBy = s.CreatedBy,
+                    CreatedAtUtc = s.CreatedAtUtc
+                })
+                .ToListAsync(ct);
+
+            return studios;
         }
     }
 }

@@ -9,7 +9,7 @@ import { useAdminStats } from "@/lib/hooks/use-admin-stats";
 import { Users, Package, ShoppingCart, Building2, TrendingUp, AlertCircle } from "lucide-react";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UsersTable } from "@/components/admin/users-table";
+import { UsersTable, AgenciesTable, StudiosTable } from "@/components/admin";
 import { StatsChart } from "@/components/admin/stats-chart";
 
 export default function AdminDashboardPage() {
@@ -80,11 +80,21 @@ export default function AdminDashboardPage() {
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="agencies">Agencies</TabsTrigger>
+          <TabsTrigger value="studios">Studios</TabsTrigger>
           <TabsTrigger value="alerts">System Alerts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
           <UsersTable />
+        </TabsContent>
+
+        <TabsContent value="agencies" className="space-y-4">
+          <AgenciesTable />
+        </TabsContent>
+
+        <TabsContent value="studios" className="space-y-4">
+          <StudiosTable />
         </TabsContent>
 
         <TabsContent value="alerts" className="space-y-4">
