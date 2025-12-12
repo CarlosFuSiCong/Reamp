@@ -54,7 +54,11 @@ namespace Reamp.Api
             builder.Host.UseSerilog();
 
             // API & Swagger
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -196,6 +200,8 @@ namespace Reamp.Api
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<Reamp.Application.Admin.Services.IAdminService,
+                Reamp.Application.Admin.Services.AdminService>();
             builder.Services.AddScoped<IAgencyAppService, AgencyAppService>();
             builder.Services.AddScoped<IClientAppService, ClientAppService>();
             builder.Services.AddScoped<IStaffAppService, StaffAppService>();
