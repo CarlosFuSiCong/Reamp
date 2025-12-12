@@ -112,6 +112,11 @@ namespace Reamp.Api.Controllers
                     null,
                     "Invitation accepted successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
@@ -137,13 +142,14 @@ namespace Reamp.Api.Controllers
                     null,
                     "Invitation rejected successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -166,13 +172,14 @@ namespace Reamp.Api.Controllers
                     null,
                     "Invitation cancelled successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for invitation: {InvitationId}", invitationId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
