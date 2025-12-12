@@ -39,7 +39,7 @@ namespace Reamp.Application.Accounts.Staff.Services
             if (existingStaff != null && existingStaff.DeletedAtUtc == null)
                 throw new InvalidOperationException($"A staff member already exists for UserProfile {dto.UserProfileId}.");
 
-            var staff = new Domain.Accounts.Entities.Staff(dto.UserProfileId, dto.StudioId, dto.Skills);
+            var staff = new Domain.Accounts.Entities.Staff(dto.UserProfileId, dto.StudioId, StudioRole.Member, dto.Skills);
             await _staffRepository.AddAsync(staff, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 

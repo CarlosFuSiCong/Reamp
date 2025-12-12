@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Reamp.Application.Read.Listings;
 using Reamp.Application.Read.Listings.DTOs;
 using Reamp.Application.Read.Shared;
@@ -71,7 +71,7 @@ namespace Reamp.Infrastructure.Read.EF.Listings
 
             return await q
                 .Select(l => new ListingDetailDto(
-                    l.Id, l.Title, l.Description, l.Price, l.Currency,
+                    l.Id, l.OwnerAgencyId, l.Title, l.Description, l.Price, l.Currency,
                     l.Status, l.ListingType, l.PropertyType,
                     l.Bedrooms, l.Bathrooms, l.ParkingSpaces,
                     l.FloorAreaSqm, l.LandAreaSqm,

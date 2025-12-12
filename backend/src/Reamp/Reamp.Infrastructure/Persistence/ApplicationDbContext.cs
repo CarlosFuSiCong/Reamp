@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Common.Abstractions;
@@ -25,6 +25,7 @@ namespace Reamp.Infrastructure
         public DbSet<UserProfile> UserProfiles { get; set; } = null!;
         public DbSet<Agency> Agencies { get; set; } = null!;
         public DbSet<AgencyBranch> AgencyBranches { get; set; } = null!;
+        public DbSet<Agent> Agents { get; set; } = null!;
         public DbSet<Studio> Studios { get; set; } = null!;
         public DbSet<Staff> Staffs { get; set; } = null!;
         public DbSet<Client> Clients { get; set; } = null!;

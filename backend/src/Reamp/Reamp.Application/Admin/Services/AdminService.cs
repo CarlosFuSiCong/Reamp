@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Reamp.Application.Admin.Dtos;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Enums;
@@ -184,7 +185,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task UpdateUserStatusAsync(Guid userId, UserStatus status, CancellationToken ct)
         {
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, ct);
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, false, false, ct);
             if (profile == null)
             {
                 throw new InvalidOperationException("User profile not found");
@@ -199,7 +200,6 @@ namespace Reamp.Application.Admin.Services
                 profile.Deactivate();
             }
             
-            await _userProfileRepo.UpdateAsync(profile, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User {UserId} status updated to {Status}", userId, status);
@@ -207,14 +207,13 @@ namespace Reamp.Application.Admin.Services
 
         public async Task UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct)
         {
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, ct);
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, false, false, ct);
             if (profile == null)
             {
                 throw new InvalidOperationException("User profile not found");
             }
 
             profile.SetRole(role);
-            await _userProfileRepo.UpdateAsync(profile, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User {UserId} role updated to {Role}", userId, role);
@@ -222,7 +221,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<AgencySummaryDto> CreateAgencyAsync(CreateAgencyForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
@@ -275,7 +274,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<StudioSummaryDto> CreateStudioAsync(CreateStudioForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
