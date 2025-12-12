@@ -285,7 +285,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<StudioSummaryDto> CreateStudioAsync(CreateStudioForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, false, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
