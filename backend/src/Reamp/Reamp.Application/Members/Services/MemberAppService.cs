@@ -133,34 +133,47 @@ namespace Reamp.Application.Members.Services
             Guid studioId,
             CancellationToken ct = default)
         {
-            // Use a large page size to retrieve all members (studios typically have <10k members)
-            var staffList = await _staffRepository.ListByStudioAsync(
-                studioId,
-                new PageRequest(1, 10000),
-                null,
-                ct);
-
+            // Retrieve all members using pagination to handle any studio size
             var result = new List<StudioMemberDto>();
+            int pageNumber = 1;
+            const int pageSize = 1000;
+            int totalProcessed = 0;
+            int totalCount = 0;
 
-            foreach (var staff in staffList.Items)
+            do
             {
-                var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
-                if (profile == null) continue;
+                var staffList = await _staffRepository.ListByStudioAsync(
+                    studioId,
+                    new PageRequest(pageNumber, pageSize),
+                    null,
+                    ct);
 
-                var appUser = await _userManager.FindByIdAsync(profile.ApplicationUserId.ToString());
+                totalCount = staffList.TotalCount;
 
-                result.Add(new StudioMemberDto
+                foreach (var staff in staffList.Items)
                 {
-                    Id = staff.Id,
-                    UserProfileId = staff.UserProfileId,
-                    DisplayName = profile.DisplayName,
-                    Email = appUser?.Email ?? string.Empty,
-                    AvatarAssetId = profile.AvatarAssetId,
-                    Role = staff.Role,
-                    Skills = staff.Skills,
-                    JoinedAtUtc = staff.CreatedAtUtc
-                });
+                    var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
+                    if (profile == null) continue;
+
+                    var appUser = await _userManager.FindByIdAsync(profile.ApplicationUserId.ToString());
+
+                    result.Add(new StudioMemberDto
+                    {
+                        Id = staff.Id,
+                        UserProfileId = staff.UserProfileId,
+                        DisplayName = profile.DisplayName,
+                        Email = appUser?.Email ?? string.Empty,
+                        AvatarAssetId = profile.AvatarAssetId,
+                        Role = staff.Role,
+                        Skills = staff.Skills,
+                        JoinedAtUtc = staff.CreatedAtUtc
+                    });
+                }
+
+                totalProcessed += staffList.Items.Count;
+                pageNumber++;
             }
+            while (totalProcessed < totalCount);
 
             return result.OrderByDescending(m => m.Role).ThenBy(m => m.JoinedAtUtc).ToList();
         }
