@@ -72,6 +72,16 @@ namespace Reamp.Api.Controllers
                 if (invitation == null)
                     return NotFound(ApiResponse<object>.Fail("Invitation not found"));
 
+                // Verify the current user is either the invitee or inviter
+                var currentUserId = GetCurrentUserId();
+                var currentUserEmail = GetCurrentUserEmail();
+                
+                bool isInviter = invitation.InvitedBy == currentUserId;
+                bool isInvitee = invitation.InviteeEmail.Equals(currentUserEmail, StringComparison.OrdinalIgnoreCase);
+                
+                if (!isInviter && !isInvitee)
+                    return Forbid();
+
                 return Ok(ApiResponse<InvitationDetailDto>.Ok(
                     invitation,
                     "Invitation retrieved successfully"));

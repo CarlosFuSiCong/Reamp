@@ -67,6 +67,7 @@ namespace Reamp.Api.Controllers
 
         // GET /api/studios/{studioId}/invitations - Get studio invitations
         [HttpGet("{studioId:guid}/invitations")]
+        [RequireStudioRole(StudioRole.Member)]
         public async Task<IActionResult> GetInvitations(Guid studioId, CancellationToken ct)
         {
             try
