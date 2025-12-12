@@ -251,7 +251,9 @@ namespace Reamp.Application.Invitations.Services
                 throw new KeyNotFoundException("User profile not found.");
 
             var appUser = await _userManager.FindByIdAsync(userProfile.ApplicationUserId.ToString());
-            if (appUser == null || appUser.Email?.ToLowerInvariant() != invitation.InviteeEmail)
+            // Normalize user email to match how invitations are stored (trim + lowercase)
+            var normalizedUserEmail = appUser?.Email?.Trim().ToLowerInvariant();
+            if (appUser == null || normalizedUserEmail != invitation.InviteeEmail)
                 throw new InvalidOperationException("Invitation email does not match current user.");
 
             invitation.Accept(userId);

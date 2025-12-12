@@ -34,7 +34,11 @@ namespace Reamp.Api.Controllers
 
         private string GetCurrentUserEmail()
         {
-            return User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(emailClaim))
+                throw new UnauthorizedAccessException("User email claim not found.");
+            
+            return emailClaim;
         }
 
         // GET /api/invitations/me - Get my invitations
