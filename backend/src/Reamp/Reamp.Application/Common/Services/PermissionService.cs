@@ -48,11 +48,12 @@ namespace Reamp.Application.Common.Services
 
             if (userProfile == null) return null;
 
-            // Get Agent record
-            var agents = await _agentRepo.GetByAgencyIdAsync(agencyId, ct);
-            var agent = agents.FirstOrDefault(a => a.UserProfileId == userProfile.Id && a.DeletedAtUtc == null);
+            // Get Agent record directly by UserProfileId (one-to-one relationship)
+            var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
+            if (agent == null || agent.DeletedAtUtc != null || agent.AgencyId != agencyId)
+                return null;
 
-            return agent?.Role;
+            return agent.Role;
         }
 
         public async Task<StudioRole?> GetStudioRoleAsync(Guid userId, Guid studioId, CancellationToken ct = default)
