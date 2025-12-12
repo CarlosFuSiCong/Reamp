@@ -9,8 +9,19 @@ alwaysApply: true
 
 ## 2. Commit Rules (Atomic Commits)
 - Each commit performs **one clear, small, focused change**.
-- Do not mix unrelated changes (e.g., feature + refactor + fix in one commit).
-- Use **simple, short English commit messages**, one line only.
+- Do not mix unrelated changes.
+- Use **Conventional Commit prefixes**, one-line only:
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `refactor:` for internal code improvements (no behavior change)
+  - `docs:` for documentation changes
+  - `chore:` for tools, config, formatting, build scripts
+- Commit messages must be **simple, short English sentences**, e.g.:
+  - `feat: add user service`
+  - `fix: correct email validation`
+  - `refactor: simplify order mapping`
+  - `docs: update API description`
+  - `chore: format project files`
 
 ## 3. Comments & Code Style
 - Prefer **self-explanatory code** over long comments.

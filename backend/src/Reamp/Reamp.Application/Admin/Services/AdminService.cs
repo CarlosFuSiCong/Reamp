@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Reamp.Application.Admin.Dtos;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Accounts.Enums;
@@ -18,6 +19,8 @@ namespace Reamp.Application.Admin.Services
         private readonly IUserProfileRepository _userProfileRepo;
         private readonly IAgencyRepository _agencyRepo;
         private readonly IStudioRepository _studioRepo;
+        private readonly IAgentRepository _agentRepo;
+        private readonly IStaffRepository _staffRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<AdminService> _logger;
@@ -27,6 +30,8 @@ namespace Reamp.Application.Admin.Services
             IUserProfileRepository userProfileRepo,
             IAgencyRepository agencyRepo,
             IStudioRepository studioRepo,
+            IAgentRepository agentRepo,
+            IStaffRepository staffRepo,
             UserManager<ApplicationUser> userManager,
             IUnitOfWork uow,
             ILogger<AdminService> logger)
@@ -35,6 +40,8 @@ namespace Reamp.Application.Admin.Services
             _userProfileRepo = userProfileRepo;
             _agencyRepo = agencyRepo;
             _studioRepo = studioRepo;
+            _agentRepo = agentRepo;
+            _staffRepo = staffRepo;
             _userManager = userManager;
             _uow = uow;
             _logger = logger;
@@ -184,7 +191,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task UpdateUserStatusAsync(Guid userId, UserStatus status, CancellationToken ct)
         {
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, ct);
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, false, false, ct);
             if (profile == null)
             {
                 throw new InvalidOperationException("User profile not found");
@@ -199,7 +206,6 @@ namespace Reamp.Application.Admin.Services
                 profile.Deactivate();
             }
             
-            await _userProfileRepo.UpdateAsync(profile, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User {UserId} status updated to {Status}", userId, status);
@@ -207,14 +213,13 @@ namespace Reamp.Application.Admin.Services
 
         public async Task UpdateUserRoleAsync(Guid userId, UserRole role, CancellationToken ct)
         {
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, ct);
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, false, false, ct);
             if (profile == null)
             {
                 throw new InvalidOperationException("User profile not found");
             }
 
             profile.SetRole(role);
-            await _userProfileRepo.UpdateAsync(profile, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User {UserId} role updated to {Role}", userId, role);
@@ -222,7 +227,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<AgencySummaryDto> CreateAgencyAsync(CreateAgencyForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
@@ -236,7 +241,20 @@ namespace Reamp.Application.Admin.Services
                 description: dto.Description
             );
 
+            // Check if owner already has an agent record
+            var existingAgent = await _agentRepo.GetByUserProfileIdAsync(ownerProfile.Id, ct);
+            if (existingAgent != null && existingAgent.DeletedAtUtc == null)
+            {
+                throw new InvalidOperationException("User already belongs to an agency");
+            }
+
             await _agencyRepo.AddAsync(agency, ct);
+
+            // Create Agent record with Owner role
+            var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
+            await _agentRepo.AddAsync(ownerAgent, ct);
+            
+            // Save both agency and owner agent in a single transaction
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Agency {AgencyName} created by admin with owner {OwnerId}", 
@@ -275,7 +293,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<StudioSummaryDto> CreateStudioAsync(CreateStudioForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
@@ -289,7 +307,20 @@ namespace Reamp.Application.Admin.Services
                 description: dto.Description
             );
 
+            // Check if owner already has a staff record
+            var existingStaff = await _staffRepo.GetByUserProfileIdAsync(ownerProfile.Id, asNoTracking: false, ct);
+            if (existingStaff != null && existingStaff.DeletedAtUtc == null)
+            {
+                throw new InvalidOperationException("User already belongs to a studio");
+            }
+
             await _studioRepo.AddAsync(studio, ct);
+
+            // Create Staff record with Owner role
+            var ownerStaff = new Domain.Accounts.Entities.Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
+            await _staffRepo.AddAsync(ownerStaff, ct);
+            
+            // Save both studio and owner staff in a single transaction
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Studio {StudioName} created by admin with owner {OwnerId}", 

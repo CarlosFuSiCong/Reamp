@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Accounts.Enums;
+using Reamp.Domain.Accounts.Enums;
 using Reamp.Domain.Common.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,18 +13,26 @@ namespace Reamp.Domain.Accounts.Entities
         public Guid UserProfileId { get; private set; }
         public Guid StudioId { get; private set; }
 
+        public StudioRole Role { get; private set; }
         public StaffSkills Skills { get; private set; }
 
         private Staff() { } // EF
 
-        public Staff(Guid userProfileId, Guid studioId, StaffSkills skills = StaffSkills.None)
+        public Staff(Guid userProfileId, Guid studioId, StudioRole role = StudioRole.Member, StaffSkills skills = StaffSkills.None)
         {
             if (userProfileId == Guid.Empty) throw new ArgumentException("UserProfileId required.");
             if (studioId == Guid.Empty) throw new ArgumentException("StudioId required.");
 
             UserProfileId = userProfileId;
             StudioId = studioId;
+            Role = role;
             Skills = skills;
+        }
+
+        public void ChangeRole(StudioRole role)
+        {
+            Role = role;
+            Touch();
         }
 
         public void ChangeStudio(Guid studioId)

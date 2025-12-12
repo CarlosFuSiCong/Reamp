@@ -186,6 +186,7 @@ namespace Reamp.Api
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             builder.Services.AddScoped<IAgencyRepository, AgencyRepository>();
             builder.Services.AddScoped<IAgencyBranchRepository, AgencyBranchRepository>();
+            builder.Services.AddScoped<IAgentRepository, Reamp.Infrastructure.Repositories.Accounts.AgentRepository>();
             builder.Services.AddScoped<IStudioRepository, StudioRepository>();
             builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
             builder.Services.AddScoped<IClientRepository, ClientRepository>();
@@ -225,6 +226,8 @@ namespace Reamp.Api
             // Query Services
             builder.Services.AddScoped<Reamp.Application.Common.Services.IAccountQueryService,
                 Reamp.Application.Common.Services.AccountQueryService>();
+            builder.Services.AddScoped<Reamp.Application.Common.Services.IPermissionService,
+                Reamp.Application.Common.Services.PermissionService>();
 
             // Media Services
             builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 

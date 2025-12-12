@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Reamp.Infrastructure.Configurations.Accounts
 {
-    public class StaffConfiguration : IEntityTypeConfiguration<Staff>
+    public class AgentConfiguration : IEntityTypeConfiguration<Agent>
     {
-        public void Configure(EntityTypeBuilder<Staff> b)
+        public void Configure(EntityTypeBuilder<Agent> b)
         {
-            b.ToTable("Staffs");
+            b.ToTable("Agents");
             b.HasKey(x => x.Id);
 
             b.Property(x => x.UserProfileId).IsRequired();
@@ -21,25 +21,31 @@ namespace Reamp.Infrastructure.Configurations.Accounts
              .IsUnique()
              .HasFilter("[DeletedAtUtc] IS NULL");
             b.HasOne<UserProfile>().WithOne()
-             .HasForeignKey<Staff>(x => x.UserProfileId)
+             .HasForeignKey<Agent>(x => x.UserProfileId)
              .OnDelete(DeleteBehavior.Restrict);
 
-            b.Property(x => x.StudioId).IsRequired();
-            b.HasOne<Studio>().WithMany()
-             .HasForeignKey(x => x.StudioId)
+            b.Property(x => x.AgencyId).IsRequired();
+            b.HasOne<Agency>()
+             .WithMany()
+             .HasForeignKey(x => x.AgencyId)
              .OnDelete(DeleteBehavior.Restrict);
-            b.HasIndex(x => x.StudioId);
+            b.HasIndex(x => x.AgencyId);
+
+            b.HasOne<AgencyBranch>()
+             .WithMany()
+             .HasForeignKey(x => x.AgencyBranchId)
+             .OnDelete(DeleteBehavior.Restrict);
+            b.HasIndex(x => x.AgencyBranchId);
 
             b.Property(x => x.Role).IsRequired().HasConversion<int>();
-            b.Property(x => x.Skills).IsRequired().HasConversion<int>();
 
             b.HasQueryFilter(x => x.DeletedAtUtc == null);
 
             b.ToTable(tb =>
             {
-                tb.HasCheckConstraint("CK_Staffs_Role_Valid", "[Role] >= 0 AND [Role] <= 4");
-                tb.HasCheckConstraint("CK_Staffs_Skills_Valid", "[Skills] >= 0");
+                tb.HasCheckConstraint("CK_Agents_Role_Valid", "[Role] >= 0 AND [Role] <= 3");
             });
         }
     }
 }
+
