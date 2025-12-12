@@ -35,7 +35,7 @@ export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
       onSuccess();
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to create agency");
+      toast.error(error?.message || "Failed to create agency");
     },
   });
 

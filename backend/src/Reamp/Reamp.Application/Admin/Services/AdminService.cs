@@ -42,39 +42,87 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<AdminStatsResponse> GetStatsAsync(CancellationToken ct)
         {
-            var totalUsers = await _dbContext.UserProfiles.CountAsync(ct);
-            var activeListings = await _dbContext.Listings
-                .CountAsync(l => l.Status == ListingStatus.Active, ct);
-            var totalOrders = await _dbContext.ShootOrders.CountAsync(ct);
-            var totalStudios = await _dbContext.Studios.CountAsync(ct);
+            // Batch all count queries
+            var countsTask = Task.WhenAll(
+                _dbContext.UserProfiles.CountAsync(ct),
+                _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Active, ct),
+                _dbContext.ShootOrders.CountAsync(ct),
+                _dbContext.Studios.CountAsync(ct),
+                _dbContext.ShootOrders.CountAsync(o => o.Status == ShootOrderStatus.Placed, ct),
+                _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Pending, ct)
+            );
 
-            // Get last 7 days data for chart
+            // Get chart data for last 7 days in single query
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7).Date;
+            var ordersGrouped = await _dbContext.ShootOrders
+                .Where(o => o.CreatedAtUtc >= sevenDaysAgo)
+                .GroupBy(o => o.CreatedAtUtc.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync(ct);
+
+            var listingsGrouped = await _dbContext.Listings
+                .Where(l => l.CreatedAtUtc >= sevenDaysAgo)
+                .GroupBy(l => l.CreatedAtUtc.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToListAsync(ct);
+
+            // Get recent activities in single query
+            var recentActivitiesTask = Task.WhenAll(
+                _dbContext.ShootOrders
+                    .OrderByDescending(o => o.CreatedAtUtc)
+                    .Take(5)
+                    .Select(o => new ActivityDto
+                    {
+                        Id = o.Id.ToString(),
+                        Type = "order",
+                        Title = "New Order",
+                        Description = "New order placed",
+                        Timestamp = o.CreatedAtUtc
+                    })
+                    .ToListAsync(ct),
+                _dbContext.Listings
+                    .OrderByDescending(l => l.CreatedAtUtc)
+                    .Take(5)
+                    .Select(l => new ActivityDto
+                    {
+                        Id = l.Id.ToString(),
+                        Type = "listing",
+                        Title = "New Listing",
+                        Description = "New listing created",
+                        Timestamp = l.CreatedAtUtc
+                    })
+                    .ToListAsync(ct)
+            );
+
+            // Wait for all queries to complete
+            var counts = await countsTask;
+            var recentActivities = await recentActivitiesTask;
+
+            var totalUsers = counts[0];
+            var activeListings = counts[1];
+            var totalOrders = counts[2];
+            var totalStudios = counts[3];
+            var pendingOrders = counts[4];
+            var pendingListings = counts[5];
+
+            // Build chart data from grouped results
+            var ordersDict = ordersGrouped.ToDictionary(x => x.Date, x => x.Count);
+            var listingsDict = listingsGrouped.ToDictionary(x => x.Date, x => x.Count);
             var chartData = new List<ChartDataPoint>();
 
             for (int i = 6; i >= 0; i--)
             {
                 var date = DateTime.UtcNow.AddDays(-i).Date;
-                var nextDate = date.AddDays(1);
-
-                var ordersCount = await _dbContext.ShootOrders
-                    .CountAsync(o => o.CreatedAtUtc >= date && o.CreatedAtUtc < nextDate, ct);
-                
-                var listingsCount = await _dbContext.Listings
-                    .CountAsync(l => l.CreatedAtUtc >= date && l.CreatedAtUtc < nextDate, ct);
-
                 chartData.Add(new ChartDataPoint
                 {
                     Date = date.ToString("MM/dd"),
-                    Orders = ordersCount,
-                    Listings = listingsCount
+                    Orders = ordersDict.GetValueOrDefault(date, 0),
+                    Listings = listingsDict.GetValueOrDefault(date, 0)
                 });
             }
 
             // Generate system alerts
             var alerts = new List<SystemAlert>();
-            
-            var pendingOrders = await _dbContext.ShootOrders
-                .CountAsync(o => o.Status == ShootOrderStatus.Placed, ct);
             if (pendingOrders > 0)
             {
                 alerts.Add(new SystemAlert
@@ -83,9 +131,6 @@ namespace Reamp.Application.Admin.Services
                     Message = $"{pendingOrders} order(s) waiting for acceptance"
                 });
             }
-
-            var pendingListings = await _dbContext.Listings
-                .CountAsync(l => l.Status == ListingStatus.Pending, ct);
             if (pendingListings > 0)
             {
                 alerts.Add(new SystemAlert
@@ -95,34 +140,7 @@ namespace Reamp.Application.Admin.Services
                 });
             }
 
-            // Get recent activities
-            var recentOrders = await _dbContext.ShootOrders
-                .OrderByDescending(o => o.CreatedAtUtc)
-                .Take(5)
-                .Select(o => new ActivityDto
-                {
-                    Id = o.Id.ToString(),
-                    Type = "order",
-                    Title = "New Order",
-                    Description = $"New order placed",
-                    Timestamp = o.CreatedAtUtc
-                })
-                .ToListAsync(ct);
-
-            var recentListings = await _dbContext.Listings
-                .OrderByDescending(l => l.CreatedAtUtc)
-                .Take(5)
-                .Select(l => new ActivityDto
-                {
-                    Id = l.Id.ToString(),
-                    Type = "listing",
-                    Title = "New Listing",
-                    Description = $"New listing created",
-                    Timestamp = l.CreatedAtUtc
-                })
-                .ToListAsync(ct);
-
-            var activities = recentOrders.Concat(recentListings)
+            var activities = recentActivities[0].Concat(recentActivities[1])
                 .OrderByDescending(a => a.Timestamp)
                 .Take(10)
                 .ToList();
@@ -146,26 +164,20 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<List<AdminUserDto>> GetUsersAsync(CancellationToken ct)
         {
-            var profiles = await _dbContext.UserProfiles
-                .OrderByDescending(u => u.CreatedAtUtc)
-                .ToListAsync(ct);
-
-            var users = new List<AdminUserDto>();
-            
-            foreach (var profile in profiles)
-            {
-                var appUser = await _userManager.FindByIdAsync(profile.ApplicationUserId.ToString());
-                
-                users.Add(new AdminUserDto
+            var users = await (
+                from profile in _dbContext.UserProfiles
+                join appUser in _dbContext.Users on profile.ApplicationUserId equals appUser.Id
+                orderby profile.CreatedAtUtc descending
+                select new AdminUserDto
                 {
                     Id = profile.ApplicationUserId,
-                    Email = appUser?.Email ?? string.Empty,
+                    Email = appUser.Email ?? string.Empty,
                     DisplayName = profile.DisplayName,
                     Role = profile.Role,
                     Status = profile.Status,
                     CreatedAtUtc = profile.CreatedAtUtc
-                });
-            }
+                }
+            ).ToListAsync(ct);
 
             return users;
         }
