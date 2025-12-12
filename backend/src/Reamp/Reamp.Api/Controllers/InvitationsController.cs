@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Invitations.Dtos;
 using Reamp.Application.Invitations.Services;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Shared;
 using System.Security.Claims;
 
@@ -13,13 +14,16 @@ namespace Reamp.Api.Controllers
     public sealed class InvitationsController : ControllerBase
     {
         private readonly IInvitationAppService _invitationService;
+        private readonly IUserProfileRepository _userProfileRepository;
         private readonly ILogger<InvitationsController> _logger;
 
         public InvitationsController(
             IInvitationAppService invitationService,
+            IUserProfileRepository userProfileRepository,
             ILogger<InvitationsController> logger)
         {
             _invitationService = invitationService;
+            _userProfileRepository = userProfileRepository;
             _logger = logger;
         }
 
@@ -76,10 +80,17 @@ namespace Reamp.Api.Controllers
                     return NotFound(ApiResponse<object>.Fail("Invitation not found"));
 
                 // Verify the current user is either the invitee or inviter
-                var currentUserId = GetCurrentUserId();
+                var currentApplicationUserId = GetCurrentUserId();
                 var currentUserEmail = GetCurrentUserEmail();
                 
-                bool isInviter = invitation.InvitedBy == currentUserId;
+                // Get UserProfileId from ApplicationUserId to check inviter
+                var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(
+                    currentApplicationUserId, 
+                    asNoTracking: true, 
+                    includeDeleted: false, 
+                    ct: ct);
+                
+                bool isInviter = userProfile != null && invitation.InvitedBy == userProfile.Id;
                 // Normalize email to match how invitations are stored (trim + lowercase)
                 var normalizedEmail = currentUserEmail.Trim().ToLowerInvariant();
                 bool isInvitee = invitation.InviteeEmail.Equals(normalizedEmail, StringComparison.Ordinal);

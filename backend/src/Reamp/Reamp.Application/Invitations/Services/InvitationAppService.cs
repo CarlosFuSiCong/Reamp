@@ -51,7 +51,7 @@ namespace Reamp.Application.Invitations.Services
         public async Task<InvitationDetailDto> SendAgencyInvitationAsync(
             Guid agencyId,
             SendAgencyInvitationDto dto,
-            Guid currentUserId,
+            Guid currentApplicationUserId,
             CancellationToken ct = default)
         {
             var agency = await _agencyRepository.GetByIdAsync(agencyId, asNoTracking: true, ct);
@@ -64,6 +64,11 @@ namespace Reamp.Application.Invitations.Services
                 if (branch == null || branch.AgencyId != agencyId)
                     throw new KeyNotFoundException("Branch not found.");
             }
+
+            // Get UserProfileId from ApplicationUserId for the inviter
+            var inviterProfile = await _userProfileRepository.GetByApplicationUserIdAsync(currentApplicationUserId, asNoTracking: true, includeDeleted: false, ct: ct);
+            if (inviterProfile == null)
+                throw new KeyNotFoundException("User profile not found for inviter.");
 
             // Normalize email for consistent duplicate checking
             var normalizedEmail = dto.InviteeEmail.Trim().ToLowerInvariant();
@@ -81,7 +86,7 @@ namespace Reamp.Application.Invitations.Services
                 agencyId,
                 dto.InviteeEmail,
                 dto.TargetRole,
-                currentUserId,
+                inviterProfile.Id,
                 dto.AgencyBranchId);
 
             await _invitationRepository.AddAsync(invitation, ct);
@@ -93,12 +98,17 @@ namespace Reamp.Application.Invitations.Services
         public async Task<InvitationDetailDto> SendStudioInvitationAsync(
             Guid studioId,
             SendStudioInvitationDto dto,
-            Guid currentUserId,
+            Guid currentApplicationUserId,
             CancellationToken ct = default)
         {
             var studio = await _studioRepository.GetByIdAsync(studioId, asNoTracking: true, ct);
             if (studio == null)
                 throw new KeyNotFoundException($"Studio with ID {studioId} not found.");
+
+            // Get UserProfileId from ApplicationUserId for the inviter
+            var inviterProfile = await _userProfileRepository.GetByApplicationUserIdAsync(currentApplicationUserId, asNoTracking: true, includeDeleted: false, ct: ct);
+            if (inviterProfile == null)
+                throw new KeyNotFoundException("User profile not found for inviter.");
 
             // Normalize email for consistent duplicate checking
             var normalizedEmail = dto.InviteeEmail.Trim().ToLowerInvariant();
@@ -116,7 +126,7 @@ namespace Reamp.Application.Invitations.Services
                 studioId,
                 dto.InviteeEmail,
                 dto.TargetRole,
-                currentUserId);
+                inviterProfile.Id);
 
             await _invitationRepository.AddAsync(invitation, ct);
             await _unitOfWork.SaveChangesAsync(ct);
@@ -239,18 +249,18 @@ namespace Reamp.Application.Invitations.Services
 
         public async Task AcceptInvitationAsync(
             Guid invitationId,
-            Guid userId,
+            Guid applicationUserId,
             CancellationToken ct = default)
         {
             var invitation = await _invitationRepository.GetByIdAsync(invitationId, ct);
             if (invitation == null)
                 throw new KeyNotFoundException($"Invitation with ID {invitationId} not found.");
 
-            var userProfile = await _userProfileRepository.GetByIdAsync(userId, asNoTracking: false, includeDeleted: false, ct: ct);
+            var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(applicationUserId, asNoTracking: false, includeDeleted: false, ct: ct);
             if (userProfile == null)
                 throw new KeyNotFoundException("User profile not found.");
 
-            var appUser = await _userManager.FindByIdAsync(userProfile.ApplicationUserId.ToString());
+            var appUser = await _userManager.FindByIdAsync(applicationUserId.ToString());
             if (appUser == null)
                 throw new KeyNotFoundException("Application user not found.");
             
@@ -262,11 +272,11 @@ namespace Reamp.Application.Invitations.Services
             if (normalizedUserEmail != invitation.InviteeEmail)
                 throw new InvalidOperationException("Invitation email does not match current user.");
 
-            invitation.Accept(userId);
+            invitation.Accept(userProfile.Id);
 
             if (invitation.Type == InvitationType.Agency)
             {
-                var existingAgent = await _agentRepository.GetByUserProfileIdAsync(userId, ct);
+                var existingAgent = await _agentRepository.GetByUserProfileIdAsync(userProfile.Id, ct);
                 if (existingAgent != null)
                 {
                     // Check if user is already an agent of THIS specific agency
@@ -277,7 +287,7 @@ namespace Reamp.Application.Invitations.Services
                 }
 
                 var agent = new Agent(
-                    userId,
+                    userProfile.Id,
                     invitation.TargetEntityId,
                     invitation.GetAgencyRole(),
                     invitation.TargetBranchId);
@@ -286,7 +296,7 @@ namespace Reamp.Application.Invitations.Services
             }
             else if (invitation.Type == InvitationType.Studio)
             {
-                var existingStaff = await _staffRepository.GetByUserProfileIdAsync(userId, asNoTracking: true, ct);
+                var existingStaff = await _staffRepository.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
                 if (existingStaff != null)
                 {
                     // Check if user is already a staff member of THIS specific studio
@@ -297,7 +307,7 @@ namespace Reamp.Application.Invitations.Services
                 }
 
                 var staff = new Staff(
-                    userId,
+                    userProfile.Id,
                     invitation.TargetEntityId,
                     invitation.GetStudioRole());
 
@@ -330,15 +340,20 @@ namespace Reamp.Application.Invitations.Services
 
         public async Task CancelInvitationAsync(
             Guid invitationId,
-            Guid currentUserId,
+            Guid currentApplicationUserId,
             CancellationToken ct = default)
         {
             var invitation = await _invitationRepository.GetByIdAsync(invitationId, ct);
             if (invitation == null)
                 throw new KeyNotFoundException($"Invitation with ID {invitationId} not found.");
 
-            // Verify the user is the inviter
-            if (invitation.InvitedBy != currentUserId)
+            // Get UserProfileId from ApplicationUserId to verify inviter
+            var userProfile = await _userProfileRepository.GetByApplicationUserIdAsync(currentApplicationUserId, asNoTracking: true, includeDeleted: false, ct: ct);
+            if (userProfile == null)
+                throw new KeyNotFoundException("User profile not found.");
+
+            // Verify the user is the inviter (InvitedBy stores UserProfileId)
+            if (invitation.InvitedBy != userProfile.Id)
                 throw new UnauthorizedAccessException("You are not authorized to cancel this invitation.");
 
             invitation.Cancel();
@@ -353,7 +368,8 @@ namespace Reamp.Application.Invitations.Services
             string? branchName,
             CancellationToken ct)
         {
-            var inviter = await _userProfileRepository.GetByIdAsync(invitation.InvitedBy, includeDeleted: false, asNoTracking: true, ct);
+            // InvitedBy is a UserProfileId (foreign key to UserProfiles)
+            var inviterProfile = await _userProfileRepository.GetByIdAsync(invitation.InvitedBy, includeDeleted: false, asNoTracking: true, ct);
 
             return new InvitationDetailDto
             {
@@ -368,7 +384,7 @@ namespace Reamp.Application.Invitations.Services
                 TargetRoleName = GetRoleName(invitation),
                 Status = invitation.Status,
                 InvitedBy = invitation.InvitedBy,
-                InvitedByName = inviter?.DisplayName ?? "Unknown",
+                InvitedByName = inviterProfile?.DisplayName ?? "Unknown",
                 ExpiresAtUtc = invitation.ExpiresAtUtc,
                 CreatedAtUtc = invitation.CreatedAtUtc,
                 RespondedAtUtc = invitation.RespondedAtUtc,
