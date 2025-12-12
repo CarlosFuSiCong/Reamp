@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Reamp.Api.Attributes;
 using Reamp.Application.Invitations.Dtos;
 using Reamp.Application.Invitations.Services;
+using Reamp.Domain.Accounts.Enums;
 using Reamp.Shared;
 using System.Security.Claims;
 
@@ -34,6 +36,7 @@ namespace Reamp.Api.Controllers
 
         // POST /api/agencies/{agencyId}/invitations - Send agency invitation
         [HttpPost("{agencyId:guid}/invitations")]
+        [RequireAgencyRole(AgencyRole.Manager)]
         public async Task<IActionResult> SendInvitation(
             Guid agencyId,
             [FromBody] SendAgencyInvitationDto dto,
