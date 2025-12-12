@@ -58,6 +58,11 @@ namespace Reamp.Api.Controllers
                     invitation,
                     "Invitation sent successfully"));
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt for studio invitation: {StudioId}", studioId);
+                return Unauthorized(ApiResponse<object>.Fail(ex.Message));
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
