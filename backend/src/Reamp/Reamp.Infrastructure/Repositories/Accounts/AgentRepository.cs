@@ -18,7 +18,7 @@ namespace Reamp.Infrastructure.Repositories.Accounts
 
         public async Task<Agent?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            return await GetByIdAsync(id, true, ct);
+            return await base.GetByIdAsync(id, true, ct);
         }
 
         public async Task<Agent?> GetByUserProfileIdAsync(Guid userProfileId, CancellationToken ct = default)

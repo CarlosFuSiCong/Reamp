@@ -186,6 +186,7 @@ namespace Reamp.Api
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             builder.Services.AddScoped<IAgencyRepository, AgencyRepository>();
             builder.Services.AddScoped<IAgencyBranchRepository, AgencyBranchRepository>();
+            builder.Services.AddScoped<IAgentRepository, Reamp.Infrastructure.Repositories.Accounts.AgentRepository>();
             builder.Services.AddScoped<IStudioRepository, StudioRepository>();
             builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
             builder.Services.AddScoped<IClientRepository, ClientRepository>();
