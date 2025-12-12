@@ -53,15 +53,15 @@ namespace Reamp.Application.Admin.Services
             );
 
             // Get chart data for last 7 days in single query
-            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7).Date;
+            var sixDaysAgo = DateTime.UtcNow.AddDays(-6).Date;
             var ordersGrouped = await _dbContext.ShootOrders
-                .Where(o => o.CreatedAtUtc >= sevenDaysAgo)
+                .Where(o => o.CreatedAtUtc >= sixDaysAgo)
                 .GroupBy(o => o.CreatedAtUtc.Date)
                 .Select(g => new { Date = g.Key, Count = g.Count() })
                 .ToListAsync(ct);
 
             var listingsGrouped = await _dbContext.Listings
-                .Where(l => l.CreatedAtUtc >= sevenDaysAgo)
+                .Where(l => l.CreatedAtUtc >= sixDaysAgo)
                 .GroupBy(l => l.CreatedAtUtc.Date)
                 .Select(g => new { Date = g.Key, Count = g.Count() })
                 .ToListAsync(ct);
