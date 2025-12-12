@@ -49,7 +49,6 @@ namespace Reamp.Application.Admin.Services
             var totalStudios = await _dbContext.Studios.CountAsync(ct);
 
             // Get last 7 days data for chart
-            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7).Date;
             var chartData = new List<ChartDataPoint>();
 
             for (int i = 6; i >= 0; i--)

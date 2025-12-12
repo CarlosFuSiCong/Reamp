@@ -18,6 +18,9 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
   const queryClient = useQueryClient();
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<CreateStudioDto>();
 
+  // Register ownerUserId with validation
+  register("ownerUserId", { required: "Owner user is required" });
+
   const { data: users } = useQuery({
     queryKey: ["admin-users"],
     queryFn: () => adminApi.getUsers(),
@@ -86,8 +89,7 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
       <div className="space-y-2">
         <Label htmlFor="ownerUserId">Owner User *</Label>
         <Select
-          onValueChange={(value) => setValue("ownerUserId", value)}
-          required
+          onValueChange={(value) => setValue("ownerUserId", value, { shouldValidate: true })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select owner user" />
@@ -100,6 +102,7 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
             ))}
           </SelectContent>
         </Select>
+        {errors.ownerUserId && <p className="text-sm text-red-600">{errors.ownerUserId.message}</p>}
       </div>
 
       <div className="flex justify-end gap-2">
