@@ -65,9 +65,12 @@ namespace Reamp.Application.Invitations.Services
                     throw new KeyNotFoundException("Branch not found.");
             }
 
+            // Normalize email for consistent duplicate checking
+            var normalizedEmail = dto.InviteeEmail.Trim().ToLowerInvariant();
+
             var existingInvitation = await _invitationRepository.GetPendingInvitationAsync(
                 agencyId,
-                dto.InviteeEmail,
+                normalizedEmail,
                 InvitationType.Agency,
                 ct);
 
@@ -97,9 +100,12 @@ namespace Reamp.Application.Invitations.Services
             if (studio == null)
                 throw new KeyNotFoundException($"Studio with ID {studioId} not found.");
 
+            // Normalize email for consistent duplicate checking
+            var normalizedEmail = dto.InviteeEmail.Trim().ToLowerInvariant();
+
             var existingInvitation = await _invitationRepository.GetPendingInvitationAsync(
                 studioId,
-                dto.InviteeEmail,
+                normalizedEmail,
                 InvitationType.Studio,
                 ct);
 
@@ -122,7 +128,9 @@ namespace Reamp.Application.Invitations.Services
             string userEmail,
             CancellationToken ct = default)
         {
-            var invitations = await _invitationRepository.GetPendingByInviteeEmailAsync(userEmail, ct);
+            // Normalize email to match how invitations are stored
+            var normalizedEmail = userEmail.Trim().ToLowerInvariant();
+            var invitations = await _invitationRepository.GetPendingByInviteeEmailAsync(normalizedEmail, ct);
 
             var result = new List<InvitationListDto>();
 
