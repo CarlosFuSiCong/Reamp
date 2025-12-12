@@ -8,3 +8,4 @@ export { clientsApi } from "./clients";
 export { deliveriesApi } from "./deliveries";
 export { mediaApi } from "./media";
 export { profilesApi } from "./profiles";
+export { adminApi } from "./admin";
