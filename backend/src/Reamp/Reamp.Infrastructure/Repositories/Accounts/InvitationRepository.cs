@@ -68,7 +68,7 @@ namespace Reamp.Infrastructure.Repositories.Accounts
 
         public Task UpdateAsync(Invitation invitation, CancellationToken ct = default)
         {
-            _set.Update(invitation);
+            // EF Core tracks changes automatically
             return Task.CompletedTask;
         }
 

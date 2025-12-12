@@ -60,7 +60,7 @@ namespace Reamp.Application.Invitations.Services
 
             if (dto.AgencyBranchId.HasValue)
             {
-                var branch = await _branchRepository.GetByIdAsync(dto.AgencyBranchId.Value, ct);
+                var branch = await _branchRepository.GetByIdAsync(dto.AgencyBranchId.Value, asNoTracking: true, ct);
                 if (branch == null || branch.AgencyId != agencyId)
                     throw new KeyNotFoundException("Branch not found.");
             }
@@ -171,7 +171,7 @@ namespace Reamp.Application.Invitations.Services
                 string? branchName = null;
                 if (invitation.TargetBranchId.HasValue)
                 {
-                    var branch = await _branchRepository.GetByIdAsync(invitation.TargetBranchId.Value, ct);
+                    var branch = await _branchRepository.GetByIdAsync(invitation.TargetBranchId.Value, asNoTracking: true, ct);
                     branchName = branch?.Name;
                 }
 
@@ -216,7 +216,7 @@ namespace Reamp.Application.Invitations.Services
 
                 if (invitation.TargetBranchId.HasValue)
                 {
-                    var branch = await _branchRepository.GetByIdAsync(invitation.TargetBranchId.Value, ct);
+                    var branch = await _branchRepository.GetByIdAsync(invitation.TargetBranchId.Value, asNoTracking: true, ct);
                     branchName = branch?.Name;
                 }
             }
@@ -238,7 +238,7 @@ namespace Reamp.Application.Invitations.Services
             if (invitation == null)
                 throw new KeyNotFoundException($"Invitation with ID {invitationId} not found.");
 
-            var userProfile = await _userProfileRepository.GetByIdAsync(userId, asNoTracking: false, ct: ct);
+            var userProfile = await _userProfileRepository.GetByIdAsync(userId, asNoTracking: false, includeDeleted: false, ct: ct);
             if (userProfile == null)
                 throw new KeyNotFoundException("User profile not found.");
 
@@ -264,7 +264,7 @@ namespace Reamp.Application.Invitations.Services
             }
             else if (invitation.Type == InvitationType.Studio)
             {
-                var existingStaff = await _staffRepository.GetByUserProfileIdAsync(userId, ct);
+                var existingStaff = await _staffRepository.GetByUserProfileIdAsync(userId, asNoTracking: true, ct);
                 if (existingStaff != null)
                     throw new InvalidOperationException("User is already a staff member.");
 
@@ -314,7 +314,7 @@ namespace Reamp.Application.Invitations.Services
             string? branchName,
             CancellationToken ct)
         {
-            var inviter = await _userProfileRepository.GetByIdAsync(invitation.InvitedBy, asNoTracking: true, ct: ct);
+            var inviter = await _userProfileRepository.GetByIdAsync(invitation.InvitedBy, includeDeleted: false, asNoTracking: true, ct);
 
             return new InvitationDetailDto
             {
