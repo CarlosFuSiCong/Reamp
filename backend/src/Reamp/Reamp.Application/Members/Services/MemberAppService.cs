@@ -137,7 +137,7 @@ namespace Reamp.Application.Members.Services
             var result = new List<StudioMemberDto>();
             int pageNumber = 1;
             const int pageSize = 1000;
-            int totalProcessed = 0;
+            int totalFetched = 0;  // Track items fetched from repository
             int totalCount = 0;
 
             do
@@ -174,10 +174,10 @@ namespace Reamp.Application.Members.Services
                     });
                 }
 
-                totalProcessed += staffList.Items.Count;
+                totalFetched += staffList.Items.Count;  // Count all fetched items, not just processed
                 pageNumber++;
             }
-            while (totalProcessed < totalCount);
+            while (totalFetched < totalCount);  // Continue until all items fetched
 
             return result.OrderByDescending(m => m.Role).ThenBy(m => m.JoinedAtUtc).ToList();
         }
