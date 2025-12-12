@@ -196,6 +196,8 @@ namespace Reamp.Api
 
             // Application Services
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<Reamp.Application.Admin.Services.IAdminService,
+                Reamp.Application.Admin.Services.AdminService>();
             builder.Services.AddScoped<IAgencyAppService, AgencyAppService>();
             builder.Services.AddScoped<IClientAppService, ClientAppService>();
             builder.Services.AddScoped<IStaffAppService, StaffAppService>();

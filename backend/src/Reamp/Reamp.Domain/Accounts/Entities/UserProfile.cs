@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Accounts.Enums;
+using Reamp.Domain.Accounts.Enums;
 using Reamp.Domain.Common.Entities;
 using System;
 using System.Collections.Generic;
