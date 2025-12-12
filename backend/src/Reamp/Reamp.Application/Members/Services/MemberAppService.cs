@@ -133,9 +133,10 @@ namespace Reamp.Application.Members.Services
             Guid studioId,
             CancellationToken ct = default)
         {
+            // Use a large page size to retrieve all members (studios typically have <10k members)
             var staffList = await _staffRepository.ListByStudioAsync(
                 studioId,
-                new PageRequest(1, 1000),
+                new PageRequest(1, 10000),
                 null,
                 ct);
 
