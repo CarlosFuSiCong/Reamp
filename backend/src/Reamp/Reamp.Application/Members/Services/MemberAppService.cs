@@ -90,7 +90,10 @@ namespace Reamp.Application.Members.Services
             await _unitOfWork.SaveChangesAsync(ct);
 
             var profile = await _userProfileRepository.GetByIdAsync(agent.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
-            var appUser = await _userManager.FindByIdAsync(profile!.ApplicationUserId.ToString());
+            if (profile == null)
+                throw new InvalidOperationException("User profile not found for this member.");
+            
+            var appUser = await _userManager.FindByIdAsync(profile.ApplicationUserId.ToString());
 
             string? branchName = null;
             if (agent.AgencyBranchId.HasValue)
@@ -177,7 +180,10 @@ namespace Reamp.Application.Members.Services
             await _unitOfWork.SaveChangesAsync(ct);
 
             var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
-            var appUser = await _userManager.FindByIdAsync(profile!.ApplicationUserId.ToString());
+            if (profile == null)
+                throw new InvalidOperationException("User profile not found for this member.");
+            
+            var appUser = await _userManager.FindByIdAsync(profile.ApplicationUserId.ToString());
 
             return new StudioMemberDto
             {

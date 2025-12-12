@@ -43,10 +43,12 @@ namespace Reamp.Application.Invitations.Services
 
         Task RejectInvitationAsync(
             Guid invitationId,
+            string userEmail,
             CancellationToken ct = default);
 
         Task CancelInvitationAsync(
             Guid invitationId,
+            Guid currentUserId,
             CancellationToken ct = default);
     }
 }

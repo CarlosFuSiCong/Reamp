@@ -26,7 +26,10 @@ namespace Reamp.Api.Controllers
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim!);
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found.");
+            
+            return Guid.Parse(userIdClaim);
         }
 
         private string GetCurrentUserEmail()
@@ -109,7 +112,8 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _invitationService.RejectInvitationAsync(invitationId, ct);
+                var userEmail = GetCurrentUserEmail();
+                await _invitationService.RejectInvitationAsync(invitationId, userEmail, ct);
 
                 _logger.LogInformation("Invitation rejected: InvitationId={InvitationId}", invitationId);
 
@@ -120,6 +124,10 @@ namespace Reamp.Api.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {
@@ -133,7 +141,8 @@ namespace Reamp.Api.Controllers
         {
             try
             {
-                await _invitationService.CancelInvitationAsync(invitationId, ct);
+                var currentUserId = GetCurrentUserId();
+                await _invitationService.CancelInvitationAsync(invitationId, currentUserId, ct);
 
                 _logger.LogInformation("Invitation cancelled: InvitationId={InvitationId}", invitationId);
 
@@ -144,6 +153,10 @@ namespace Reamp.Api.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ApiResponse<object>.Fail(ex.Message));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
             }
             catch (InvalidOperationException ex)
             {

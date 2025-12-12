@@ -282,11 +282,17 @@ namespace Reamp.Application.Invitations.Services
 
         public async Task RejectInvitationAsync(
             Guid invitationId,
+            string userEmail,
             CancellationToken ct = default)
         {
             var invitation = await _invitationRepository.GetByIdAsync(invitationId, ct);
             if (invitation == null)
                 throw new KeyNotFoundException($"Invitation with ID {invitationId} not found.");
+
+            // Verify the user is the invitee
+            var normalizedEmail = userEmail.Trim().ToLowerInvariant();
+            if (invitation.InviteeEmail != normalizedEmail)
+                throw new UnauthorizedAccessException("You are not authorized to reject this invitation.");
 
             invitation.Reject();
 
@@ -296,11 +302,16 @@ namespace Reamp.Application.Invitations.Services
 
         public async Task CancelInvitationAsync(
             Guid invitationId,
+            Guid currentUserId,
             CancellationToken ct = default)
         {
             var invitation = await _invitationRepository.GetByIdAsync(invitationId, ct);
             if (invitation == null)
                 throw new KeyNotFoundException($"Invitation with ID {invitationId} not found.");
+
+            // Verify the user is the inviter
+            if (invitation.InvitedBy != currentUserId)
+                throw new UnauthorizedAccessException("You are not authorized to cancel this invitation.");
 
             invitation.Cancel();
 

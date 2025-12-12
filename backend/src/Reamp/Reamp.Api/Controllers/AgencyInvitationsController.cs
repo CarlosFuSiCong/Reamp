@@ -26,7 +26,10 @@ namespace Reamp.Api.Controllers
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdClaim!);
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedAccessException("User ID claim not found.");
+            
+            return Guid.Parse(userIdClaim);
         }
 
         // POST /api/agencies/{agencyId}/invitations - Send agency invitation
