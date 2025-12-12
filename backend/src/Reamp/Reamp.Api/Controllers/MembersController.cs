@@ -33,22 +33,10 @@ namespace Reamp.Api.Controllers
             Guid agencyId,
             CancellationToken ct)
         {
-            try
-            {
-                var members = await _memberService.GetAgencyMembersAsync(agencyId, ct);
-                return Ok(ApiResponse<List<AgencyMemberDto>>.Ok(
-                    members,
-                    "Agency members retrieved successfully"));
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving agency members: {AgencyId}", agencyId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while retrieving agency members"));
-            }
+            var members = await _memberService.GetAgencyMembersAsync(agencyId, ct);
+            return Ok(ApiResponse<List<AgencyMemberDto>>.Ok(
+                members,
+                "Agency members retrieved successfully"));
         }
 
         /// <summary>
@@ -62,31 +50,15 @@ namespace Reamp.Api.Controllers
             [FromBody] UpdateAgencyMemberRoleDto dto,
             CancellationToken ct)
         {
-            try
-            {
-                var member = await _memberService.UpdateAgencyMemberRoleAsync(agencyId, memberId, dto, ct);
-                
-                _logger.LogInformation(
-                    "Agency member role updated: AgencyId={AgencyId}, MemberId={MemberId}, NewRole={NewRole}",
-                    agencyId, memberId, dto.NewRole);
+            var member = await _memberService.UpdateAgencyMemberRoleAsync(agencyId, memberId, dto, ct);
+            
+            _logger.LogInformation(
+                "Agency member role updated: AgencyId={AgencyId}, MemberId={MemberId}, NewRole={NewRole}",
+                agencyId, memberId, dto.NewRole);
 
-                return Ok(ApiResponse<AgencyMemberDto>.Ok(
-                    member,
-                    "Member role updated successfully"));
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating agency member role: {AgencyId}, {MemberId}", agencyId, memberId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while updating member role"));
-            }
+            return Ok(ApiResponse<AgencyMemberDto>.Ok(
+                member,
+                "Member role updated successfully"));
         }
 
         /// <summary>
@@ -99,25 +71,13 @@ namespace Reamp.Api.Controllers
             Guid memberId,
             CancellationToken ct)
         {
-            try
-            {
-                await _memberService.RemoveAgencyMemberAsync(agencyId, memberId, ct);
-                
-                _logger.LogInformation(
-                    "Agency member removed: AgencyId={AgencyId}, MemberId={MemberId}",
-                    agencyId, memberId);
+            await _memberService.RemoveAgencyMemberAsync(agencyId, memberId, ct);
+            
+            _logger.LogInformation(
+                "Agency member removed: AgencyId={AgencyId}, MemberId={MemberId}",
+                agencyId, memberId);
 
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error removing agency member: {AgencyId}, {MemberId}", agencyId, memberId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while removing member"));
-            }
+            return NoContent();
         }
     }
 
@@ -146,22 +106,10 @@ namespace Reamp.Api.Controllers
             Guid studioId,
             CancellationToken ct)
         {
-            try
-            {
-                var members = await _memberService.GetStudioMembersAsync(studioId, ct);
-                return Ok(ApiResponse<List<StudioMemberDto>>.Ok(
-                    members,
-                    "Studio members retrieved successfully"));
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving studio members: {StudioId}", studioId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while retrieving studio members"));
-            }
+            var members = await _memberService.GetStudioMembersAsync(studioId, ct);
+            return Ok(ApiResponse<List<StudioMemberDto>>.Ok(
+                members,
+                "Studio members retrieved successfully"));
         }
 
         /// <summary>
@@ -175,31 +123,15 @@ namespace Reamp.Api.Controllers
             [FromBody] UpdateStudioMemberRoleDto dto,
             CancellationToken ct)
         {
-            try
-            {
-                var member = await _memberService.UpdateStudioMemberRoleAsync(studioId, memberId, dto, ct);
-                
-                _logger.LogInformation(
-                    "Studio member role updated: StudioId={StudioId}, MemberId={MemberId}, NewRole={NewRole}",
-                    studioId, memberId, dto.NewRole);
+            var member = await _memberService.UpdateStudioMemberRoleAsync(studioId, memberId, dto, ct);
+            
+            _logger.LogInformation(
+                "Studio member role updated: StudioId={StudioId}, MemberId={MemberId}, NewRole={NewRole}",
+                studioId, memberId, dto.NewRole);
 
-                return Ok(ApiResponse<StudioMemberDto>.Ok(
-                    member,
-                    "Member role updated successfully"));
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating studio member role: {StudioId}, {MemberId}", studioId, memberId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while updating member role"));
-            }
+            return Ok(ApiResponse<StudioMemberDto>.Ok(
+                member,
+                "Member role updated successfully"));
         }
 
         /// <summary>
@@ -212,25 +144,13 @@ namespace Reamp.Api.Controllers
             Guid memberId,
             CancellationToken ct)
         {
-            try
-            {
-                await _memberService.RemoveStudioMemberAsync(studioId, memberId, ct);
-                
-                _logger.LogInformation(
-                    "Studio member removed: StudioId={StudioId}, MemberId={MemberId}",
-                    studioId, memberId);
+            await _memberService.RemoveStudioMemberAsync(studioId, memberId, ct);
+            
+            _logger.LogInformation(
+                "Studio member removed: StudioId={StudioId}, MemberId={MemberId}",
+                studioId, memberId);
 
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ApiResponse<object>.Fail(ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error removing studio member: {StudioId}, {MemberId}", studioId, memberId);
-                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while removing member"));
-            }
+            return NoContent();
         }
     }
 }
