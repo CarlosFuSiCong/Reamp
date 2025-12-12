@@ -102,6 +102,9 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
             ))}
           </SelectContent>
         </Select>
+        <p className="text-sm text-muted-foreground">
+          The selected user will become the studio owner with full permissions.
+        </p>
         {errors.ownerUserId && <p className="text-sm text-red-600">{errors.ownerUserId.message}</p>}
       </div>
 
