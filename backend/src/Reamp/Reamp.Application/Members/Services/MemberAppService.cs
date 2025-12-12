@@ -176,7 +176,7 @@ namespace Reamp.Application.Members.Services
             // StaffRepository uses EF tracking, no Update method
             await _unitOfWork.SaveChangesAsync(ct);
 
-            var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, asNoTracking: true, ct: ct);
+            var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
             var appUser = await _userManager.FindByIdAsync(profile!.ApplicationUserId.ToString());
 
             return new StudioMemberDto
