@@ -225,6 +225,8 @@ namespace Reamp.Api
             // Query Services
             builder.Services.AddScoped<Reamp.Application.Common.Services.IAccountQueryService,
                 Reamp.Application.Common.Services.AccountQueryService>();
+            builder.Services.AddScoped<Reamp.Application.Common.Services.IPermissionService,
+                Reamp.Application.Common.Services.PermissionService>();
 
             // Media Services
             builder.Services.AddScoped<Reamp.Infrastructure.Services.Media.ICloudinaryService, 

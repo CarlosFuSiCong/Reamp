@@ -19,6 +19,8 @@ namespace Reamp.Application.Admin.Services
         private readonly IUserProfileRepository _userProfileRepo;
         private readonly IAgencyRepository _agencyRepo;
         private readonly IStudioRepository _studioRepo;
+        private readonly IAgentRepository _agentRepo;
+        private readonly IStaffRepository _staffRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<AdminService> _logger;
@@ -28,6 +30,8 @@ namespace Reamp.Application.Admin.Services
             IUserProfileRepository userProfileRepo,
             IAgencyRepository agencyRepo,
             IStudioRepository studioRepo,
+            IAgentRepository agentRepo,
+            IStaffRepository staffRepo,
             UserManager<ApplicationUser> userManager,
             IUnitOfWork uow,
             ILogger<AdminService> logger)
@@ -36,6 +40,8 @@ namespace Reamp.Application.Admin.Services
             _userProfileRepo = userProfileRepo;
             _agencyRepo = agencyRepo;
             _studioRepo = studioRepo;
+            _agentRepo = agentRepo;
+            _staffRepo = staffRepo;
             _userManager = userManager;
             _uow = uow;
             _logger = logger;
@@ -238,6 +244,11 @@ namespace Reamp.Application.Admin.Services
             await _agencyRepo.AddAsync(agency, ct);
             await _uow.SaveChangesAsync(ct);
 
+            // Automatically create Agent record with Owner role
+            var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
+            await _agentRepo.AddAsync(ownerAgent, ct);
+            await _uow.SaveChangesAsync(ct);
+
             _logger.LogInformation("Agency {AgencyName} created by admin with owner {OwnerId}", 
                 dto.Name, dto.OwnerUserId);
 
@@ -274,7 +285,7 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<StudioSummaryDto> CreateStudioAsync(CreateStudioForAdminDto dto, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, true, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(dto.OwnerUserId, false, false, ct);
             if (ownerProfile == null)
             {
                 throw new InvalidOperationException("Owner user not found");
@@ -289,6 +300,11 @@ namespace Reamp.Application.Admin.Services
             );
 
             await _studioRepo.AddAsync(studio, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            // Automatically create Staff record with Owner role
+            var ownerStaff = new Domain.Accounts.Entities.Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
+            await _staffRepo.AddAsync(ownerStaff, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Studio {StudioName} created by admin with owner {OwnerId}", 
