@@ -150,6 +150,10 @@ namespace Reamp.Application.Members.Services
 
                 totalCount = staffList.TotalCount;
 
+                // Break if no items returned to prevent infinite loop
+                if (staffList.Items.Count == 0)
+                    break;
+
                 foreach (var staff in staffList.Items)
                 {
                     var profile = await _userProfileRepository.GetByIdAsync(staff.UserProfileId, includeDeleted: false, asNoTracking: true, ct);
