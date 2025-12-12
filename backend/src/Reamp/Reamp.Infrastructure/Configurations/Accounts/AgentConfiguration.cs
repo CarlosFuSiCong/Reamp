@@ -29,13 +29,12 @@ namespace Reamp.Infrastructure.Configurations.Accounts
              .WithMany()
              .HasForeignKey(x => x.AgencyId)
              .OnDelete(DeleteBehavior.Restrict);
+            b.HasIndex(x => x.AgencyId);
 
             b.HasOne<AgencyBranch>()
              .WithMany()
              .HasForeignKey(x => x.AgencyBranchId)
              .OnDelete(DeleteBehavior.Restrict);
-
-            b.HasIndex(x => x.AgencyId);
             b.HasIndex(x => x.AgencyBranchId);
 
             b.Property(x => x.Role).IsRequired().HasConversion<int>();

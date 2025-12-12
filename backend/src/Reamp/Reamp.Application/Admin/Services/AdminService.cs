@@ -241,9 +241,16 @@ namespace Reamp.Application.Admin.Services
                 description: dto.Description
             );
 
+            // Check if owner already has an agent record
+            var existingAgent = await _agentRepo.GetByUserProfileIdAsync(ownerProfile.Id, ct);
+            if (existingAgent != null && existingAgent.DeletedAtUtc == null)
+            {
+                throw new InvalidOperationException("User already belongs to an agency");
+            }
+
             await _agencyRepo.AddAsync(agency, ct);
 
-            // Automatically create Agent record with Owner role
+            // Create Agent record with Owner role
             var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
             await _agentRepo.AddAsync(ownerAgent, ct);
             
@@ -300,9 +307,16 @@ namespace Reamp.Application.Admin.Services
                 description: dto.Description
             );
 
+            // Check if owner already has a staff record
+            var existingStaff = await _staffRepo.GetByUserProfileIdAsync(ownerProfile.Id, asNoTracking: false, ct);
+            if (existingStaff != null && existingStaff.DeletedAtUtc == null)
+            {
+                throw new InvalidOperationException("User already belongs to a studio");
+            }
+
             await _studioRepo.AddAsync(studio, ct);
 
-            // Automatically create Staff record with Owner role
+            // Create Staff record with Owner role
             var ownerStaff = new Domain.Accounts.Entities.Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
             await _staffRepo.AddAsync(ownerStaff, ct);
             
