@@ -77,7 +77,9 @@ namespace Reamp.Api.Controllers
                 var currentUserEmail = GetCurrentUserEmail();
                 
                 bool isInviter = invitation.InvitedBy == currentUserId;
-                bool isInvitee = invitation.InviteeEmail.Equals(currentUserEmail, StringComparison.OrdinalIgnoreCase);
+                // Normalize email to match how invitations are stored (trim + lowercase)
+                var normalizedEmail = currentUserEmail.Trim().ToLowerInvariant();
+                bool isInvitee = invitation.InviteeEmail.Equals(normalizedEmail, StringComparison.Ordinal);
                 
                 if (!isInviter && !isInvitee)
                     return Forbid();

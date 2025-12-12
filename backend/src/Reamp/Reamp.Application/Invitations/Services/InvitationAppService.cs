@@ -268,7 +268,13 @@ namespace Reamp.Application.Invitations.Services
             {
                 var existingAgent = await _agentRepository.GetByUserProfileIdAsync(userId, ct);
                 if (existingAgent != null)
-                    throw new InvalidOperationException("User is already an agent.");
+                {
+                    // Check if user is already an agent of THIS specific agency
+                    if (existingAgent.AgencyId == invitation.TargetEntityId)
+                        throw new InvalidOperationException("User is already a member of this agency.");
+                    else
+                        throw new InvalidOperationException("User is already an agent of another agency.");
+                }
 
                 var agent = new Agent(
                     userId,
@@ -282,7 +288,13 @@ namespace Reamp.Application.Invitations.Services
             {
                 var existingStaff = await _staffRepository.GetByUserProfileIdAsync(userId, asNoTracking: true, ct);
                 if (existingStaff != null)
-                    throw new InvalidOperationException("User is already a staff member.");
+                {
+                    // Check if user is already a staff member of THIS specific studio
+                    if (existingStaff.StudioId == invitation.TargetEntityId)
+                        throw new InvalidOperationException("User is already a member of this studio.");
+                    else
+                        throw new InvalidOperationException("User is already a staff member of another studio.");
+                }
 
                 var staff = new Staff(
                     userId,
