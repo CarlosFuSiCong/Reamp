@@ -242,11 +242,12 @@ namespace Reamp.Application.Admin.Services
             );
 
             await _agencyRepo.AddAsync(agency, ct);
-            await _uow.SaveChangesAsync(ct);
 
             // Automatically create Agent record with Owner role
             var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
             await _agentRepo.AddAsync(ownerAgent, ct);
+            
+            // Save both agency and owner agent in a single transaction
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Agency {AgencyName} created by admin with owner {OwnerId}", 
@@ -300,11 +301,12 @@ namespace Reamp.Application.Admin.Services
             );
 
             await _studioRepo.AddAsync(studio, ct);
-            await _uow.SaveChangesAsync(ct);
 
             // Automatically create Staff record with Owner role
             var ownerStaff = new Domain.Accounts.Entities.Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
             await _staffRepo.AddAsync(ownerStaff, ct);
+            
+            // Save both studio and owner staff in a single transaction
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Studio {StudioName} created by admin with owner {OwnerId}", 
