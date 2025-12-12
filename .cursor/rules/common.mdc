@@ -16,16 +16,11 @@ alwaysApply: true
   - `refactor:` for internal code improvements (no behavior change)
   - `docs:` for documentation changes
   - `chore:` for tools, config, formatting, build scripts
-- Commit messages must be **simple, short English sentences**, e.g.:
-  - `feat: add user service`
-  - `fix: correct email validation`
-  - `refactor: simplify order mapping`
-  - `docs: update API description`
-  - `chore: format project files`
+- Commit messages must be **simple, short English sentences**.
 
 ## 3. Comments & Code Style
 - Prefer **self-explanatory code** over long comments.
-- Only add comments for **non-obvious logic / caveats**.
+- Only add comments for **non-obvious logic or caveats**.
 - Use **simple one-line English comments** when necessary.
 - Avoid long descriptive block comments.
 
@@ -38,3 +33,7 @@ alwaysApply: true
 - **Do NOT generate full Markdown documents unless I explicitly request it.**
 - If a task might require a document, **summarize in a few sentences instead**.
 - If generating a long document is necessary, **ask me for confirmation first**.
+
+## 6. Task Summary (Required)
+- After completing a task, **summarize what was done in 2–3 short sentences**.
+- Focus on *what changed* and *why*, not on implementation details.

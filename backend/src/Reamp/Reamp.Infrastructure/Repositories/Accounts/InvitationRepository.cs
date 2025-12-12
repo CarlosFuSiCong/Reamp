@@ -19,7 +19,8 @@ namespace Reamp.Infrastructure.Repositories.Accounts
 
         public async Task<Invitation?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            return await base.GetByIdAsync(id, true, ct);
+            // Use asNoTracking: false to enable change tracking for updates
+            return await base.GetByIdAsync(id, asNoTracking: false, ct);
         }
 
         public async Task<List<Invitation>> GetByInviteeEmailAsync(string email, CancellationToken ct = default)
