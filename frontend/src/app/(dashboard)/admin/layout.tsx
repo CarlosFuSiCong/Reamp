@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { LoadingState } from "@/components/shared/loading-state";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
