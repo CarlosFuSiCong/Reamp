@@ -13,11 +13,11 @@ namespace Reamp.Application.UserProfiles.Validators
                 .MaximumLength(40)
                 .WithMessage("First name must not exceed 40 characters");
 
+            // LastName is optional (nullable) to match domain and database design
             RuleFor(x => x.LastName)
-                .NotNull()
-                .WithMessage("Last name cannot be null")
                 .MaximumLength(40)
-                .WithMessage("Last name must not exceed 40 characters");
+                .WithMessage("Last name must not exceed 40 characters")
+                .When(x => !string.IsNullOrEmpty(x.LastName));
         }
     }
 }

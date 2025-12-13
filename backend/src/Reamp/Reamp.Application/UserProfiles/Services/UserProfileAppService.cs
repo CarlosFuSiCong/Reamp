@@ -54,7 +54,7 @@ namespace Reamp.Application.UserProfiles.Services
             if (profile == null)
                 throw new KeyNotFoundException($"User profile with ID {id} not found");
 
-            profile.UpdateBasicInfo(dto.FirstName, dto.LastName);
+            profile.UpdateBasicInfo(dto.FirstName, dto.LastName ?? string.Empty);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("User profile {ProfileId} updated", id);
