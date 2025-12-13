@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { useAdminStats } from "@/lib/hooks/use-admin-stats";
-import { Users, Package, ShoppingCart, Building2, TrendingUp, AlertCircle } from "lucide-react";
+import { useApplications } from "@/lib/hooks";
+import { ApplicationStatus } from "@/types";
+import { Users, Package, ShoppingCart, Building2, TrendingUp, AlertCircle, ClipboardCheck } from "lucide-react";
 import { ActivityTimeline, Activity } from "@/components/dashboard/activity-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable, AgenciesTable, StudiosTable } from "@/components/admin";
@@ -16,6 +18,7 @@ import { Activity as AdminActivity } from "@/lib/api/admin";
 
 export default function AdminDashboardPage() {
   const { stats, activities, isLoading, error } = useAdminStats();
+  const { data: pendingApps } = useApplications(1, 10, ApplicationStatus.Pending);
 
   if (isLoading) {
     return <LoadingState message="Loading admin dashboard..." />;
@@ -32,7 +35,14 @@ export default function AdminDashboardPage() {
         description="System overview and management"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <StatsCard
+          title="Pending Applications"
+          value={pendingApps?.total ?? 0}
+          icon={ClipboardCheck}
+          description="Awaiting review"
+          className="border-orange-200 bg-orange-50"
+        />
         <StatsCard
           title="Total Users"
           value={stats.totalUsers}
@@ -79,12 +89,12 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-4">
+      <Tabs defaultValue="applications" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="agencies">Agencies</TabsTrigger>
           <TabsTrigger value="studios">Studios</TabsTrigger>
-          <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="alerts">System Alerts</TabsTrigger>
         </TabsList>
 
