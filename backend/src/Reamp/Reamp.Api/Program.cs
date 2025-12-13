@@ -135,7 +135,6 @@ namespace Reamp.Api
                         ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                         ClockSkew = TimeSpan.Zero,
-                        // Map the JWT 'sub' claim to NameIdentifier
                         NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
                         RoleClaimType = "role"
                     };
@@ -144,7 +143,6 @@ namespace Reamp.Api
                     {
                         OnMessageReceived = context =>
                         {
-                            // Try to read token from cookie first, fallback to Authorization header
                             var accessToken = context.Request.Cookies["accessToken"];
                             if (!string.IsNullOrEmpty(accessToken))
                             {
@@ -153,7 +151,6 @@ namespace Reamp.Api
                             }
                             else
                             {
-                                // Fallback to Authorization header (standard Bearer token)
                                 var authHeader = context.Request.Headers["Authorization"].ToString();
                                 if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -170,7 +167,7 @@ namespace Reamp.Api
                         OnAuthenticationFailed = context =>
                         {
                             Log.Warning("JWT authentication failed: {Error} for path: {Path}", 
-                                context.Exception.Message, context.Request.Path);
+                                context.Exception?.Message ?? "Unknown error", context.Request.Path);
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = context =>
