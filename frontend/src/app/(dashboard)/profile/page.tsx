@@ -89,7 +89,13 @@ export default function ProfilePage() {
             initialData={profileFormData}
             email={user?.email || ""}
             role={profile.role}
-            onSubmit={(data) => updateProfileMutation.mutate({ profileId: profile.id, data })}
+            onSubmit={(data) => updateProfileMutation.mutate({ 
+              profileId: profile.id, 
+              data: {
+                firstName: data.firstName,
+                lastName: data.lastName
+              }
+            })}
             isSubmitting={updateProfileMutation.isPending}
             isSuccess={updateProfileMutation.isSuccess}
           />

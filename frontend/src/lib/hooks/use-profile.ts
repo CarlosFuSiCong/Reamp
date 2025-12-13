@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { profilesApi } from "@/lib/api/profiles";
+import { profilesApi, UpdateProfileDto } from "@/lib/api/profiles";
 import { toast } from "sonner";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ profileId, data }: { profileId: string; data: any }) => 
+    mutationFn: ({ profileId, data }: { profileId: string; data: UpdateProfileDto }) => 
       profilesApi.update(profileId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });

@@ -2,9 +2,8 @@ import apiClient from "@/lib/api-client";
 import { UserProfile } from "@/types";
 
 export interface UpdateProfileDto {
-  firstName?: string;
-  lastName?: string;
-  displayName?: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface ChangePasswordDto {
