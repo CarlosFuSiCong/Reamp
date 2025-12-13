@@ -32,13 +32,22 @@ namespace Reamp.Api.Controllers
             _logger = logger;
         }
 
-        private async Task<Guid?> GetUserProfileIdAsync(CancellationToken ct)
+        private Guid? GetApplicationUserId()
         {
             var applicationUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (applicationUserIdClaim == null || !Guid.TryParse(applicationUserIdClaim, out var applicationUserId))
                 return null;
+            
+            return applicationUserId;
+        }
 
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId, includeDeleted: false, asNoTracking: true, ct);
+        private async Task<Guid?> GetUserProfileIdAsync(CancellationToken ct)
+        {
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return null;
+
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId.Value, includeDeleted: false, asNoTracking: true, ct);
             return profile?.Id;
         }
 
@@ -47,13 +56,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitAgencyApplicationDto dto,
             CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(userProfileId.Value, dto, ct);
+            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(applicationUserId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", userProfileId, applicationId);
+            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", applicationUserId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Agency application submitted successfully"));
         }
 
@@ -62,13 +71,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitStudioApplicationDto dto,
             CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applicationId = await _applicationService.SubmitStudioApplicationAsync(userProfileId.Value, dto, ct);
+            var applicationId = await _applicationService.SubmitStudioApplicationAsync(applicationUserId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", userProfileId, applicationId);
+            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", applicationUserId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Studio application submitted successfully"));
         }
 
