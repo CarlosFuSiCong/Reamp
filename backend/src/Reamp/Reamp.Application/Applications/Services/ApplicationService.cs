@@ -105,6 +105,9 @@ namespace Reamp.Application.Applications.Services
                 var profile = await _userProfileRepo.GetByApplicationUserIdAsync(app.ApplicantUserId, true, false, ct);
                 var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
                 
+                var applicantUser = await _dbContext.Users.FindAsync(new object[] { app.ApplicantUserId }, ct);
+                var applicantEmail = applicantUser?.Email ?? "Unknown";
+                
                 dtos.Add(new ApplicationListDto
                 {
                     Id = app.Id,
@@ -113,7 +116,7 @@ namespace Reamp.Application.Applications.Services
                     OrganizationName = app.OrganizationName,
                     ContactEmail = app.ContactEmail,
                     ApplicantUserId = app.ApplicantUserId,
-                    ApplicantEmail = fullName,
+                    ApplicantEmail = applicantEmail,
                     ApplicantName = fullName,
                     CreatedAtUtc = app.CreatedAtUtc,
                     ReviewedAtUtc = app.ReviewedAtUtc
@@ -128,6 +131,9 @@ namespace Reamp.Application.Applications.Services
             var applications = await _applicationRepo.GetByApplicantAsync(userId, ct);
             var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, true, false, ct);
             var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
+            
+            var applicantUser = await _dbContext.Users.FindAsync(new object[] { userId }, ct);
+            var applicantEmail = applicantUser?.Email ?? "Unknown";
 
             return applications.Select(app => new ApplicationListDto
             {
@@ -137,7 +143,7 @@ namespace Reamp.Application.Applications.Services
                 OrganizationName = app.OrganizationName,
                 ContactEmail = app.ContactEmail,
                 ApplicantUserId = app.ApplicantUserId,
-                ApplicantEmail = fullName,
+                ApplicantEmail = applicantEmail,
                 ApplicantName = fullName,
                 CreatedAtUtc = app.CreatedAtUtc,
                 ReviewedAtUtc = app.ReviewedAtUtc
@@ -153,6 +159,9 @@ namespace Reamp.Application.Applications.Services
             var applicantProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, true, false, ct);
             var applicantFullName = applicantProfile != null ? $"{applicantProfile.FirstName} {applicantProfile.LastName}" : "Unknown";
             
+            var applicantUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
+            var applicantEmail = applicantUser?.Email ?? "Unknown";
+            
             string? reviewerName = null;
             if (application.ReviewedBy.HasValue)
             {
@@ -166,7 +175,7 @@ namespace Reamp.Application.Applications.Services
                 Type = application.Type,
                 Status = application.Status,
                 ApplicantUserId = application.ApplicantUserId,
-                ApplicantEmail = applicantFullName,
+                ApplicantEmail = applicantEmail,
                 ApplicantName = applicantFullName,
                 OrganizationName = application.OrganizationName,
                 Description = application.Description,
