@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     // Agency navigation (user has agencyRole)
     if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
       const agencyItems: SidebarNavItem[] = [
-        { title: "Agency Dashboard", href: "/dashboard/agency", icon: Building2 },
+        { title: "Agency", href: "/dashboard/agency", icon: Building2 },
       ];
 
       // Owner & Manager can manage team and clients
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     // Studio navigation (user has studioRole)
     if (profile.studioRole !== undefined && profile.studioRole !== null) {
       const studioItems: SidebarNavItem[] = [
-        { title: "Studio Dashboard", href: "/dashboard/studio", icon: Building2 },
+        { title: "Studio", href: "/dashboard/studio", icon: Building2 },
       ];
 
       // Owner & Manager can manage team

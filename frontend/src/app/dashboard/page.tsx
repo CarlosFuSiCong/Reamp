@@ -108,7 +108,7 @@ export default function DashboardPage() {
   // For Agency members
   if (profile?.agencyRole !== undefined && profile?.agencyRole !== null) {
     const quickActions = [
-      { title: "Agency Dashboard", href: "/dashboard/agency", icon: Building2 },
+      { title: "Agency", href: "/dashboard/agency", icon: Building2 },
       { title: "Listings", href: "/dashboard/agency/listings", icon: ClipboardList },
       { title: "Profile", href: "/dashboard/profile", icon: FileText },
     ];
@@ -156,7 +156,7 @@ export default function DashboardPage() {
   // For Studio members
   if (profile?.studioRole !== undefined && profile?.studioRole !== null) {
     const quickActions = [
-      { title: "Studio Dashboard", href: "/dashboard/studio", icon: Building2 },
+      { title: "Studio", href: "/dashboard/studio", icon: Building2 },
       { title: "Profile", href: "/dashboard/profile", icon: FileText },
     ];
 
