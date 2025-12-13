@@ -6,12 +6,6 @@ import { UserRole } from "@/types";
 import { toast } from "sonner";
 
 function getRedirectPath(role: UserRole): string {
-  console.log("[DEBUG] getRedirectPath called with role:", role);
-  console.log("[DEBUG] Role type:", typeof role);
-  console.log("[DEBUG] UserRole.Admin:", UserRole.Admin, "Type:", typeof UserRole.Admin);
-  console.log("[DEBUG] Role === UserRole.Admin:", role === UserRole.Admin);
-  console.log("[DEBUG] Role == UserRole.Admin:", role == UserRole.Admin);
-  
   switch (role) {
     case UserRole.Admin:
       return "/admin/dashboard";
@@ -20,7 +14,6 @@ function getRedirectPath(role: UserRole): string {
     case UserRole.Staff:
       return "/studio/dashboard";
     default:
-      console.log("[DEBUG] Falling through to default case!");
       return "/";
   }
 }
@@ -33,8 +26,6 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: async (userInfo) => {
-      console.log("[DEBUG] Login success, userInfo:", userInfo);
-      
       const userData = {
         id: userInfo.userId,
         email: userInfo.email,
@@ -42,9 +33,6 @@ export function useAuth() {
         createdAt: userInfo.createdAtUtc,
         updatedAt: userInfo.updatedAtUtc,
       };
-      
-      console.log("[DEBUG] Processed userData:", userData);
-      console.log("[DEBUG] User role:", userInfo.role, "Type:", typeof userInfo.role);
       
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -54,8 +42,6 @@ export function useAuth() {
       });
       
       const redirectPath = getRedirectPath(userInfo.role);
-      console.log("[DEBUG] Redirect path:", redirectPath, "for role:", userInfo.role);
-      
       window.location.href = redirectPath;
     },
     onError: (error: any) => {
