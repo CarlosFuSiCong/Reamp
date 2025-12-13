@@ -140,17 +140,25 @@ namespace Reamp.Api
                             if (!string.IsNullOrEmpty(accessToken))
                             {
                                 context.Token = accessToken;
+                                Log.Debug("JWT token retrieved from cookie");
+                            }
+                            else
+                            {
+                                Log.Debug("No JWT token found in cookie");
                             }
                             return Task.CompletedTask;
                         },
                         OnAuthenticationFailed = context =>
                         {
-                            Log.Warning("JWT authentication failed: {Error}", context.Exception.Message);
+                            Log.Warning("JWT authentication failed: {Error} for path: {Path}", 
+                                context.Exception.Message, context.Request.Path);
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = context =>
                         {
-                            Log.Debug("JWT token validated for user: {UserId}", context.Principal?.Identity?.Name);
+                            var userId = context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                            Log.Debug("JWT token validated for user: {UserId} at path: {Path}", 
+                                userId ?? "unknown", context.Request.Path);
                             return Task.CompletedTask;
                         }
                     };

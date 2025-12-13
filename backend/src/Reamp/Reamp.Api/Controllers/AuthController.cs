@@ -232,7 +232,7 @@ namespace Reamp.Api.Controllers
             {
                 HttpOnly = true,
                 Secure = isProduction,
-                SameSite = SameSiteMode.Strict,
+                SameSite = isProduction ? SameSiteMode.Strict : SameSiteMode.Lax,
                 Expires = tokenResponse.ExpiresAt,
                 Path = "/"
             });
@@ -241,7 +241,7 @@ namespace Reamp.Api.Controllers
             {
                 HttpOnly = true,
                 Secure = isProduction,
-                SameSite = SameSiteMode.Strict,
+                SameSite = isProduction ? SameSiteMode.Strict : SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
                 Path = "/"
             });
