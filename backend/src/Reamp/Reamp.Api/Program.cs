@@ -3,10 +3,9 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.SqlServer;
 using Mapster;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Reamp.Api.Configuration;
 using Reamp.Application.Accounts.Agencies.Services;
 using Reamp.Application.Accounts.Clients.Services;
 using Reamp.Application.Accounts.Staff.Services;
@@ -37,7 +36,6 @@ using Reamp.Infrastructure.Repositories.Orders;
 using Reamp.Shared;
 using Reamp.Shared.Middlewares;
 using Serilog;
-using System.Text;
 
 namespace Reamp.Api
 {
@@ -103,87 +101,13 @@ namespace Reamp.Api
                 .AddDefaultTokenProviders();
 
             // Configuration
-            var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
-            if (jwtSettings == null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
-                throw new InvalidOperationException("JWT settings are not configured properly.");
-
-            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
             builder.Services.Configure<Reamp.Infrastructure.Configuration.CloudinarySettings>(
                 builder.Configuration.GetSection("CloudinarySettings"));
             builder.Services.Configure<Reamp.Infrastructure.Configuration.MediaUploadSettings>(
                 builder.Configuration.GetSection("MediaUploadSettings"));
 
-            // Authentication
-            builder.Services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    // Disable claim type mapping to preserve JWT standard claim names
-                    options.MapInboundClaims = false;
-                    
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                        ClockSkew = TimeSpan.Zero,
-                        NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "role"
-                    };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            var accessToken = context.Request.Cookies["accessToken"];
-                            if (!string.IsNullOrEmpty(accessToken))
-                            {
-                                context.Token = accessToken;
-                                Log.Debug("JWT token retrieved from cookie");
-                            }
-                            else
-                            {
-                                var authHeader = context.Request.Headers["Authorization"].ToString();
-                                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    context.Token = authHeader.Substring("Bearer ".Length).Trim();
-                                    Log.Debug("JWT token retrieved from Authorization header");
-                                }
-                                else
-                                {
-                                    Log.Debug("No JWT token found in cookie or Authorization header");
-                                }
-                            }
-                            return Task.CompletedTask;
-                        },
-                        OnAuthenticationFailed = context =>
-                        {
-                            Log.Warning("JWT authentication failed: {Error} for path: {Path}", 
-                                context.Exception?.Message ?? "Unknown error", context.Request.Path);
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
-                        {
-                            var allClaims = context.Principal?.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
-                            var userId = context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
-                            Log.Debug("JWT token validated. UserId: {UserId}, Claims: {Claims}, Path: {Path}", 
-                                userId ?? "unknown", 
-                                allClaims != null ? string.Join(", ", allClaims) : "none",
-                                context.Request.Path);
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-
-            // Authorization
+            // Authentication & Authorization
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy(AuthPolicies.RequireAdminRole, policy =>
