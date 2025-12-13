@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Users, Mail, Calendar, MoreVertical, UserPlus } from "lucide-react";
+import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,12 +31,14 @@ import {
   useUpdateAgencyMemberRole,
   useRemoveAgencyMember,
   useCancelInvitation,
+  useProfile,
 } from "@/lib/hooks";
 import { AgencyRole, InvitationStatus } from "@/types";
 
 export default function AgencyTeamPage() {
   const params = useParams();
   const agencyId = params?.agencyId as string || "";
+  const { user: profile } = useProfile();
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
@@ -59,10 +61,28 @@ export default function AgencyTeamPage() {
         return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
       case AgencyRole.Manager:
         return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
+      case AgencyRole.Agent:
+        return <Badge className="bg-green-50 text-green-700 border-green-200">Agent</Badge>;
       case AgencyRole.Member:
         return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
       default:
         return <Badge>{role}</Badge>;
+    }
+  };
+
+  const getRoleName = (role: AgencyRole | undefined) => {
+    if (role === undefined || role === null) return "Member";
+    switch (role) {
+      case AgencyRole.Owner:
+        return "Owner";
+      case AgencyRole.Manager:
+        return "Manager";
+      case AgencyRole.Agent:
+        return "Agent";
+      case AgencyRole.Member:
+        return "Member";
+      default:
+        return "Member";
     }
   };
 
@@ -111,7 +131,18 @@ export default function AgencyTeamPage() {
     <div>
       <PageHeader
         title="Team Management"
-        description="Manage your agency team members and invitations"
+        description={
+          <div className="flex items-center gap-2">
+            <span>Manage your agency team members and invitations</span>
+            {profile?.agencyRole !== undefined && (
+              <div className="flex items-center gap-2 ml-4">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Your role:</span>
+                {getRoleBadge(profile.agencyRole)}
+              </div>
+            )}
+          </div>
+        }
       >
         <Button onClick={() => setInviteDialogOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />

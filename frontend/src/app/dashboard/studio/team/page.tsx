@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Users, Mail, Calendar, MoreVertical, UserPlus } from "lucide-react";
+import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,12 +31,14 @@ import {
   useUpdateStudioMemberRole,
   useRemoveStudioMember,
   useCancelInvitation,
+  useProfile,
 } from "@/lib/hooks";
 import { StudioRole, InvitationStatus } from "@/types";
 
 export default function StudioTeamPage() {
   const params = useParams();
   const studioId = params?.studioId as string || "";
+  const { user: profile } = useProfile();
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
@@ -59,6 +61,10 @@ export default function StudioTeamPage() {
         return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
       case StudioRole.Manager:
         return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
+      case StudioRole.Photographer:
+        return <Badge className="bg-green-50 text-green-700 border-green-200">Photographer</Badge>;
+      case StudioRole.Editor:
+        return <Badge className="bg-orange-50 text-orange-700 border-orange-200">Editor</Badge>;
       case StudioRole.Member:
         return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
       default:
@@ -111,7 +117,18 @@ export default function StudioTeamPage() {
     <div>
       <PageHeader
         title="Team Management"
-        description="Manage your studio team members and invitations"
+        description={
+          <div className="flex items-center gap-2">
+            <span>Manage your studio team members and invitations</span>
+            {profile?.studioRole !== undefined && (
+              <div className="flex items-center gap-2 ml-4">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Your role:</span>
+                {getRoleBadge(profile.studioRole)}
+              </div>
+            )}
+          </div>
+        }
       >
         <Button onClick={() => setInviteDialogOpen(true)}>
           <UserPlus className="mr-2 h-4 w-4" />
