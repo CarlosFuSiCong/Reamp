@@ -6,6 +6,21 @@ export enum UserRole {
   Admin = 4,
 }
 
+export enum AgencyRole {
+  Member = 0,
+  Agent = 1,
+  Manager = 2,
+  Owner = 3,
+}
+
+export enum StudioRole {
+  Member = 0,
+  Editor = 1,
+  Photographer = 2,
+  Manager = 3,
+  Owner = 4,
+}
+
 export enum UserStatus {
   Active = 0,
   Inactive = 1,

@@ -1,41 +1,65 @@
 "use client";
 
-import { useAuth } from "@/lib/hooks";
+import { useAuth, useProfile } from "@/lib/hooks";
 import { PageHeader } from "@/components/shared";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserRole } from "@/types/enums";
+import { UserRole, AgencyRole, StudioRole } from "@/types/enums";
 import { Building2, Users, ClipboardList, FileText } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { data: profile, isLoading } = useProfile();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const getWelcomeMessage = () => {
-    if (!user) return "Welcome to Reamp";
+    if (!profile) return "Welcome to Reamp";
     
-    switch (user.role) {
-      case UserRole.AgencyOwner:
-        return "Welcome, Agency Owner";
-      case UserRole.AgencyManager:
-        return "Welcome, Agency Manager";
-      case UserRole.AgencyStaff:
-        return "Welcome, Agency Staff";
-      case UserRole.StudioOwner:
-        return "Welcome, Studio Owner";
-      case UserRole.StudioManager:
-        return "Welcome, Studio Manager";
-      case UserRole.StudioStaff:
-        return "Welcome, Studio Staff";
-      case UserRole.Admin:
-        return "Welcome, Administrator";
-      default:
-        return "Welcome to Reamp";
+    if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
+      switch (profile.agencyRole) {
+        case AgencyRole.Owner:
+          return "Welcome, Agency Owner";
+        case AgencyRole.Manager:
+          return "Welcome, Agency Manager";
+        case AgencyRole.Agent:
+          return "Welcome, Agency Agent";
+        default:
+          return "Welcome, Agency Member";
+      }
     }
+
+    if (profile.studioRole !== undefined && profile.studioRole !== null) {
+      switch (profile.studioRole) {
+        case StudioRole.Owner:
+          return "Welcome, Studio Owner";
+        case StudioRole.Manager:
+          return "Welcome, Studio Manager";
+        case StudioRole.Photographer:
+          return "Welcome, Photographer";
+        case StudioRole.Editor:
+          return "Welcome, Editor";
+        default:
+          return "Welcome, Studio Member";
+      }
+    }
+
+    if (user?.role === UserRole.Admin) {
+      return "Welcome, Administrator";
+    }
+
+    return "Welcome to Reamp";
   };
 
   // For regular Staff without organization
-  if (user?.role === UserRole.Staff) {
+  if (user?.role === UserRole.Staff && !profile?.agencyRole && !profile?.studioRole) {
     return (
       <div className="space-y-6">
         <PageHeader 
@@ -82,7 +106,7 @@ export default function DashboardPage() {
   }
 
   // For Agency members
-  if ([UserRole.AgencyOwner, UserRole.AgencyManager, UserRole.AgencyStaff].includes(user?.role as UserRole)) {
+  if (profile?.agencyRole !== undefined && profile?.agencyRole !== null) {
     const quickActions = [
       { title: "Agency Dashboard", href: "/dashboard/agency", icon: Building2 },
       { title: "Listings", href: "/dashboard/agency/listings", icon: ClipboardList },
@@ -90,7 +114,7 @@ export default function DashboardPage() {
     ];
 
     // Add Team and Clients for Owner/Manager
-    if ([UserRole.AgencyOwner, UserRole.AgencyManager].includes(user?.role as UserRole)) {
+    if ([AgencyRole.Owner, AgencyRole.Manager].includes(profile.agencyRole)) {
       quickActions.splice(1, 0, 
         { title: "Team", href: "/dashboard/agency/team", icon: Users }
       );
@@ -130,14 +154,14 @@ export default function DashboardPage() {
   }
 
   // For Studio members
-  if ([UserRole.StudioOwner, UserRole.StudioManager, UserRole.StudioStaff].includes(user?.role as UserRole)) {
+  if (profile?.studioRole !== undefined && profile?.studioRole !== null) {
     const quickActions = [
       { title: "Studio Dashboard", href: "/dashboard/studio", icon: Building2 },
       { title: "Profile", href: "/dashboard/profile", icon: FileText },
     ];
 
     // Add Team for Owner/Manager
-    if ([UserRole.StudioOwner, UserRole.StudioManager].includes(user?.role as UserRole)) {
+    if ([StudioRole.Owner, StudioRole.Manager].includes(profile.studioRole)) {
       quickActions.splice(1, 0,
         { title: "Team", href: "/dashboard/studio/team", icon: Users }
       );
