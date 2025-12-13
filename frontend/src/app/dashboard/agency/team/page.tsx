@@ -60,19 +60,23 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
     }
     
     // Convert to number if it's a string
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : role;
+    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
+    
+    // Debug log
+    console.log('Agency Role Value:', { original: role, converted: roleValue, type: typeof role });
     
     switch (roleValue) {
-      case AgencyRole.Owner:
+      case AgencyRole.Owner: // 3
         return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
-      case AgencyRole.Manager:
+      case AgencyRole.Manager: // 2
         return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-      case AgencyRole.Agent:
+      case AgencyRole.Agent: // 1
         return <Badge className="bg-green-50 text-green-700 border-green-200">Agent</Badge>;
-      case AgencyRole.Member:
+      case AgencyRole.Member: // 0
         return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
       default:
-        return <Badge>{role}</Badge>;
+        console.warn('Unknown agency role:', roleValue);
+        return <Badge>Role: {roleValue}</Badge>;
     }
   };
 

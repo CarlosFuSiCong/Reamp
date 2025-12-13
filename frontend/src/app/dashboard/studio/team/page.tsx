@@ -60,21 +60,25 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
     }
     
     // Convert to number if it's a string
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : role;
+    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
+    
+    // Debug log
+    console.log('Studio Role Value:', { original: role, converted: roleValue, type: typeof role });
     
     switch (roleValue) {
-      case StudioRole.Owner:
+      case StudioRole.Owner: // 4
         return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
-      case StudioRole.Manager:
+      case StudioRole.Manager: // 3
         return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-      case StudioRole.Photographer:
+      case StudioRole.Photographer: // 2
         return <Badge className="bg-green-50 text-green-700 border-green-200">Photographer</Badge>;
-      case StudioRole.Editor:
+      case StudioRole.Editor: // 1
         return <Badge className="bg-orange-50 text-orange-700 border-orange-200">Editor</Badge>;
-      case StudioRole.Member:
+      case StudioRole.Member: // 0
         return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
       default:
-        return <Badge>{role}</Badge>;
+        console.warn('Unknown studio role:', roleValue);
+        return <Badge>Role: {roleValue}</Badge>;
     }
   };
 
