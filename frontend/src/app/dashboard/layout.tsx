@@ -19,7 +19,7 @@ import { UserRole, AgencyRole, StudioRole } from "@/types/enums";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { data: profile, isLoading } = useProfile();
+  const { user: profile, isLoading } = useProfile();
 
   const getNavigationItems = (): SidebarNavItem[] => {
     if (!user || !profile) return [];

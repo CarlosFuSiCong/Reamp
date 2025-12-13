@@ -22,6 +22,9 @@ export function useUser() {
   };
 }
 
+// Alias for useUser - fetches current user profile
+export const useProfile = useUser;
+
 export function useUserById(id: string) {
   const {
     data: user,

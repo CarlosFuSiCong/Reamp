@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { data: profile, isLoading } = useProfile();
+  const { user: profile, isLoading } = useProfile();
 
   if (isLoading) {
     return (
