@@ -39,8 +39,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Agency", href: "/dashboard/agency", icon: Building2 },
       ];
 
+      const roleValue = typeof profile.agencyRole === 'string' 
+        ? parseInt(profile.agencyRole, 10) 
+        : Number(profile.agencyRole);
+
       // Owner & Manager can manage team and clients
-      if ([AgencyRole.Owner, AgencyRole.Manager].includes(profile.agencyRole)) {
+      if (roleValue === AgencyRole.Owner || roleValue === AgencyRole.Manager) {
         agencyItems.push(
           { title: "Team", href: "/dashboard/agency/team", icon: Users },
           { title: "Clients", href: "/dashboard/agency/clients", icon: Briefcase }
@@ -54,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       );
 
       // Only Owner can access settings
-      if (profile.agencyRole === AgencyRole.Owner) {
+      if (roleValue === AgencyRole.Owner) {
         agencyItems.push({ title: "Settings", href: "/dashboard/agency/settings", icon: Settings });
       }
 
@@ -67,8 +71,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
       ];
 
+      const roleValue = typeof profile.studioRole === 'string' 
+        ? parseInt(profile.studioRole, 10) 
+        : Number(profile.studioRole);
+
       // Owner & Manager can manage team
-      if ([StudioRole.Owner, StudioRole.Manager].includes(profile.studioRole)) {
+      if (roleValue === StudioRole.Owner || roleValue === StudioRole.Manager) {
         studioItems.push({ title: "Team", href: "/dashboard/studio/team", icon: Users });
       }
 

@@ -59,16 +59,9 @@ export function ProfileInfoForm({
     const trimmedFirstName = formData.firstName?.trim() || "";
     const trimmedLastName = formData.lastName?.trim() || "";
     
-    // If both are empty, show error
     if (!trimmedFirstName && !trimmedLastName) {
-      console.error("At least one of First Name or Last Name is required");
       return;
     }
-    
-    console.log("Submitting profile data:", {
-      firstName: trimmedFirstName,
-      lastName: trimmedLastName,
-    });
     
     onSubmit(formData);
   };

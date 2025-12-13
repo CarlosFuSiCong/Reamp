@@ -3,6 +3,7 @@
  * Consolidates all admin dashboard related state and logic
  */
 import { useAdminStats } from "./use-admin-stats";
+import { Activity } from "@/lib/api/admin";
 
 export interface AdminDashboardState {
   stats: {
@@ -20,13 +21,7 @@ export interface AdminDashboardState {
       message: string;
     }>;
   };
-  activities: Array<{
-    id: string;
-    type: string;
-    title: string;
-    description: string;
-    timestamp: Date;
-  }>;
+  activities: Activity[];
   isLoading: boolean;
   error: Error | null;
 }

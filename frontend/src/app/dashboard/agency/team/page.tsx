@@ -2,10 +2,15 @@
 
 import { use, useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
-import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
+import { 
+  PageHeader, 
+  LoadingState, 
+  ErrorState, 
+  AgencyRoleBadge, 
+  InvitationStatusBadge 
+} from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -33,12 +38,12 @@ import {
   useProfile,
 } from "@/lib/hooks";
 import { AgencyRole, InvitationStatus } from "@/types";
+import { canInviteAgencyMembers, canManageAgencyMember } from "@/lib/utils";
 
 export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?: string }> }) {
   const resolvedParams = use(params);
   const { user: profile } = useProfile();
   
-  // Get agencyId from profile instead of params
   const agencyId = profile?.agencyId || resolvedParams?.agencyId || "";
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -55,75 +60,6 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
   const updateRole = useUpdateAgencyMemberRole();
   const removeMember = useRemoveAgencyMember();
   const cancelInvitation = useCancelInvitation();
-
-  const getRoleName = (role: AgencyRole | undefined | null): string => {
-    if (role === undefined || role === null) return "Member";
-    
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    
-    switch (roleValue) {
-      case 0: return "Member";
-      case 1: return "Agent";
-      case 2: return "Manager";
-      case 3: return "Owner";
-      default: return "Unknown";
-    }
-  };
-
-  const getRoleBadge = (role: AgencyRole | undefined | null) => {
-    if (role === undefined || role === null) {
-      return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
-    }
-    
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    const roleName = getRoleName(role);
-    
-    switch (roleValue) {
-      case 3: // Owner
-        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">{roleName}</Badge>;
-      case 2: // Manager
-        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">{roleName}</Badge>;
-      case 1: // Agent
-        return <Badge className="bg-green-50 text-green-700 border-green-200">{roleName}</Badge>;
-      case 0: // Member
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">{roleName}</Badge>;
-      default:
-        return <Badge>{roleName}</Badge>;
-    }
-  };
-
-  const getRoleName = (role: AgencyRole | undefined) => {
-    if (role === undefined || role === null) return "Member";
-    switch (role) {
-      case AgencyRole.Owner:
-        return "Owner";
-      case AgencyRole.Manager:
-        return "Manager";
-      case AgencyRole.Agent:
-        return "Agent";
-      case AgencyRole.Member:
-        return "Member";
-      default:
-        return "Member";
-    }
-  };
-
-  const getStatusBadge = (status: InvitationStatus) => {
-    switch (status) {
-      case InvitationStatus.Pending:
-        return <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
-      case InvitationStatus.Accepted:
-        return <Badge className="bg-green-50 text-green-700 border-green-200">Accepted</Badge>;
-      case InvitationStatus.Rejected:
-        return <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>;
-      case InvitationStatus.Cancelled:
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Cancelled</Badge>;
-      case InvitationStatus.Expired:
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Expired</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
 
   const handleRemoveMember = () => {
     if (selectedMember) {
@@ -149,6 +85,8 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
     return <ErrorState message="Failed to load team members" />;
   }
 
+  const canInvite = canInviteAgencyMembers(profile?.agencyRole);
+
   return (
     <div>
       <PageHeader
@@ -160,16 +98,13 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Your role:</span>
-                {getRoleBadge(profile.agencyRole)}
+                <AgencyRoleBadge role={profile.agencyRole} />
               </div>
             )}
           </div>
         }
         action={
-          // Show invite button for Owner and Manager
-          profile?.agencyRole !== undefined && 
-          profile?.agencyRole !== null && 
-          (Number(profile.agencyRole) === 3 || Number(profile.agencyRole) === 2) ? (
+          canInvite ? (
             <Button onClick={() => setInviteDialogOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Member
@@ -221,7 +156,9 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                           {member.email}
                         </div>
                       </TableCell>
-                      <TableCell>{getRoleBadge(member.role)}</TableCell>
+                      <TableCell>
+                        <AgencyRoleBadge role={member.role} />
+                      </TableCell>
                       <TableCell>
                         {member.agencyBranchName || (
                           <span className="text-gray-400">No branch</span>
@@ -234,49 +171,48 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateRole.mutate({
-                                  agencyId,
-                                  memberId: member.id,
-                                  data: { newRole: AgencyRole.Manager },
-                                });
-                              }}
-                              disabled={member.role === AgencyRole.Owner}
-                            >
-                              Promote to Manager
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateRole.mutate({
-                                  agencyId,
-                                  memberId: member.id,
-                                  data: { newRole: AgencyRole.Member },
-                                });
-                              }}
-                              disabled={member.role === AgencyRole.Owner}
-                            >
-                              Change to Member
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member.id);
-                                setConfirmRemoveOpen(true);
-                              }}
-                              disabled={member.role === AgencyRole.Owner}
-                              className="text-red-600"
-                            >
-                              Remove Member
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {canManageAgencyMember(profile?.agencyRole, member.role) && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  updateRole.mutate({
+                                    agencyId,
+                                    memberId: member.id,
+                                    data: { newRole: AgencyRole.Manager },
+                                  });
+                                }}
+                              >
+                                Promote to Manager
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  updateRole.mutate({
+                                    agencyId,
+                                    memberId: member.id,
+                                    data: { newRole: AgencyRole.Member },
+                                  });
+                                }}
+                              >
+                                Change to Member
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedMember(member.id);
+                                  setConfirmRemoveOpen(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                Remove Member
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -317,7 +253,9 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                         </div>
                       </TableCell>
                       <TableCell>{invitation.targetRoleName}</TableCell>
-                      <TableCell>{getStatusBadge(invitation.status)}</TableCell>
+                      <TableCell>
+                        <InvitationStatusBadge status={invitation.status} />
+                      </TableCell>
                       <TableCell>{invitation.invitedByName}</TableCell>
                       <TableCell>
                         {new Date(invitation.createdAtUtc).toLocaleDateString()}

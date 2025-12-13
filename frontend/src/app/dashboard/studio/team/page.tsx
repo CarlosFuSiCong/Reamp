@@ -2,7 +2,13 @@
 
 import { use, useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
-import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
+import { 
+  PageHeader, 
+  LoadingState, 
+  ErrorState, 
+  StudioRoleBadge, 
+  InvitationStatusBadge 
+} from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,12 +39,12 @@ import {
   useProfile,
 } from "@/lib/hooks";
 import { StudioRole, InvitationStatus } from "@/types";
+import { canInviteStudioMembers, canManageStudioMember } from "@/lib/utils";
 
 export default function StudioTeamPage({ params }: { params: Promise<{ studioId?: string }> }) {
   const resolvedParams = use(params);
   const { user: profile } = useProfile();
   
-  // Get studioId from profile instead of params
   const studioId = profile?.studioId || resolvedParams?.studioId || "";
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -55,62 +61,6 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
   const updateRole = useUpdateStudioMemberRole();
   const removeMember = useRemoveStudioMember();
   const cancelInvitation = useCancelInvitation();
-
-  const getRoleName = (role: StudioRole | undefined | null): string => {
-    if (role === undefined || role === null) return "Member";
-    
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    
-    switch (roleValue) {
-      case 0: return "Member";
-      case 1: return "Editor";
-      case 2: return "Photographer";
-      case 3: return "Manager";
-      case 4: return "Owner";
-      default: return "Unknown";
-    }
-  };
-
-  const getRoleBadge = (role: StudioRole | undefined | null) => {
-    if (role === undefined || role === null) {
-      return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
-    }
-    
-    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    const roleName = getRoleName(role);
-    
-    switch (roleValue) {
-      case 4: // Owner
-        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">{roleName}</Badge>;
-      case 3: // Manager
-        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">{roleName}</Badge>;
-      case 2: // Photographer
-        return <Badge className="bg-green-50 text-green-700 border-green-200">{roleName}</Badge>;
-      case 1: // Editor
-        return <Badge className="bg-orange-50 text-orange-700 border-orange-200">{roleName}</Badge>;
-      case 0: // Member
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">{roleName}</Badge>;
-      default:
-        return <Badge>{roleName}</Badge>;
-    }
-  };
-
-  const getStatusBadge = (status: InvitationStatus) => {
-    switch (status) {
-      case InvitationStatus.Pending:
-        return <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
-      case InvitationStatus.Accepted:
-        return <Badge className="bg-green-50 text-green-700 border-green-200">Accepted</Badge>;
-      case InvitationStatus.Rejected:
-        return <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>;
-      case InvitationStatus.Cancelled:
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Cancelled</Badge>;
-      case InvitationStatus.Expired:
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Expired</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
 
   const handleRemoveMember = () => {
     if (selectedMember) {
@@ -136,6 +86,8 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
     return <ErrorState message="Failed to load team members" />;
   }
 
+  const canInvite = canInviteStudioMembers(profile?.studioRole);
+
   return (
     <div>
       <PageHeader
@@ -147,16 +99,13 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Your role:</span>
-                {getRoleBadge(profile.studioRole)}
+                <StudioRoleBadge role={profile.studioRole} />
               </div>
             )}
           </div>
         }
         action={
-          // Show invite button for Owner and Manager
-          profile?.studioRole !== undefined && 
-          profile?.studioRole !== null && 
-          (Number(profile.studioRole) === 4 || Number(profile.studioRole) === 3) ? (
+          canInvite ? (
             <Button onClick={() => setInviteDialogOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Staff
@@ -208,7 +157,9 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
                           {member.email}
                         </div>
                       </TableCell>
-                      <TableCell>{getRoleBadge(member.role)}</TableCell>
+                      <TableCell>
+                        <StudioRoleBadge role={member.role} />
+                      </TableCell>
                       <TableCell>
                         {member.skills && member.skills.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -234,49 +185,48 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateRole.mutate({
-                                  studioId,
-                                  memberId: member.id,
-                                  data: { newRole: StudioRole.Manager },
-                                });
-                              }}
-                              disabled={member.role === StudioRole.Owner}
-                            >
-                              Promote to Manager
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                updateRole.mutate({
-                                  studioId,
-                                  memberId: member.id,
-                                  data: { newRole: StudioRole.Member },
-                                });
-                              }}
-                              disabled={member.role === StudioRole.Owner}
-                            >
-                              Change to Member
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedMember(member.id);
-                                setConfirmRemoveOpen(true);
-                              }}
-                              disabled={member.role === StudioRole.Owner}
-                              className="text-red-600"
-                            >
-                              Remove Member
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {canManageStudioMember(profile?.studioRole, member.role) && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  updateRole.mutate({
+                                    studioId,
+                                    memberId: member.id,
+                                    data: { newRole: StudioRole.Manager },
+                                  });
+                                }}
+                              >
+                                Promote to Manager
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  updateRole.mutate({
+                                    studioId,
+                                    memberId: member.id,
+                                    data: { newRole: StudioRole.Member },
+                                  });
+                                }}
+                              >
+                                Change to Member
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedMember(member.id);
+                                  setConfirmRemoveOpen(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                Remove Member
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -317,7 +267,9 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
                         </div>
                       </TableCell>
                       <TableCell>{invitation.targetRoleName}</TableCell>
-                      <TableCell>{getStatusBadge(invitation.status)}</TableCell>
+                      <TableCell>
+                        <InvitationStatusBadge status={invitation.status} />
+                      </TableCell>
                       <TableCell>{invitation.invitedByName}</TableCell>
                       <TableCell>
                         {new Date(invitation.createdAtUtc).toLocaleDateString()}

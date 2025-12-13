@@ -80,7 +80,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
           <AvatarUpload
             avatarUrl={profile.avatarAssetId}
             displayName={profile.displayName}
-            onUpload={(file) => updateAvatarMutation.mutate({ profileId: profile.id, file })}
+            onUpload={(file) => updateAvatarMutation.mutate({ profileId: profile.id, file } as any)}
             isUploading={updateAvatarMutation.isPending}
           />
 

@@ -1,4 +1,4 @@
-import { AgencyRole, StudioRole } from "./invitation";
+import { AgencyRole, StudioRole } from "./enums";
 
 export interface AgencyMemberDto {
   id: string;

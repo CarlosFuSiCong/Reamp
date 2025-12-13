@@ -1,3 +1,5 @@
+import { AgencyRole, StudioRole } from "./enums";
+
 export enum InvitationType {
   Agency = 1,
   Studio = 2,
@@ -9,18 +11,6 @@ export enum InvitationStatus {
   Rejected = 3,
   Cancelled = 4,
   Expired = 5,
-}
-
-export enum AgencyRole {
-  Owner = 3,
-  Manager = 2,
-  Member = 1,
-}
-
-export enum StudioRole {
-  Owner = 3,
-  Manager = 2,
-  Member = 1,
 }
 
 export interface InvitationListDto {
