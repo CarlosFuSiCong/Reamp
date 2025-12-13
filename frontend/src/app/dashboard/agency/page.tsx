@@ -1,13 +1,23 @@
 "use client";
 
-import { Home, ShoppingCart, Users, Clock, Plus } from "lucide-react";
+import { useState } from "react";
+import { Home, ShoppingCart, Users, Clock, Plus, UserPlus } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { StatsCard, ActivityTimeline, QuickActions } from "@/components/dashboard";
+import { InviteMemberDialog } from "@/components/agencies";
+import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/lib/hooks/use-dashboard-stats";
+import { useProfile } from "@/lib/hooks";
 import { generateRecentActivities } from "@/lib/utils/activity-utils";
+import { AgencyRole } from "@/types/enums";
 
 export default function AgentDashboardPage() {
   const { stats, listings, orders, isLoading, error } = useDashboardStats();
+  const { user: profile } = useProfile();
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+
+  // Check if user can invite (Owner or Manager)
+  const canInvite = profile?.agencyRole === AgencyRole.Owner || profile?.agencyRole === AgencyRole.Manager;
 
   if (isLoading) {
     return <LoadingState message="Loading dashboard..." />;
@@ -28,8 +38,16 @@ export default function AgentDashboardPage() {
   return (
     <div>
       <PageHeader
-        title="Dashboard"
+        title="Agency Dashboard"
         description="Welcome back! Here's an overview of your activities"
+        action={
+          canInvite && (
+            <Button onClick={() => setInviteDialogOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite Member
+            </Button>
+          )
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -63,6 +81,14 @@ export default function AgentDashboardPage() {
         <QuickActions actions={quickActions} />
         <ActivityTimeline activities={recentActivities} />
       </div>
+
+      {canInvite && profile?.agencyId && (
+        <InviteMemberDialog
+          agencyId={profile.agencyId}
+          open={inviteDialogOpen}
+          onOpenChange={setInviteDialogOpen}
+        />
+      )}
     </div>
   );
 }
