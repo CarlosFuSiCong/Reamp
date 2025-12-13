@@ -53,12 +53,21 @@ apiClient.interceptors.response.use(
       console.log("API Response:", {
         status: response.status,
         data: response.data,
+        url: response.config.url,
       });
     }
 
     // Unwrap ApiResponse and return only the data field
     if (response.data && typeof response.data === "object" && "data" in response.data) {
+      const originalData = response.data;
       response.data = response.data.data as typeof response.data;
+      
+      if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
+        console.log("API Response unwrapped:", {
+          original: originalData,
+          unwrapped: response.data,
+        });
+      }
     }
 
     return response;
