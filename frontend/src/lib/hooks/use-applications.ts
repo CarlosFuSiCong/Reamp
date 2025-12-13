@@ -40,7 +40,16 @@ export function useSubmitAgencyApplication() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to submit agency application");
+      const errorMessage = error?.message || "Failed to submit agency application";
+      const errors = error?.errors;
+      
+      toast.error(errorMessage, { duration: 5000 });
+      
+      if (errors && Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: string) => {
+          toast.error(err, { duration: 5000 });
+        });
+      }
     },
   });
 }
@@ -55,7 +64,16 @@ export function useSubmitStudioApplication() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to submit studio application");
+      const errorMessage = error?.message || "Failed to submit studio application";
+      const errors = error?.errors;
+      
+      toast.error(errorMessage, { duration: 5000 });
+      
+      if (errors && Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: string) => {
+          toast.error(err, { duration: 5000 });
+        });
+      }
     },
   });
 }
@@ -71,7 +89,18 @@ export function useReviewApplication() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to review application");
+      const errorMessage = error?.message || "Failed to review application";
+      const errors = error?.errors;
+      
+      // Show main error message with longer duration
+      toast.error(errorMessage, { duration: 5000 });
+      
+      // Show additional error details if available
+      if (errors && Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: string) => {
+          toast.error(err, { duration: 5000 });
+        });
+      }
     },
   });
 }
@@ -86,7 +115,16 @@ export function useCancelApplication() {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to cancel application");
+      const errorMessage = error?.message || "Failed to cancel application";
+      const errors = error?.errors;
+      
+      toast.error(errorMessage, { duration: 5000 });
+      
+      if (errors && Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: string) => {
+          toast.error(err, { duration: 5000 });
+        });
+      }
     },
   });
 }

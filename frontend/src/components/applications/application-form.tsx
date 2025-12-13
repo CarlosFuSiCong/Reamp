@@ -69,7 +69,18 @@ export function ApplicationForm({ type, userEmail, onSuccess }: ApplicationFormP
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Failed to submit application");
+      const errorMessage = error?.message || "Failed to submit application";
+      const errors = error?.errors;
+      
+      // Show main error message
+      toast.error(errorMessage);
+      
+      // Show additional error details if available
+      if (errors && Array.isArray(errors) && errors.length > 0) {
+        errors.forEach((err: string) => {
+          toast.error(err);
+        });
+      }
     },
   });
 
