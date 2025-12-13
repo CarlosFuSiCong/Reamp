@@ -29,7 +29,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     ];
 
     // For regular Staff (no organization)
-    if (user.role === UserRole.Staff && !profile.agencyRole && !profile.studioRole) {
+    if (user.role === UserRole.Staff && 
+        (profile.agencyRole === undefined || profile.agencyRole === null) && 
+        (profile.studioRole === undefined || profile.studioRole === null)) {
       return baseItems;
     }
 
