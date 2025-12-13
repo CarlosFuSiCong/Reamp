@@ -24,9 +24,17 @@ export default function AdminDashboardPage() {
     return <LoadingState message="Loading admin dashboard..." />;
   }
 
-  if (error) {
-    return <ErrorState message="Failed to load dashboard data" />;
-  }
+  // Use default values if stats fail to load
+  const safeStats = error ? {
+    totalUsers: 0,
+    activeListings: 0,
+    totalOrders: 0,
+    totalStudios: 0,
+    chartData: [],
+    alerts: []
+  } : stats;
+
+  const safeActivities = error ? [] : activities;
 
   return (
     <div className="space-y-6">
@@ -45,25 +53,25 @@ export default function AdminDashboardPage() {
         />
         <StatsCard
           title="Total Users"
-          value={stats.totalUsers}
+          value={safeStats.totalUsers}
           icon={Users}
           description="Active platform users"
         />
         <StatsCard
           title="Active Listings"
-          value={stats.activeListings}
+          value={safeStats.activeListings}
           icon={Package}
           description="Currently active"
         />
         <StatsCard
           title="Total Orders"
-          value={stats.totalOrders}
+          value={safeStats.totalOrders}
           icon={ShoppingCart}
           description="All time orders"
         />
         <StatsCard
           title="Studios"
-          value={stats.totalStudios}
+          value={safeStats.totalStudios}
           icon={Building2}
           description="Registered studios"
         />
@@ -75,7 +83,7 @@ export default function AdminDashboardPage() {
             <CardTitle>System Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <StatsChart data={stats.chartData} />
+            <StatsChart data={safeStats.chartData} />
           </CardContent>
         </Card>
 
@@ -84,7 +92,7 @@ export default function AdminDashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <ActivityTimeline activities={activities as Activity[]} />
+            <ActivityTimeline activities={safeActivities as Activity[]} />
           </CardContent>
         </Card>
       </div>
@@ -131,8 +139,8 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {stats.alerts?.length > 0 ? (
-                  stats.alerts.map((alert, index) => (
+                {safeStats.alerts?.length > 0 ? (
+                  safeStats.alerts.map((alert, index) => (
                     <div
                       key={index}
                       className="flex items-start gap-3 rounded-lg border p-3"
