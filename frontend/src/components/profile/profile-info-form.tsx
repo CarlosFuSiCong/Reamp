@@ -110,9 +110,7 @@ export function ProfileInfoForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="displayName">
-              Display Name <span className="text-xs text-muted-foreground">(Auto-generated)</span>
-            </Label>
+            <Label htmlFor="displayName">Display Name</Label>
             <Input
               id="displayName"
               value={formData.displayName}
