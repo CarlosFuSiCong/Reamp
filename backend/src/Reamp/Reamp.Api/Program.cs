@@ -134,7 +134,10 @@ namespace Reamp.Api
                         ValidIssuer = jwtSettings.Issuer,
                         ValidAudience = jwtSettings.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                        ClockSkew = TimeSpan.Zero
+                        ClockSkew = TimeSpan.Zero,
+                        // Map the JWT 'sub' claim to NameIdentifier
+                        NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
+                        RoleClaimType = "role"
                     };
 
                     options.Events = new JwtBearerEvents
