@@ -7,11 +7,12 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { useAdminStats } from "@/lib/hooks/use-admin-stats";
 import { Users, Package, ShoppingCart, Building2, TrendingUp, AlertCircle } from "lucide-react";
-import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
+import { ActivityTimeline, Activity } from "@/components/dashboard/activity-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable, AgenciesTable, StudiosTable } from "@/components/admin";
 import { ApplicationsList } from "@/components/applications";
 import { StatsChart } from "@/components/admin/stats-chart";
+import { Activity as AdminActivity } from "@/lib/api/admin";
 
 export default function AdminDashboardPage() {
   const { stats, activities, isLoading, error } = useAdminStats();
@@ -73,7 +74,7 @@ export default function AdminDashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <ActivityTimeline activities={activities} />
+            <ActivityTimeline activities={activities as Activity[]} />
           </CardContent>
         </Card>
       </div>

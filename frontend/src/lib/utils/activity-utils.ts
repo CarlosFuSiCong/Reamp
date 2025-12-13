@@ -1,6 +1,8 @@
 import { Activity } from "@/components/dashboard";
 import { Listing, ShootOrder } from "@/types";
 
+type ActivityWithSortKey = Activity & { sortKey: number };
+
 export function generateRecentActivities(
   listings: Listing[],
   orders: ShootOrder[],
@@ -8,7 +10,7 @@ export function generateRecentActivities(
 ): Activity[] {
   const now = Date.now();
   
-  const activities: Activity[] = [
+  const activities: ActivityWithSortKey[] = [
     ...orders.slice(0, 3).map(order => ({
       id: order.id,
       type: "order" as const,
