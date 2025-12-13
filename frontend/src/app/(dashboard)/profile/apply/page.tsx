@@ -1,21 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ApplicationForm } from "@/components/applications";
 import { ApplicationType } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Camera } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/hooks";
+import { LoadingState } from "@/components/shared";
 
 export default function ApplyPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<"agency" | "studio">("agency");
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login?redirect=/profile/apply");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   const handleSuccess = () => {
-    // Redirect to profile page to view application history
     router.push("/profile?tab=applications");
   };
+
+  if (isLoading) {
+    return <LoadingState message="Loading..." />;
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   return (
     <div className="container max-w-4xl py-8">
@@ -49,7 +65,11 @@ export default function ApplyPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ApplicationForm type={ApplicationType.Agency} onSuccess={handleSuccess} />
+              <ApplicationForm 
+                type={ApplicationType.Agency} 
+                userEmail={user.email} 
+                onSuccess={handleSuccess} 
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -64,7 +84,11 @@ export default function ApplyPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ApplicationForm type={ApplicationType.Studio} onSuccess={handleSuccess} />
+              <ApplicationForm 
+                type={ApplicationType.Studio} 
+                userEmail={user.email} 
+                onSuccess={handleSuccess} 
+              />
             </CardContent>
           </Card>
         </TabsContent>

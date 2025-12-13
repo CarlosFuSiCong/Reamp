@@ -36,10 +36,11 @@ type StudioFormData = z.infer<typeof studioSchema>;
 
 interface ApplicationFormProps {
   type: ApplicationType;
+  userEmail: string;
   onSuccess?: () => void;
 }
 
-export function ApplicationForm({ type, onSuccess }: ApplicationFormProps) {
+export function ApplicationForm({ type, userEmail, onSuccess }: ApplicationFormProps) {
   const isStudio = type === ApplicationType.Studio;
   const schema = isStudio ? studioSchema : agencySchema;
   const queryClient = useQueryClient();
@@ -50,6 +51,9 @@ export function ApplicationForm({ type, onSuccess }: ApplicationFormProps) {
     formState: { errors },
   } = useForm<AgencyFormData | StudioFormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      contactEmail: userEmail,
+    },
   });
 
   const submitMutation = useMutation({
@@ -108,7 +112,10 @@ export function ApplicationForm({ type, onSuccess }: ApplicationFormProps) {
           type="email"
           {...register("contactEmail")}
           placeholder="contact@example.com"
+          disabled
+          className="bg-gray-50 cursor-not-allowed"
         />
+        <p className="text-xs text-gray-500">Using your account email</p>
         {errors.contactEmail && (
           <p className="text-sm text-red-600">{errors.contactEmail.message}</p>
         )}
