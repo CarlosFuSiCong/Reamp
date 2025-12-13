@@ -8,18 +8,14 @@ import { useEffect } from "react";
 import { LoadingState } from "@/components/shared/loading-state";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== UserRole.Admin)) {
+    if (!user || user.role !== UserRole.Admin) {
       router.push("/profile");
     }
-  }, [user, isLoading, router]);
-
-  if (isLoading) {
-    return <LoadingState message="Checking permissions..." />;
-  }
+  }, [user, router]);
 
   if (!user || user.role !== UserRole.Admin) {
     return null;
