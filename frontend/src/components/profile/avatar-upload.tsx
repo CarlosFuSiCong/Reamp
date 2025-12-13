@@ -62,18 +62,35 @@ export function AvatarUpload({
       // First upload the file to get an assetId and publicUrl
       const response = await mediaApi.upload(file, setUploadProgress);
       
-      // Then update the profile with the assetId
+      // Then trigger the profile update with the assetId
+      // Don't clear state yet - wait for the profile update to complete
       onUpload(response.id);
       
+      // State will be cleared when isUploading becomes false (via useEffect)
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload avatar");
+      // Only clear state on error, since the upload failed
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to upload avatar");
-    } finally {
       setUploading(false);
     }
+    // Note: uploading state is NOT set to false here - we keep it true
+    // until the entire process (media + profile update) completes
   };
+
+  // Clear state when the entire upload process (media + profile update) completes
+  useEffect(() => {
+    // When profile update finishes successfully
+    if (uploading && !isUploading && file) {
+      // Profile update completed, now we can clear the UI state
+      setFile(null);
+      setPreview(null);
+      setUploadProgress(0);
+      setUploading(false);
+      toast.success("Avatar updated successfully");
+    }
+  }, [isUploading, uploading, file]);
 
   const isProcessing = uploading || isUploading;
 
