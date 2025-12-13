@@ -122,6 +122,9 @@ namespace Reamp.Api
                 })
                 .AddJwtBearer(options =>
                 {
+                    // Disable claim type mapping to preserve JWT standard claim names
+                    options.MapInboundClaims = false;
+                    
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
