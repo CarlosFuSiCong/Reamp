@@ -11,15 +11,15 @@ namespace Reamp.Application.UserProfiles.Validators
                 .NotNull()
                 .WithMessage("First name cannot be null")
                 .MaximumLength(40)
-                .WithMessage("First name must not exceed 40 characters")
-                .When(x => !string.IsNullOrEmpty(x.FirstName));
+                .When(x => !string.IsNullOrEmpty(x.FirstName))
+                .WithMessage("First name must not exceed 40 characters");
 
             RuleFor(x => x.LastName)
                 .NotNull()
                 .WithMessage("Last name cannot be null")
                 .MaximumLength(40)
-                .WithMessage("Last name must not exceed 40 characters")
-                .When(x => !string.IsNullOrEmpty(x.LastName));
+                .When(x => !string.IsNullOrEmpty(x.LastName))
+                .WithMessage("Last name must not exceed 40 characters");
         }
     }
 }
