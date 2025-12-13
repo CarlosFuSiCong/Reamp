@@ -36,8 +36,10 @@ import { AgencyRole, InvitationStatus } from "@/types";
 
 export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?: string }> }) {
   const resolvedParams = use(params);
-  const agencyId = resolvedParams?.agencyId || "";
   const { user: profile } = useProfile();
+  
+  // Get agencyId from profile instead of params
+  const agencyId = profile?.agencyId || resolvedParams?.agencyId || "";
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);

@@ -36,8 +36,10 @@ import { StudioRole, InvitationStatus } from "@/types";
 
 export default function StudioTeamPage({ params }: { params: Promise<{ studioId?: string }> }) {
   const resolvedParams = use(params);
-  const studioId = resolvedParams?.studioId || "";
   const { user: profile } = useProfile();
+  
+  // Get studioId from profile instead of params
+  const studioId = profile?.studioId || resolvedParams?.studioId || "";
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
