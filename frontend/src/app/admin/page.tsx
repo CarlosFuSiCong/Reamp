@@ -24,7 +24,7 @@ export default function AdminDashboardPage() {
 
       <ActivitySection 
         chartData={stats.chartData} 
-        activities={activities as any} 
+        activities={activities} 
       />
 
       <ManagementTabs alerts={stats.alerts} />

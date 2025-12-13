@@ -62,7 +62,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         action={
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/agent/orders">
+              <Link href="/dashboard/agency/orders">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Orders
               </Link>
@@ -118,7 +118,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   {listing.city}, {listing.state} {listing.postcode}
                 </p>
                 <Button variant="outline" size="sm" asChild className="mt-2">
-                  <Link href={`/agent/listings/${listing.id}`}>
+                  <Link href={`/dashboard/agency/listings/${listing.id}`}>
                     View Listing
                   </Link>
                 </Button>
@@ -140,7 +140,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
           {order.status === OrderStatus.Completed && (
             <Button className="w-full" asChild>
-              <Link href={`/agent/orders/${order.id}/delivery`}>
+              <Link href={`/dashboard/agency/orders/${order.id}/delivery`}>
                 View Delivery
               </Link>
             </Button>
