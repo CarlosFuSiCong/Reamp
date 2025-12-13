@@ -277,7 +277,7 @@ namespace Reamp.Application.Applications.Services
                 if (appUser == null)
                     throw new InvalidOperationException("Applicant user not found");
 
-                // Create a default user profile
+                // Create a default user profile with User role initially
                 ownerProfile = UserProfile.Create(
                     applicationUserId: application.ApplicantUserId,
                     firstName: appUser.Email?.Split('@')[0] ?? "User",
@@ -285,7 +285,6 @@ namespace Reamp.Application.Applications.Services
                     role: UserRole.User
                 );
                 await _userProfileRepo.AddAsync(ownerProfile, ct);
-                await _uow.SaveChangesAsync(ct);
                 
                 _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
             }
@@ -308,6 +307,7 @@ namespace Reamp.Application.Applications.Services
             await _agentRepo.AddAsync(ownerAgent, ct);
 
             // Update user role to Client when they become an agency owner
+            // This must be done before SaveChangesAsync to ensure all changes are persisted together
             ownerProfile.SetRole(UserRole.Client);
 
             _logger.LogInformation("Agency {AgencyName} created from application with owner {OwnerId}", 
@@ -326,7 +326,7 @@ namespace Reamp.Application.Applications.Services
                 if (appUser == null)
                     throw new InvalidOperationException("Applicant user not found");
 
-                // Create a default user profile
+                // Create a default user profile with User role initially
                 ownerProfile = UserProfile.Create(
                     applicationUserId: application.ApplicantUserId,
                     firstName: appUser.Email?.Split('@')[0] ?? "User",
@@ -334,7 +334,6 @@ namespace Reamp.Application.Applications.Services
                     role: UserRole.User
                 );
                 await _userProfileRepo.AddAsync(ownerProfile, ct);
-                await _uow.SaveChangesAsync(ct);
                 
                 _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
             }
@@ -358,6 +357,7 @@ namespace Reamp.Application.Applications.Services
             await _staffRepo.AddAsync(ownerStaff, ct);
 
             // Update user role to Staff when they become a studio owner
+            // This must be done before SaveChangesAsync to ensure all changes are persisted together
             ownerProfile.SetRole(UserRole.Staff);
 
             _logger.LogInformation("Studio {StudioName} created from application with owner {OwnerId}", 
