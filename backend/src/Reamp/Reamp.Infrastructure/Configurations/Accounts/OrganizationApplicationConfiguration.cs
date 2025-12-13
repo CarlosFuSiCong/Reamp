@@ -22,6 +22,9 @@ namespace Reamp.Infrastructure.Configurations.Accounts
             b.Property(x => x.ApplicantUserId)
                 .IsRequired();
 
+            // Note: ApplicantUserId stores ApplicationUser.Id, not UserProfile.Id
+            // No foreign key constraint to allow flexibility
+
             b.Property(x => x.OrganizationName)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -60,11 +63,6 @@ namespace Reamp.Infrastructure.Configurations.Accounts
             b.Property(x => x.ReviewNotes)
                 .IsRequired(false)
                 .HasMaxLength(500);
-
-            b.HasOne<UserProfile>()
-                .WithMany()
-                .HasForeignKey(x => x.ApplicantUserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             b.HasIndex(x => x.ApplicantUserId);
             b.HasIndex(x => new { x.Status, x.Type });
