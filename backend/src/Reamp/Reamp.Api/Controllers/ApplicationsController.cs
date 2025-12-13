@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Applications.Dtos;
 using Reamp.Application.Applications.Services;
 using Reamp.Domain.Accounts.Enums;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Shared;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,14 +20,36 @@ namespace Reamp.Api.Controllers
     public sealed class ApplicationsController : ControllerBase
     {
         private readonly IApplicationService _applicationService;
+        private readonly IUserProfileRepository _userProfileRepo;
         private readonly ILogger<ApplicationsController> _logger;
 
         public ApplicationsController(
             IApplicationService applicationService,
+            IUserProfileRepository userProfileRepo,
             ILogger<ApplicationsController> logger)
         {
             _applicationService = applicationService;
+            _userProfileRepo = userProfileRepo;
             _logger = logger;
+        }
+
+        private Guid? GetApplicationUserId()
+        {
+            var applicationUserIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (applicationUserIdClaim == null || !Guid.TryParse(applicationUserIdClaim, out var applicationUserId))
+                return null;
+            
+            return applicationUserId;
+        }
+
+        private async Task<Guid?> GetUserProfileIdAsync(CancellationToken ct)
+        {
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return null;
+
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId.Value, includeDeleted: false, asNoTracking: true, ct);
+            return profile?.Id;
         }
 
         [HttpPost("agency")]
@@ -33,13 +57,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitAgencyApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(userId, dto, ct);
+            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(applicationUserId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", userId, applicationId);
+            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", applicationUserId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Agency application submitted successfully"));
         }
 
@@ -48,13 +72,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitStudioApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applicationId = await _applicationService.SubmitStudioApplicationAsync(userId, dto, ct);
+            var applicationId = await _applicationService.SubmitStudioApplicationAsync(applicationUserId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", userId, applicationId);
+            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", applicationUserId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Studio application submitted successfully"));
         }
 
@@ -77,11 +101,11 @@ namespace Reamp.Api.Controllers
         [HttpGet("my")]
         public async Task<IActionResult> GetMyApplications(CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applications = await _applicationService.GetMyApplicationsAsync(userId, ct);
+            var applications = await _applicationService.GetMyApplicationsAsync(applicationUserId.Value, ct);
 
             return Ok(ApiResponse<List<ApplicationListDto>>.Ok(applications));
         }
@@ -89,14 +113,14 @@ namespace Reamp.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationDetail(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
             var application = await _applicationService.GetApplicationDetailAsync(id, ct);
 
             var isAdmin = User.IsInRole(nameof(UserRole.Admin));
-            if (!isAdmin && application.ApplicantUserId != userId)
+            if (!isAdmin && application.ApplicantUserId != applicationUserId)
                 return Forbid();
 
             return Ok(ApiResponse<ApplicationDetailDto>.Ok(application));
@@ -109,14 +133,14 @@ namespace Reamp.Api.Controllers
             [FromBody] ReviewApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            await _applicationService.ReviewApplicationAsync(id, userId, dto, ct);
+            await _applicationService.ReviewApplicationAsync(id, applicationUserId.Value, dto, ct);
 
             var action = dto.Approved ? "approved" : "rejected";
-            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", userId, action, id);
+            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", applicationUserId, action, id);
             
             return Ok(ApiResponse.Ok($"Application {action} successfully"));
         }
@@ -124,13 +148,13 @@ namespace Reamp.Api.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelApplication(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            await _applicationService.CancelApplicationAsync(id, userId, ct);
+            await _applicationService.CancelApplicationAsync(id, applicationUserId.Value, ct);
 
-            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", userId, id);
+            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", applicationUserId, id);
             return Ok(ApiResponse.Ok("Application cancelled successfully"));
         }
     }

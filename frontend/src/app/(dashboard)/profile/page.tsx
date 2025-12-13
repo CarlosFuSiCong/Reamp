@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Lock } from "lucide-react";
+import { User, Lock, FileText } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { AvatarUpload, ProfileInfoForm, ChangePasswordForm } from "@/components/profile";
+import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 
 export default function ProfilePage() {
   const { user } = useAuthStore();
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams?.get("tab") || "profile";
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile"],
@@ -53,7 +57,7 @@ export default function ProfilePage() {
         description="Manage your profile and account settings" 
       />
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="profile">
             <User className="h-4 w-4 mr-2" />
@@ -62,6 +66,10 @@ export default function ProfilePage() {
           <TabsTrigger value="security">
             <Lock className="h-4 w-4 mr-2" />
             Security
+          </TabsTrigger>
+          <TabsTrigger value="applications">
+            <FileText className="h-4 w-4 mr-2" />
+            Applications
           </TabsTrigger>
         </TabsList>
 
@@ -89,6 +97,10 @@ export default function ProfilePage() {
             isSubmitting={changePasswordMutation.isPending}
             isSuccess={changePasswordMutation.isSuccess}
           />
+        </TabsContent>
+
+        <TabsContent value="applications">
+          <MyApplications />
         </TabsContent>
       </Tabs>
     </div>

@@ -269,9 +269,25 @@ namespace Reamp.Application.Applications.Services
 
         private async Task<Guid> CreateAgencyFromApplicationAsync(OrganizationApplication application, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, true, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, false, ct);
             if (ownerProfile == null)
-                throw new InvalidOperationException("Applicant user profile not found");
+            {
+                // Try to get the ApplicationUser to create a profile if missing
+                var appUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
+                if (appUser == null)
+                    throw new InvalidOperationException("Applicant user not found");
+
+                // Create a default user profile with User role initially
+                ownerProfile = UserProfile.Create(
+                    applicationUserId: application.ApplicantUserId,
+                    firstName: appUser.Email?.Split('@')[0] ?? "User",
+                    lastName: string.Empty,
+                    role: UserRole.User
+                );
+                await _userProfileRepo.AddAsync(ownerProfile, ct);
+                
+                _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
+            }
 
             var agency = Agency.Create(
                 name: application.OrganizationName,
@@ -290,6 +306,10 @@ namespace Reamp.Application.Applications.Services
             var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
             await _agentRepo.AddAsync(ownerAgent, ct);
 
+            // Update user role to Client when they become an agency owner
+            // This must be done before SaveChangesAsync to ensure all changes are persisted together
+            ownerProfile.SetRole(UserRole.Client);
+
             _logger.LogInformation("Agency {AgencyName} created from application with owner {OwnerId}", 
                 application.OrganizationName, application.ApplicantUserId);
 
@@ -298,9 +318,25 @@ namespace Reamp.Application.Applications.Services
 
         private async Task<Guid> CreateStudioFromApplicationAsync(OrganizationApplication application, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, true, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, false, ct);
             if (ownerProfile == null)
-                throw new InvalidOperationException("Applicant user profile not found");
+            {
+                // Try to get the ApplicationUser to create a profile if missing
+                var appUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
+                if (appUser == null)
+                    throw new InvalidOperationException("Applicant user not found");
+
+                // Create a default user profile with User role initially
+                ownerProfile = UserProfile.Create(
+                    applicationUserId: application.ApplicantUserId,
+                    firstName: appUser.Email?.Split('@')[0] ?? "User",
+                    lastName: string.Empty,
+                    role: UserRole.User
+                );
+                await _userProfileRepo.AddAsync(ownerProfile, ct);
+                
+                _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
+            }
 
             var studio = Studio.Create(
                 name: application.OrganizationName,
@@ -319,6 +355,10 @@ namespace Reamp.Application.Applications.Services
 
             var ownerStaff = new Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
             await _staffRepo.AddAsync(ownerStaff, ct);
+
+            // Update user role to Staff when they become a studio owner
+            // This must be done before SaveChangesAsync to ensure all changes are persisted together
+            ownerProfile.SetRole(UserRole.Staff);
 
             _logger.LogInformation("Studio {StudioName} created from application with owner {OwnerId}", 
                 application.OrganizationName, application.ApplicantUserId);

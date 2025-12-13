@@ -5,6 +5,7 @@ using Reamp.Application.Invitations.Dtos;
 using Reamp.Application.Invitations.Services;
 using Reamp.Domain.Accounts.Enums;
 using Reamp.Shared;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Reamp.Api.Controllers
@@ -27,7 +28,7 @@ namespace Reamp.Api.Controllers
 
         private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 throw new UnauthorizedAccessException("User ID claim not found.");
             

@@ -34,12 +34,12 @@ import { ordersApi } from "@/lib/api";
 const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
   studioId: z.string().min(1, "Please select a studio"),
-  currency: z.string().default("AUD"),
+  currency: z.string().min(1),
   tasks: z.array(
     z.object({
       taskType: z.nativeEnum(ShootTaskType),
       description: z.string().optional(),
-      unitPrice: z.coerce.number().min(0, "Price must be positive"),
+      unitPrice: z.number().min(0, "Price must be positive"),
     })
   ).min(1, "At least one task is required"),
 });
@@ -310,6 +310,8 @@ export function OrderCreationForm() {
                                   min="0"
                                   placeholder="0.00"
                                   {...field}
+                                  value={field.value || 0}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                 />
                               </FormControl>
                               <FormMessage />

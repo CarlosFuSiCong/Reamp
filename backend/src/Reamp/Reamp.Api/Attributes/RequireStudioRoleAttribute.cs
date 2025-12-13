@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Reamp.Application.Common.Services;
 using Reamp.Domain.Accounts.Enums;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Reamp.Api.Attributes
@@ -31,7 +32,7 @@ namespace Reamp.Api.Attributes
             }
 
             // Get user ID from claims
-            var userIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = context.HttpContext.User.FindFirst(JwtRegisteredClaimNames.Sub);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
                 context.Result = new UnauthorizedResult();

@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, ChevronDown, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Bell, ChevronDown, LogOut, Building2 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -26,6 +27,12 @@ export function Header({ breadcrumbs }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
+      {/* Logo - Link to home */}
+      <Link href="/" className="flex items-center gap-2 mr-4">
+        <Building2 className="h-5 w-5 text-blue-600" />
+        <span className="font-semibold">Reamp</span>
+      </Link>
+
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
           {breadcrumbs.map((crumb, index) => (

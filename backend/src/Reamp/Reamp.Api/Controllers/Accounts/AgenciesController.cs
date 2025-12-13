@@ -5,6 +5,7 @@ using Reamp.Application.Accounts.Agencies.Services;
 using Reamp.Application.Read.Agencies;
 using Reamp.Application.Read.Shared;
 using Reamp.Shared;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Reamp.Api.Controllers.Accounts
@@ -29,7 +30,7 @@ namespace Reamp.Api.Controllers.Accounts
 
         private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             return Guid.Parse(userIdClaim!);
         }
 

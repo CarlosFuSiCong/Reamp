@@ -23,7 +23,7 @@ export function StatsCard({
   className 
 }: StatsCardProps) {
   return (
-    <Card className={className}>
+    <Card className={cn("bg-card border-border", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -31,13 +31,13 @@ export function StatsCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold text-card-foreground">{value}</div>
         {(description || trend) && (
           <div className="mt-1 flex items-center gap-2">
             {trend && (
               <span className={cn(
                 "text-xs font-medium",
-                trend.isPositive ? "text-green-600" : "text-red-600"
+                trend.isPositive ? "text-chart-4" : "text-destructive"
               )}>
                 {trend.isPositive ? "+" : ""}{trend.value}%
               </span>
@@ -51,4 +51,3 @@ export function StatsCard({
     </Card>
   );
 }
-

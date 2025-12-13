@@ -49,124 +49,170 @@ namespace Reamp.Application.Admin.Services
 
         public async Task<AdminStatsResponse> GetStatsAsync(CancellationToken ct)
         {
-            // Batch all count queries
-            var countsTask = Task.WhenAll(
-                _dbContext.UserProfiles.CountAsync(ct),
-                _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Active, ct),
-                _dbContext.ShootOrders.CountAsync(ct),
-                _dbContext.Studios.CountAsync(ct),
-                _dbContext.ShootOrders.CountAsync(o => o.Status == ShootOrderStatus.Placed, ct),
-                _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Pending, ct)
-            );
+            try
+            {
+                // Batch all count queries with safe defaults
+                var totalUsers = await _dbContext.UserProfiles.CountAsync(ct);
+                var totalStudios = await _dbContext.Studios.CountAsync(ct);
 
-            // Get chart data for last 7 days in single query
-            var sixDaysAgo = DateTime.UtcNow.AddDays(-6).Date;
-            var ordersGrouped = await _dbContext.ShootOrders
-                .Where(o => o.CreatedAtUtc >= sixDaysAgo)
-                .GroupBy(o => o.CreatedAtUtc.Date)
-                .Select(g => new { Date = g.Key, Count = g.Count() })
-                .ToListAsync(ct);
+                // These tables may not exist yet, so use try-catch
+                int activeListings = 0;
+                int totalOrders = 0;
+                int pendingOrders = 0;
+                int pendingListings = 0;
 
-            var listingsGrouped = await _dbContext.Listings
-                .Where(l => l.CreatedAtUtc >= sixDaysAgo)
-                .GroupBy(l => l.CreatedAtUtc.Date)
-                .Select(g => new { Date = g.Key, Count = g.Count() })
-                .ToListAsync(ct);
+                try
+                {
+                    activeListings = await _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Active, ct);
+                    pendingListings = await _dbContext.Listings.CountAsync(l => l.Status == ListingStatus.Pending, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to query Listings table, using default values");
+                }
 
-            // Get recent activities in single query
-            var recentActivitiesTask = Task.WhenAll(
-                _dbContext.ShootOrders
-                    .OrderByDescending(o => o.CreatedAtUtc)
-                    .Take(5)
-                    .Select(o => new ActivityDto
+                try
+                {
+                    totalOrders = await _dbContext.ShootOrders.CountAsync(ct);
+                    pendingOrders = await _dbContext.ShootOrders.CountAsync(o => o.Status == ShootOrderStatus.Placed, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to query ShootOrders table, using default values");
+                }
+
+                // Get chart data for last 7 days - with safe defaults
+                var chartData = new List<ChartDataPoint>();
+                var sixDaysAgo = DateTime.UtcNow.AddDays(-6).Date;
+
+                try
+                {
+                    // Execute queries sequentially to avoid DbContext concurrency issues
+                    var ordersGrouped = await _dbContext.ShootOrders
+                        .Where(o => o.CreatedAtUtc >= sixDaysAgo)
+                        .GroupBy(o => o.CreatedAtUtc.Date)
+                        .Select(g => new { Date = g.Key, Count = g.Count() })
+                        .ToListAsync(ct);
+
+                    var ordersDict = ordersGrouped.ToDictionary(x => x.Date, x => x.Count);
+
+                    var listingsGrouped = await _dbContext.Listings
+                        .Where(l => l.CreatedAtUtc >= sixDaysAgo)
+                        .GroupBy(l => l.CreatedAtUtc.Date)
+                        .Select(g => new { Date = g.Key, Count = g.Count() })
+                        .ToListAsync(ct);
+
+                    var listingsDict = listingsGrouped.ToDictionary(x => x.Date, x => x.Count);
+
+                    for (int i = 6; i >= 0; i--)
                     {
-                        Id = o.Id.ToString(),
-                        Type = "order",
-                        Title = "New Order",
-                        Description = "New order placed",
-                        Timestamp = o.CreatedAtUtc
-                    })
-                    .ToListAsync(ct),
-                _dbContext.Listings
-                    .OrderByDescending(l => l.CreatedAtUtc)
-                    .Take(5)
-                    .Select(l => new ActivityDto
+                        var date = DateTime.UtcNow.AddDays(-i).Date;
+                        chartData.Add(new ChartDataPoint
+                        {
+                            Date = date.ToString("MM/dd"),
+                            Orders = ordersDict.GetValueOrDefault(date, 0),
+                            Listings = listingsDict.GetValueOrDefault(date, 0)
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate chart data, using empty data");
+                    // Generate empty chart data
+                    for (int i = 6; i >= 0; i--)
                     {
-                        Id = l.Id.ToString(),
-                        Type = "listing",
-                        Title = "New Listing",
-                        Description = "New listing created",
-                        Timestamp = l.CreatedAtUtc
-                    })
-                    .ToListAsync(ct)
-            );
+                        var date = DateTime.UtcNow.AddDays(-i).Date;
+                        chartData.Add(new ChartDataPoint
+                        {
+                            Date = date.ToString("MM/dd"),
+                            Orders = 0,
+                            Listings = 0
+                        });
+                    }
+                }
 
-            // Wait for all queries to complete
-            var counts = await countsTask;
-            var recentActivities = await recentActivitiesTask;
+                // Get recent activities - with safe defaults
+                var activities = new List<ActivityDto>();
 
-            var totalUsers = counts[0];
-            var activeListings = counts[1];
-            var totalOrders = counts[2];
-            var totalStudios = counts[3];
-            var pendingOrders = counts[4];
-            var pendingListings = counts[5];
-
-            // Build chart data from grouped results
-            var ordersDict = ordersGrouped.ToDictionary(x => x.Date, x => x.Count);
-            var listingsDict = listingsGrouped.ToDictionary(x => x.Date, x => x.Count);
-            var chartData = new List<ChartDataPoint>();
-
-            for (int i = 6; i >= 0; i--)
-            {
-                var date = DateTime.UtcNow.AddDays(-i).Date;
-                chartData.Add(new ChartDataPoint
+                try
                 {
-                    Date = date.ToString("MM/dd"),
-                    Orders = ordersDict.GetValueOrDefault(date, 0),
-                    Listings = listingsDict.GetValueOrDefault(date, 0)
-                });
-            }
+                    // Execute queries sequentially to avoid DbContext concurrency issues
+                    var orderActivities = await _dbContext.ShootOrders
+                        .OrderByDescending(o => o.CreatedAtUtc)
+                        .Take(5)
+                        .Select(o => new ActivityDto
+                        {
+                            Id = o.Id.ToString(),
+                            Type = "order",
+                            Title = "New Order",
+                            Description = "New order placed",
+                            Timestamp = o.CreatedAtUtc
+                        })
+                        .ToListAsync(ct);
 
-            // Generate system alerts
-            var alerts = new List<SystemAlert>();
-            if (pendingOrders > 0)
-            {
-                alerts.Add(new SystemAlert
+                    var listingActivities = await _dbContext.Listings
+                        .OrderByDescending(l => l.CreatedAtUtc)
+                        .Take(5)
+                        .Select(l => new ActivityDto
+                        {
+                            Id = l.Id.ToString(),
+                            Type = "listing",
+                            Title = "New Listing",
+                            Description = "New listing created",
+                            Timestamp = l.CreatedAtUtc
+                        })
+                        .ToListAsync(ct);
+
+                    activities = orderActivities.Concat(listingActivities)
+                        .OrderByDescending(a => a.Timestamp)
+                        .Take(10)
+                        .ToList();
+                }
+                catch (Exception ex)
                 {
-                    Title = "Pending Orders",
-                    Message = $"{pendingOrders} order(s) waiting for acceptance"
-                });
-            }
-            if (pendingListings > 0)
-            {
-                alerts.Add(new SystemAlert
+                    _logger.LogWarning(ex, "Failed to fetch recent activities, using empty list");
+                }
+
+                // Generate system alerts
+                var alerts = new List<SystemAlert>();
+                if (pendingOrders > 0)
                 {
-                    Title = "Pending Listings",
-                    Message = $"{pendingListings} listing(s) awaiting approval"
-                });
+                    alerts.Add(new SystemAlert
+                    {
+                        Title = "Pending Orders",
+                        Message = $"{pendingOrders} order(s) waiting for acceptance"
+                    });
+                }
+                if (pendingListings > 0)
+                {
+                    alerts.Add(new SystemAlert
+                    {
+                        Title = "Pending Listings",
+                        Message = $"{pendingListings} listing(s) awaiting approval"
+                    });
+                }
+
+                var stats = new AdminStatsDto
+                {
+                    TotalUsers = totalUsers,
+                    ActiveListings = activeListings,
+                    TotalOrders = totalOrders,
+                    TotalStudios = totalStudios,
+                    ChartData = chartData,
+                    Alerts = alerts
+                };
+
+                return new AdminStatsResponse
+                {
+                    Stats = stats,
+                    Activities = activities
+                };
             }
-
-            var activities = recentActivities[0].Concat(recentActivities[1])
-                .OrderByDescending(a => a.Timestamp)
-                .Take(10)
-                .ToList();
-
-            var stats = new AdminStatsDto
+            catch (Exception ex)
             {
-                TotalUsers = totalUsers,
-                ActiveListings = activeListings,
-                TotalOrders = totalOrders,
-                TotalStudios = totalStudios,
-                ChartData = chartData,
-                Alerts = alerts
-            };
-
-            return new AdminStatsResponse
-            {
-                Stats = stats,
-                Activities = activities
-            };
+                _logger.LogError(ex, "Failed to get admin stats");
+                throw new InvalidOperationException("Failed to retrieve admin statistics", ex);
+            }
         }
 
         public async Task<List<AdminUserDto>> GetUsersAsync(CancellationToken ct)
