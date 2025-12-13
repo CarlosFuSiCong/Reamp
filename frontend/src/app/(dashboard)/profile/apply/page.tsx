@@ -16,10 +16,10 @@ export default function ApplyPage() {
   const [activeTab, setActiveTab] = useState<"agency" | "studio">("agency");
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthenticated && !isLoading) {
       router.push("/login?redirect=/profile/apply");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSuccess = () => {
     router.push("/profile?tab=applications");

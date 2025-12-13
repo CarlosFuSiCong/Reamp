@@ -6,7 +6,7 @@ using Reamp.Domain.Accounts.Enums;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Shared;
 using System;
-using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +33,7 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitAgencyApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
@@ -48,7 +48,7 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitStudioApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
@@ -77,7 +77,7 @@ namespace Reamp.Api.Controllers
         [HttpGet("my")]
         public async Task<IActionResult> GetMyApplications(CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
@@ -89,7 +89,7 @@ namespace Reamp.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationDetail(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
@@ -109,7 +109,7 @@ namespace Reamp.Api.Controllers
             [FromBody] ReviewApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
@@ -124,7 +124,7 @@ namespace Reamp.Api.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelApplication(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized(ApiResponse.Fail("Invalid token"));
 
