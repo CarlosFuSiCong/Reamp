@@ -146,7 +146,7 @@ namespace Reamp.Application.Applications.Services
         public async Task<List<ApplicationListDto>> GetMyApplicationsAsync(Guid userId, CancellationToken ct = default)
         {
             var applications = await _applicationRepo.GetByApplicantAsync(userId, ct);
-            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, true, false, ct);
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, includeDeleted: false, asNoTracking: true, ct);
             var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
             
             var applicantUser = await _dbContext.Users.FindAsync(new object[] { userId }, ct);
@@ -173,7 +173,7 @@ namespace Reamp.Application.Applications.Services
             if (application == null)
                 throw new InvalidOperationException("Application not found");
 
-            var applicantProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, true, false, ct);
+            var applicantProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, includeDeleted: false, asNoTracking: true, ct);
             var applicantFullName = applicantProfile != null ? $"{applicantProfile.FirstName} {applicantProfile.LastName}" : "Unknown";
             
             var applicantUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
@@ -182,7 +182,7 @@ namespace Reamp.Application.Applications.Services
             string? reviewerName = null;
             if (application.ReviewedBy.HasValue)
             {
-                var reviewerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ReviewedBy.Value, true, false, ct);
+                var reviewerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ReviewedBy.Value, includeDeleted: false, asNoTracking: true, ct);
                 reviewerName = reviewerProfile != null ? $"{reviewerProfile.FirstName} {reviewerProfile.LastName}" : "Unknown";
             }
 
