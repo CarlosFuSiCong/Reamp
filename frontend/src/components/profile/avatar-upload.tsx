@@ -10,7 +10,7 @@ import { mediaApi } from "@/lib/api";
 import { toast } from "sonner";
 
 interface AvatarUploadProps {
-  avatarAssetId?: string;  // Changed from avatarUrl to avatarAssetId
+  avatarAssetId?: string;
   displayName?: string;
   onUpload: (assetId: string) => void;
   isUploading?: boolean;
@@ -28,7 +28,6 @@ export function AvatarUpload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
 
-  // Fetch avatar URL when avatarAssetId changes
   useEffect(() => {
     if (avatarAssetId) {
       mediaApi.getUrl(avatarAssetId)
@@ -59,41 +58,26 @@ export function AvatarUpload({
     setUploadProgress(0);
     
     try {
-      // First upload the file to get an assetId and publicUrl
       const response = await mediaApi.upload(file, setUploadProgress);
-      
-      // Then trigger the profile update with the assetId
-      // Don't clear state yet - wait for the profile update to complete
       onUpload(response.id);
-      
-      // State will be cleared when isUploading becomes false (via useEffect)
     } catch (error: any) {
       toast.error(error?.message || "Failed to upload avatar");
-      // Only clear state on error, since the upload failed
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
       setUploading(false);
     }
-    // Note: uploading state is NOT set to false here - we keep it true
-    // until the entire process (media + profile update) completes
   };
 
-  // Clear state when the entire upload process (media + profile update) completes
+  // Wait for profile mutation to complete before clearing state
   useEffect(() => {
-    // When profile update finishes (success or error), clear the UI state
-    // We check !isUploading to detect when the mutation completes
-    // We check uploading to ensure we only clean up after our own upload
     if (uploading && !isUploading) {
-      // Profile update completed, now we can clear the UI state
-      // Note: Don't show toast here - the mutation hook already handles notifications
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
       setUploading(false);
     }
   }, [isUploading, uploading]);
-  // Note: removed 'file' from dependencies to avoid re-triggering after state cleanup
 
   const isProcessing = uploading || isUploading;
 
