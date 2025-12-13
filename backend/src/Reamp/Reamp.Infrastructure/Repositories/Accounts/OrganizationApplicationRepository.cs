@@ -25,7 +25,7 @@ namespace Reamp.Infrastructure.Repositories.Accounts
             return await query.FirstOrDefaultAsync(x => x.Id == id && x.DeletedAtUtc == null, ct);
         }
 
-        public async Task<PagedResult<OrganizationApplication>> GetPagedAsync(
+        public async Task<IPagedList<OrganizationApplication>> GetPagedAsync(
             PageRequest pageRequest,
             ApplicationStatus? status = null,
             ApplicationType? type = null,
@@ -47,7 +47,7 @@ namespace Reamp.Infrastructure.Repositories.Accounts
                 .Take(pageRequest.PageSize)
                 .ToListAsync(ct);
 
-            return new PagedResult<OrganizationApplication>(items, total, pageRequest.Page, pageRequest.PageSize);
+            return new PagedList<OrganizationApplication>(items, total, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task<List<OrganizationApplication>> GetByApplicantAsync(

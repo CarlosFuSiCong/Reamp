@@ -91,7 +91,7 @@ namespace Reamp.Application.Applications.Services
             return application.Id;
         }
 
-        public async Task<PagedResult<ApplicationListDto>> GetApplicationsAsync(
+        public async Task<IPagedList<ApplicationListDto>> GetApplicationsAsync(
             PageRequest pageRequest,
             ApplicationStatus? status = null,
             ApplicationType? type = null,
@@ -120,7 +120,7 @@ namespace Reamp.Application.Applications.Services
                 });
             }
 
-            return new PagedResult<ApplicationListDto>(dtos, pagedApplications.Total, pagedApplications.Page, pagedApplications.PageSize);
+            return new PagedList<ApplicationListDto>(dtos, pagedApplications.TotalCount, pagedApplications.Page, pagedApplications.PageSize);
         }
 
         public async Task<List<ApplicationListDto>> GetMyApplicationsAsync(Guid userId, CancellationToken ct = default)
@@ -174,10 +174,10 @@ namespace Reamp.Application.Applications.Services
                 ContactPhone = application.ContactPhone,
                 Address = application.Address != null ? new AddressDto
                 {
-                    Street = application.Address.Street,
+                    Street = application.Address.Line1,
                     City = application.Address.City,
                     State = application.Address.State,
-                    PostalCode = application.Address.PostalCode,
+                    PostalCode = application.Address.Postcode,
                     Country = application.Address.Country
                 } : null,
                 CreatedOrganizationId = application.CreatedOrganizationId,

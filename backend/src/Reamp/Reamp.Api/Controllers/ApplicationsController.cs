@@ -71,7 +71,7 @@ namespace Reamp.Api.Controllers
             var result = await _applicationService.GetApplicationsAsync(pageRequest, status, type, ct);
 
             _logger.LogInformation("Admin retrieved applications page {Page}", page);
-            return Ok(ApiResponse<PagedResult<ApplicationListDto>>.Ok(result));
+            return Ok(ApiResponse<IPagedList<ApplicationListDto>>.Ok(result));
         }
 
         [HttpGet("my")]

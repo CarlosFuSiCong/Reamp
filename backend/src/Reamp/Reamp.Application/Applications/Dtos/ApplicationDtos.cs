@@ -106,7 +106,13 @@ namespace Reamp.Application.Applications.Dtos
                 string.IsNullOrWhiteSpace(State))
                 return null;
 
-            return Address.Create(Street, City, State, PostalCode, Country);
+            return new Address(
+                Street ?? string.Empty, 
+                City ?? string.Empty, 
+                State ?? string.Empty, 
+                PostalCode ?? string.Empty, 
+                Country ?? "US"
+            );
         }
     }
 }

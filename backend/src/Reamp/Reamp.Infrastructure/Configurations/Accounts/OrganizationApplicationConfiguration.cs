@@ -40,11 +40,12 @@ namespace Reamp.Infrastructure.Configurations.Accounts
 
             b.OwnsOne(x => x.Address, addr =>
             {
-                addr.Property(a => a.Street).HasMaxLength(200).HasColumnName("Address_Street");
+                addr.Property(a => a.Line1).HasMaxLength(200).HasColumnName("Address_Line1");
+                addr.Property(a => a.Line2).HasMaxLength(200).HasColumnName("Address_Line2");
                 addr.Property(a => a.City).HasMaxLength(100).HasColumnName("Address_City");
                 addr.Property(a => a.State).HasMaxLength(100).HasColumnName("Address_State");
-                addr.Property(a => a.PostalCode).HasMaxLength(20).HasColumnName("Address_PostalCode");
-                addr.Property(a => a.Country).HasMaxLength(100).HasColumnName("Address_Country");
+                addr.Property(a => a.Postcode).HasMaxLength(20).HasColumnName("Address_Postcode");
+                addr.Property(a => a.Country).HasMaxLength(2).HasColumnName("Address_Country");
             });
 
             b.Property(x => x.CreatedOrganizationId)

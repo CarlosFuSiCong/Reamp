@@ -12,7 +12,7 @@ namespace Reamp.Domain.Accounts.Repositories
     {
         Task<OrganizationApplication?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default);
         
-        Task<PagedResult<OrganizationApplication>> GetPagedAsync(
+        Task<IPagedList<OrganizationApplication>> GetPagedAsync(
             PageRequest pageRequest,
             ApplicationStatus? status = null,
             ApplicationType? type = null,

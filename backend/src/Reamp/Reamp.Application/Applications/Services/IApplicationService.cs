@@ -14,7 +14,7 @@ namespace Reamp.Application.Applications.Services
         
         Task<Guid> SubmitStudioApplicationAsync(Guid applicantUserId, SubmitStudioApplicationDto dto, CancellationToken ct = default);
         
-        Task<PagedResult<ApplicationListDto>> GetApplicationsAsync(
+        Task<IPagedList<ApplicationListDto>> GetApplicationsAsync(
             PageRequest pageRequest,
             ApplicationStatus? status = null,
             ApplicationType? type = null,
