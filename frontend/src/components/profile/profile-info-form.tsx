@@ -45,8 +45,15 @@ export function ProfileInfoForm({
     }
   }, [isSuccess]);
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     // Only validate if values are provided
     const trimmedFirstName = formData.firstName?.trim() || "";
@@ -66,7 +73,9 @@ export function ProfileInfoForm({
     onSubmit(formData);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setFormData(initialData);
     setIsEditing(false);
   };
@@ -126,7 +135,7 @@ export function ProfileInfoForm({
 
           <div className="flex gap-2">
             {!isEditing ? (
-              <Button type="button" onClick={() => setIsEditing(true)}>
+              <Button type="button" onClick={handleEdit}>
                 Edit Profile
               </Button>
             ) : (
