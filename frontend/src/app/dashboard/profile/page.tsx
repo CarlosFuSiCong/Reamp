@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Lock, FileText, Mail } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
@@ -12,10 +11,10 @@ import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations } from
 import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 
-export default function ProfilePage() {
+export default function ProfilePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { user } = useAuthStore();
-  const searchParams = useSearchParams();
-  const defaultTab = searchParams?.get("tab") || "profile";
+  const resolvedSearchParams = use(searchParams);
+  const defaultTab = resolvedSearchParams?.tab || "profile";
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile"],

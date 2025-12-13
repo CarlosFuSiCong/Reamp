@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   PageHeader,
   LoadingState,
@@ -23,10 +23,10 @@ import { ArrowLeft, XCircle, Building2, Camera, Home } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
-export default function OrderDetailPage() {
-  const params = useParams();
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
-  const orderId = params.id as string;
+  const orderId = resolvedParams.id;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data: order, isLoading, error } = useOrder(orderId);
