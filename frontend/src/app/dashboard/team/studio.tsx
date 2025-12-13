@@ -1,16 +1,15 @@
-"use client";
-
-import { use, useState } from "react";
+import { useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
 import { 
   PageHeader, 
   LoadingState, 
   ErrorState, 
-  AgencyRoleBadge, 
+  StudioRoleBadge, 
   InvitationStatusBadge 
 } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -27,24 +26,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InviteMemberDialog } from "@/components/agencies";
+import { InviteStaffDialog } from "@/components/studios";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
-  useAgencyMembers,
-  useAgencyInvitations,
-  useUpdateAgencyMemberRole,
-  useRemoveAgencyMember,
+  useStudioMembers,
+  useStudioInvitations,
+  useUpdateStudioMemberRole,
+  useRemoveStudioMember,
   useCancelInvitation,
   useProfile,
 } from "@/lib/hooks";
-import { AgencyRole, InvitationStatus } from "@/types";
-import { canInviteAgencyMembers, canManageAgencyMember } from "@/lib/utils";
+import { StudioRole, InvitationStatus } from "@/types";
+import { canInviteStudioMembers, canManageStudioMember } from "@/lib/utils";
 
-export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?: string }> }) {
-  const resolvedParams = use(params);
+export default function StudioTeamPage() {
   const { user: profile } = useProfile();
   
-  const agencyId = profile?.agencyId || resolvedParams?.agencyId || "";
+  const studioId = profile?.studioId || "";
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
@@ -53,17 +51,17 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
   const { data: members, isLoading: membersLoading, error: membersError } =
-    useAgencyMembers(agencyId);
+    useStudioMembers(studioId);
   const { data: invitations, isLoading: invitationsLoading } =
-    useAgencyInvitations(agencyId);
+    useStudioInvitations(studioId);
 
-  const updateRole = useUpdateAgencyMemberRole();
-  const removeMember = useRemoveAgencyMember();
+  const updateRole = useUpdateStudioMemberRole();
+  const removeMember = useRemoveStudioMember();
   const cancelInvitation = useCancelInvitation();
 
   const handleRemoveMember = () => {
     if (selectedMember) {
-      removeMember.mutate({ agencyId, memberId: selectedMember });
+      removeMember.mutate({ studioId, memberId: selectedMember });
       setConfirmRemoveOpen(false);
       setSelectedMember(null);
     }
@@ -85,7 +83,7 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
     return <ErrorState message="Failed to load team members" />;
   }
 
-  const canInvite = canInviteAgencyMembers(profile?.agencyRole);
+  const canInvite = canInviteStudioMembers(profile?.studioRole);
 
   return (
     <div>
@@ -93,12 +91,12 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
         title="Team Management"
         description={
           <div className="flex items-center flex-wrap gap-4">
-            <span>Manage your agency team members and invitations</span>
-            {profile?.agencyRole !== undefined && profile?.agencyRole !== null && (
+            <span>Manage your studio team members and invitations</span>
+            {profile?.studioRole !== undefined && profile?.studioRole !== null && (
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Your role:</span>
-                <AgencyRoleBadge role={profile.agencyRole} />
+                <StudioRoleBadge role={profile.studioRole} />
               </div>
             )}
           </div>
@@ -107,7 +105,7 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
           canInvite ? (
             <Button onClick={() => setInviteDialogOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
-              Invite Member
+              Invite Staff
             </Button>
           ) : null
         }
@@ -132,7 +130,7 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                     <TableHead>Member</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Branch</TableHead>
+                    <TableHead>Skills</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -157,11 +155,24 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                         </div>
                       </TableCell>
                       <TableCell>
-                        <AgencyRoleBadge role={member.role} />
+                        <StudioRoleBadge role={member.role} />
                       </TableCell>
                       <TableCell>
-                        {member.agencyBranchName || (
-                          <span className="text-gray-400">No branch</span>
+                        {member.skills && member.skills.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {member.skills.slice(0, 3).map((skill, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {member.skills.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{member.skills.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">No skills</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -171,7 +182,7 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        {canManageAgencyMember(profile?.agencyRole, member.role) && (
+                        {canManageStudioMember(profile?.studioRole, member.role) && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -182,9 +193,9 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                               <DropdownMenuItem
                                 onClick={() => {
                                   updateRole.mutate({
-                                    agencyId,
+                                    studioId,
                                     memberId: member.id,
-                                    data: { newRole: AgencyRole.Manager },
+                                    data: { newRole: StudioRole.Manager },
                                   });
                                 }}
                               >
@@ -193,9 +204,9 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
                               <DropdownMenuItem
                                 onClick={() => {
                                   updateRole.mutate({
-                                    agencyId,
+                                    studioId,
                                     memberId: member.id,
-                                    data: { newRole: AgencyRole.Member },
+                                    data: { newRole: StudioRole.Member },
                                   });
                                 }}
                               >
@@ -298,8 +309,8 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
         </Tabs>
       </Card>
 
-      <InviteMemberDialog
-        agencyId={agencyId}
+      <InviteStaffDialog
+        studioId={studioId}
         open={inviteDialogOpen}
         onOpenChange={setInviteDialogOpen}
       />
@@ -308,7 +319,7 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
         open={confirmRemoveOpen}
         onOpenChange={setConfirmRemoveOpen}
         title="Remove Team Member"
-        description="Are you sure you want to remove this member? They will lose access to the agency."
+        description="Are you sure you want to remove this member? They will lose access to the studio."
         onConfirm={handleRemoveMember}
         confirmText="Remove"
         variant="destructive"

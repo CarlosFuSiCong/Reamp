@@ -46,7 +46,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       // Owner & Manager can manage team and clients
       if (roleValue === AgencyRole.Owner || roleValue === AgencyRole.Manager) {
         agencyItems.push(
-          { title: "Team", href: "/dashboard/agency/team", icon: Users },
+          { title: "Team", href: "/dashboard/team", icon: Users },
           { title: "Clients", href: "/dashboard/agency/clients", icon: Briefcase }
         );
       }
@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       // Owner & Manager can manage team
       if (roleValue === StudioRole.Owner || roleValue === StudioRole.Manager) {
-        studioItems.push({ title: "Team", href: "/dashboard/studio/team", icon: Users });
+        studioItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
       }
 
       // All studio members can view orders (studio side)
