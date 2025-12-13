@@ -153,7 +153,17 @@ namespace Reamp.Api
                             }
                             else
                             {
-                                Log.Debug("No JWT token found in cookie");
+                                // Fallback to Authorization header (standard Bearer token)
+                                var authHeader = context.Request.Headers["Authorization"].ToString();
+                                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                                    Log.Debug("JWT token retrieved from Authorization header");
+                                }
+                                else
+                                {
+                                    Log.Debug("No JWT token found in cookie or Authorization header");
+                                }
                             }
                             return Task.CompletedTask;
                         },

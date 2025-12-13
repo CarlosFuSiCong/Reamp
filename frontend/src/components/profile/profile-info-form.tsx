@@ -55,11 +55,11 @@ export function ProfileInfoForm({
     e.preventDefault();
     e.stopPropagation();
     
-    // Only validate if values are provided
+    // FirstName is required per backend validation
     const trimmedFirstName = formData.firstName?.trim() || "";
-    const trimmedLastName = formData.lastName?.trim() || "";
     
-    if (!trimmedFirstName && !trimmedLastName) {
+    if (!trimmedFirstName) {
+      // Don't submit if firstName is empty (required field)
       return;
     }
     
