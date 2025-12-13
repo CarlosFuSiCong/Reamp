@@ -100,7 +100,7 @@ namespace Reamp.Application.Applications.Services
             var pagedApplications = await _applicationRepo.GetPagedAsync(pageRequest, status, type, ct);
 
             if (!pagedApplications.Items.Any())
-                return new PagedList<ApplicationListDto>(new List<ApplicationListDto>(), 0, pageRequest.Page, pageRequest.PageSize);
+                return new PagedList<ApplicationListDto>(new List<ApplicationListDto>(), pagedApplications.TotalCount, pageRequest.Page, pageRequest.PageSize);
 
             var applicantUserIds = pagedApplications.Items.Select(x => x.ApplicantUserId).Distinct().ToList();
 
