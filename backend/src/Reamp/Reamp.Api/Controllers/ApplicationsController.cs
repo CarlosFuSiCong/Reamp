@@ -101,11 +101,11 @@ namespace Reamp.Api.Controllers
         [HttpGet("my")]
         public async Task<IActionResult> GetMyApplications(CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            var applications = await _applicationService.GetMyApplicationsAsync(userProfileId.Value, ct);
+            var applications = await _applicationService.GetMyApplicationsAsync(applicationUserId.Value, ct);
 
             return Ok(ApiResponse<List<ApplicationListDto>>.Ok(applications));
         }
@@ -113,14 +113,14 @@ namespace Reamp.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationDetail(Guid id, CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
             var application = await _applicationService.GetApplicationDetailAsync(id, ct);
 
             var isAdmin = User.IsInRole(nameof(UserRole.Admin));
-            if (!isAdmin && application.ApplicantUserId != userProfileId)
+            if (!isAdmin && application.ApplicantUserId != applicationUserId)
                 return Forbid();
 
             return Ok(ApiResponse<ApplicationDetailDto>.Ok(application));
@@ -133,14 +133,14 @@ namespace Reamp.Api.Controllers
             [FromBody] ReviewApplicationDto dto,
             CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            await _applicationService.ReviewApplicationAsync(id, userProfileId.Value, dto, ct);
+            await _applicationService.ReviewApplicationAsync(id, applicationUserId.Value, dto, ct);
 
             var action = dto.Approved ? "approved" : "rejected";
-            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", userProfileId, action, id);
+            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", applicationUserId, action, id);
             
             return Ok(ApiResponse.Ok($"Application {action} successfully"));
         }
@@ -148,13 +148,13 @@ namespace Reamp.Api.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelApplication(Guid id, CancellationToken ct)
         {
-            var userProfileId = await GetUserProfileIdAsync(ct);
-            if (userProfileId == null)
-                return Unauthorized(ApiResponse.Fail("User profile not found"));
+            var applicationUserId = GetApplicationUserId();
+            if (applicationUserId == null)
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-            await _applicationService.CancelApplicationAsync(id, userProfileId.Value, ct);
+            await _applicationService.CancelApplicationAsync(id, applicationUserId.Value, ct);
 
-            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", userProfileId, id);
+            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", applicationUserId, id);
             return Ok(ApiResponse.Ok("Application cancelled successfully"));
         }
     }
