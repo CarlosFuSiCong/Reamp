@@ -55,8 +55,15 @@ export default function StudioTeamPage() {
   const removeMember = useRemoveStudioMember();
   const cancelInvitation = useCancelInvitation();
 
-  const getRoleBadge = (role: StudioRole) => {
-    switch (role) {
+  const getRoleBadge = (role: StudioRole | undefined | null) => {
+    if (role === undefined || role === null) {
+      return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
+    }
+    
+    // Convert to number if it's a string
+    const roleValue = typeof role === 'string' ? parseInt(role, 10) : role;
+    
+    switch (roleValue) {
       case StudioRole.Owner:
         return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
       case StudioRole.Manager:
@@ -120,7 +127,7 @@ export default function StudioTeamPage() {
         description={
           <div className="flex items-center gap-2">
             <span>Manage your studio team members and invitations</span>
-            {profile?.studioRole !== undefined && (
+            {profile?.studioRole !== undefined && profile?.studioRole !== null && (
               <div className="flex items-center gap-2 ml-4">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Your role:</span>
