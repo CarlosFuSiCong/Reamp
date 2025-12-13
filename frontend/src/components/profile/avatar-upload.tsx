@@ -81,14 +81,14 @@ export function AvatarUpload({
 
   // Clear state when the entire upload process (media + profile update) completes
   useEffect(() => {
-    // When profile update finishes successfully
+    // When profile update finishes (success or error)
     if (uploading && !isUploading && file) {
       // Profile update completed, now we can clear the UI state
+      // Note: Don't show toast here - the mutation hook already handles notifications
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
       setUploading(false);
-      toast.success("Avatar updated successfully");
     }
   }, [isUploading, uploading, file]);
 
