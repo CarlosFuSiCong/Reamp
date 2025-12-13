@@ -6,7 +6,6 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Navbar } from "@/components/layout";
 import { Sidebar, SidebarNavItem } from "@/components/layout/sidebar";
 import { 
-  LayoutDashboard, 
   User, 
   Users, 
   Briefcase,
@@ -26,7 +25,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     // Base items for all authenticated users
     const baseItems: SidebarNavItem[] = [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Profile", href: "/dashboard/profile", icon: User },
     ];
 
