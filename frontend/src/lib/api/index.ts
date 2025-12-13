@@ -10,3 +10,5 @@ export { mediaApi } from "./media";
 export { profilesApi } from "./profiles";
 export { adminApi } from "./admin";
 export { applicationsApi } from "./applications";
+export { invitationsApi } from "./invitations";
+export { membersApi } from "./members";

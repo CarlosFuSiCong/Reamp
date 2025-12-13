@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Lock, FileText } from "lucide-react";
+import { User, Lock, FileText, Mail } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
-import { AvatarUpload, ProfileInfoForm, ChangePasswordForm } from "@/components/profile";
+import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations } from "@/components/profile";
 import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 
@@ -67,6 +67,10 @@ export default function ProfilePage() {
             <Lock className="h-4 w-4 mr-2" />
             Security
           </TabsTrigger>
+          <TabsTrigger value="invitations">
+            <Mail className="h-4 w-4 mr-2" />
+            Invitations
+          </TabsTrigger>
           <TabsTrigger value="applications">
             <FileText className="h-4 w-4 mr-2" />
             Applications
@@ -97,6 +101,10 @@ export default function ProfilePage() {
             isSubmitting={changePasswordMutation.isPending}
             isSuccess={changePasswordMutation.isSuccess}
           />
+        </TabsContent>
+
+        <TabsContent value="invitations">
+          <MyInvitations />
         </TabsContent>
 
         <TabsContent value="applications">
