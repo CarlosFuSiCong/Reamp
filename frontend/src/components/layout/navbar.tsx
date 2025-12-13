@@ -29,8 +29,8 @@ export function Navbar() {
     <nav className="border-b bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2">
+          {/* Logo - goes to home for unauthenticated users, dashboard for authenticated */}
+          <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">Reamp</span>
           </Link>
