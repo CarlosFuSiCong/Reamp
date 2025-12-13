@@ -59,6 +59,7 @@ export function AvatarUpload({
     
     try {
       const response = await mediaApi.upload(file, setUploadProgress);
+      setUploading(false);
       onUpload(response.id);
     } catch (error: any) {
       toast.error(error?.message || "Failed to upload avatar");
@@ -69,15 +70,14 @@ export function AvatarUpload({
     }
   };
 
-  // Wait for profile mutation to complete before clearing state
+  // Clear UI state after profile update completes
   useEffect(() => {
-    if (uploading && !isUploading) {
+    if (!isUploading && (file || preview)) {
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
-      setUploading(false);
     }
-  }, [isUploading, uploading]);
+  }, [isUploading, file, preview]);
 
   const isProcessing = uploading || isUploading;
 
