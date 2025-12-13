@@ -53,12 +53,20 @@ apiClient.interceptors.response.use(
       console.log("API Response:", {
         status: response.status,
         data: response.data,
+        url: response.config.url,
       });
     }
 
     // Unwrap ApiResponse and return only the data field
     if (response.data && typeof response.data === "object" && "data" in response.data) {
-      response.data = response.data.data as typeof response.data;
+      const unwrapped = response.data.data;
+      if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
+        console.log("API Response unwrapped:", {
+          original: response.data,
+          unwrapped: unwrapped,
+        });
+      }
+      response.data = unwrapped as typeof response.data;
     }
 
     return response;
@@ -67,8 +75,13 @@ apiClient.interceptors.response.use(
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.error("API Error:", {
         status: error.response?.status,
+        statusText: error.response?.statusText,
         message: error.response?.data?.message,
         errors: error.response?.data?.errors,
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.config?.data,
+        fullError: error.response?.data,
       });
     }
 
