@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
+import { use, useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -35,9 +34,9 @@ import {
 } from "@/lib/hooks";
 import { AgencyRole, InvitationStatus } from "@/types";
 
-export default function AgencyTeamPage() {
-  const params = useParams();
-  const agencyId = params?.agencyId as string || "";
+export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?: string }> }) {
+  const resolvedParams = use(params);
+  const agencyId = resolvedParams?.agencyId || "";
   const { user: profile } = useProfile();
   
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
