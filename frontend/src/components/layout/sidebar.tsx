@@ -23,7 +23,8 @@ export function Sidebar({ items, className }: SidebarProps) {
     <nav className={cn("flex flex-col gap-1", className)}>
       {items.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        // Exact match: only highlight if pathname exactly matches the href
+        const isActive = pathname === item.href;
 
         return (
           <Link
