@@ -103,6 +103,8 @@ namespace Reamp.Application.Applications.Services
             foreach (var app in pagedApplications.Items)
             {
                 var profile = await _userProfileRepo.GetByApplicationUserIdAsync(app.ApplicantUserId, true, false, ct);
+                var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
+                
                 dtos.Add(new ApplicationListDto
                 {
                     Id = app.Id,
@@ -111,8 +113,8 @@ namespace Reamp.Application.Applications.Services
                     OrganizationName = app.OrganizationName,
                     ContactEmail = app.ContactEmail,
                     ApplicantUserId = app.ApplicantUserId,
-                    ApplicantEmail = profile?.FirstName + " " + profile?.LastName ?? "Unknown",
-                    ApplicantName = profile?.FirstName + " " + profile?.LastName ?? "Unknown",
+                    ApplicantEmail = fullName,
+                    ApplicantName = fullName,
                     CreatedAtUtc = app.CreatedAtUtc,
                     ReviewedAtUtc = app.ReviewedAtUtc
                 });
@@ -125,6 +127,7 @@ namespace Reamp.Application.Applications.Services
         {
             var applications = await _applicationRepo.GetByApplicantAsync(userId, ct);
             var profile = await _userProfileRepo.GetByApplicationUserIdAsync(userId, true, false, ct);
+            var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
 
             return applications.Select(app => new ApplicationListDto
             {
@@ -134,8 +137,8 @@ namespace Reamp.Application.Applications.Services
                 OrganizationName = app.OrganizationName,
                 ContactEmail = app.ContactEmail,
                 ApplicantUserId = app.ApplicantUserId,
-                ApplicantEmail = profile?.FirstName + " " + profile?.LastName ?? "Unknown",
-                ApplicantName = profile?.FirstName + " " + profile?.LastName ?? "Unknown",
+                ApplicantEmail = fullName,
+                ApplicantName = fullName,
                 CreatedAtUtc = app.CreatedAtUtc,
                 ReviewedAtUtc = app.ReviewedAtUtc
             }).ToList();
@@ -148,6 +151,7 @@ namespace Reamp.Application.Applications.Services
                 throw new InvalidOperationException("Application not found");
 
             var applicantProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, true, false, ct);
+            var applicantFullName = applicantProfile != null ? $"{applicantProfile.FirstName} {applicantProfile.LastName}" : "Unknown";
             
             string? reviewerName = null;
             if (application.ReviewedBy.HasValue)
@@ -162,8 +166,8 @@ namespace Reamp.Application.Applications.Services
                 Type = application.Type,
                 Status = application.Status,
                 ApplicantUserId = application.ApplicantUserId,
-                ApplicantEmail = applicantProfile?.FirstName + " " + applicantProfile?.LastName ?? "Unknown",
-                ApplicantName = applicantProfile?.FirstName + " " + applicantProfile?.LastName ?? "Unknown",
+                ApplicantEmail = applicantFullName,
+                ApplicantName = applicantFullName,
                 OrganizationName = application.OrganizationName,
                 Description = application.Description,
                 ContactEmail = application.ContactEmail,
@@ -260,8 +264,6 @@ namespace Reamp.Application.Applications.Services
             var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
             await _agentRepo.AddAsync(ownerAgent, ct);
 
-            await _uow.SaveChangesAsync(ct);
-
             _logger.LogInformation("Agency {AgencyName} created from application with owner {OwnerId}", 
                 application.OrganizationName, application.ApplicantUserId);
 
@@ -291,8 +293,6 @@ namespace Reamp.Application.Applications.Services
 
             var ownerStaff = new Staff(ownerProfile.Id, studio.Id, StudioRole.Owner);
             await _staffRepo.AddAsync(ownerStaff, ct);
-
-            await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Studio {StudioName} created from application with owner {OwnerId}", 
                 application.OrganizationName, application.ApplicantUserId);
