@@ -152,23 +152,28 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
       <PageHeader
         title="Team Management"
         description={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <span>Manage your agency team members and invitations</span>
             {profile?.agencyRole !== undefined && profile?.agencyRole !== null && (
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">Your role:</span>
                 {getRoleBadge(profile.agencyRole)}
+                {[AgencyRole.Owner, AgencyRole.Manager].includes(profile.agencyRole) && (
+                  <Button 
+                    onClick={() => setInviteDialogOpen(true)}
+                    size="sm"
+                    className="ml-2"
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Invite Member
+                  </Button>
+                )}
               </div>
             )}
           </div>
         }
-      >
-        <Button onClick={() => setInviteDialogOpen(true)}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Invite Member
-        </Button>
-      </PageHeader>
+      />
 
       <Card className="p-6">
         <Tabs defaultValue="members">
