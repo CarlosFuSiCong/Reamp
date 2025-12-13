@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, User, FileText } from "lucide-react";
+import { Building2, LogOut, User, FileText, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +74,19 @@ export function Navbar() {
                         Profile
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/agent/team" className="cursor-pointer">
+                        <Users className="mr-2 h-4 w-4" />
+                        Agency Team
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/studio/team" className="cursor-pointer">
+                        <Users className="mr-2 h-4 w-4" />
+                        Studio Team
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile/apply" className="cursor-pointer">
                         <FileText className="mr-2 h-4 w-4" />
