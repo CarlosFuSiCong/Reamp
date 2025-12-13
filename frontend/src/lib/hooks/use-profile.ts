@@ -41,7 +41,7 @@ export function useChangePassword() {
       toast.success("Password changed successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to change password");
+      toast.error(error?.message || "Failed to change password");
     },
   });
 }

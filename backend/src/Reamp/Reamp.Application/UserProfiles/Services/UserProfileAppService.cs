@@ -100,8 +100,11 @@ namespace Reamp.Application.UserProfiles.Services
             // Enrich all profiles with role info
             foreach (var dto in dtos)
             {
-                var profile = profiles.First(p => p.Id == dto.Id);
-                await EnrichWithRoleInfoAsync(dto, profile.Id, ct);
+                var profile = profiles.FirstOrDefault(p => p.Id == dto.Id);
+                if (profile != null)
+                {
+                    await EnrichWithRoleInfoAsync(dto, profile.Id, ct);
+                }
             }
 
             return dtos;
