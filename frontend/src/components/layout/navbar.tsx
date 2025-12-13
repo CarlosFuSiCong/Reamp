@@ -30,7 +30,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">Reamp</span>
           </Link>
@@ -41,7 +41,7 @@ export function Navbar() {
               <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />
             ) : isAuthenticated && user ? (
               <>
-                <Link href="/profile/apply">
+                <Link href="/dashboard/profile/apply">
                   <Button variant="outline" size="sm">
                     <FileText className="h-4 w-4 mr-2" />
                     Apply
@@ -69,26 +69,26 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
+                      <Link href="/dashboard/profile" className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/agent/team" className="cursor-pointer">
+                      <Link href="/dashboard/agency/team" className="cursor-pointer">
                         <Users className="mr-2 h-4 w-4" />
                         Agency Team
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/studio/team" className="cursor-pointer">
+                      <Link href="/dashboard/studio/team" className="cursor-pointer">
                         <Users className="mr-2 h-4 w-4" />
                         Studio Team
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/profile/apply" className="cursor-pointer">
+                      <Link href="/dashboard/profile/apply" className="cursor-pointer">
                         <FileText className="mr-2 h-4 w-4" />
                         Apply for Organization
                       </Link>

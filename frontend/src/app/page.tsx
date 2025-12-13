@@ -29,14 +29,14 @@ export default function HomePage() {
           <div className="mt-10 flex items-center justify-center gap-4">
             {isAuthenticated && user ? (
               <>
-                <Link href="/profile/apply">
+                <Link href="/dashboard/profile/apply">
                   <Button size="lg" className="gap-2">
                     <Building2 className="h-5 w-5" />
                     Apply for Organization
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/profile?tab=applications">
+                <Link href="/dashboard/profile?tab=applications">
                   <Button size="lg" variant="outline">
                     View My Applications
                   </Button>
@@ -160,7 +160,7 @@ export default function HomePage() {
             Join the platform and start managing your real estate photography workflow today.
           </p>
           {isAuthenticated && user ? (
-            <Link href="/profile/apply">
+            <Link href="/dashboard/profile/apply">
               <Button size="lg" variant="secondary" className="gap-2">
                 <Building2 className="h-5 w-5" />
                 Apply Now
