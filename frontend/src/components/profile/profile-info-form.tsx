@@ -47,6 +47,18 @@ export function ProfileInfoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate data
+    if (!formData.firstName?.trim()) {
+      console.error("First name is required");
+      return;
+    }
+    if (!formData.lastName?.trim()) {
+      console.error("Last name is required");
+      return;
+    }
+    
+    console.log("Submitting profile data:", formData);
     onSubmit(formData);
   };
 

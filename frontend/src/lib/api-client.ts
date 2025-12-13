@@ -24,6 +24,9 @@ apiClient.interceptors.request.use(
         url: config.url,
         data: config.data,
       });
+      if (config.data) {
+        console.log("Request data (detailed):", JSON.stringify(config.data, null, 2));
+      }
     }
 
     return config;
