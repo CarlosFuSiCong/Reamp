@@ -63,6 +63,9 @@ namespace Reamp.Api.Controllers
             [FromBody] UpdateUserProfileDto dto,
             CancellationToken ct)
         {
+            _logger.LogDebug("Received profile update request for {ProfileId}. FirstName: '{FirstName}', LastName: '{LastName}'",
+                id, dto?.FirstName ?? "null", dto?.LastName ?? "null");
+            
             var currentUserId = GetCurrentUserId();
             
             var profile = await _appService.GetByIdAsync(id, ct);
@@ -77,7 +80,7 @@ namespace Reamp.Api.Controllers
             }
 
             var result = await _appService.UpdateAsync(id, dto, ct);
-            _logger.LogInformation("User profile {ProfileId} updated", id);
+            _logger.LogInformation("User profile {ProfileId} updated successfully", id);
 
             return Ok(ApiResponse<UserProfileDto>.Ok(result, "Profile updated successfully"));
         }
