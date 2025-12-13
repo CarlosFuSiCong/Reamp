@@ -9,3 +9,4 @@ export { deliveriesApi } from "./deliveries";
 export { mediaApi } from "./media";
 export { profilesApi } from "./profiles";
 export { adminApi } from "./admin";
+export { applicationsApi } from "./applications";
