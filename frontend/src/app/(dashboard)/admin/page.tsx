@@ -10,6 +10,7 @@ import { Users, Package, ShoppingCart, Building2, TrendingUp, AlertCircle } from
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable, AgenciesTable, StudiosTable } from "@/components/admin";
+import { ApplicationsList } from "@/components/applications";
 import { StatsChart } from "@/components/admin/stats-chart";
 
 export default function AdminDashboardPage() {
@@ -82,6 +83,7 @@ export default function AdminDashboardPage() {
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="agencies">Agencies</TabsTrigger>
           <TabsTrigger value="studios">Studios</TabsTrigger>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="alerts">System Alerts</TabsTrigger>
         </TabsList>
 
@@ -95,6 +97,17 @@ export default function AdminDashboardPage() {
 
         <TabsContent value="studios" className="space-y-4">
           <StudiosTable />
+        </TabsContent>
+
+        <TabsContent value="applications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Organization Applications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ApplicationsList />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="alerts" className="space-y-4">

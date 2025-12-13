@@ -7,5 +7,6 @@ export * from "./use-studios";
 export * from "./use-clients";
 export * from "./use-dashboard-stats";
 export * from "./use-admin-stats";
+export * from "./use-applications";
 
 
