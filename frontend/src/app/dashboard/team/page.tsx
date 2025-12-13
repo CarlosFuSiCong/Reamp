@@ -13,7 +13,10 @@ export default function TeamPage() {
 
   useEffect(() => {
     // If user has no agency or studio role, redirect to profile
-    if (!isLoading && profile && !profile.agencyId && !profile.studioId) {
+    // Use role checks (not ID checks) to be consistent with dashboard layout logic
+    if (!isLoading && profile && 
+        (profile.agencyRole === undefined || profile.agencyRole === null) &&
+        (profile.studioRole === undefined || profile.studioRole === null)) {
       router.replace("/dashboard/profile");
     }
   }, [isLoading, profile, router]);

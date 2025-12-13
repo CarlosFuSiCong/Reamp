@@ -2,7 +2,7 @@ import apiClient from "@/lib/api-client";
 
 export interface MediaUploadResponse {
   id: string;
-  url: string;
+  publicUrl: string;  // Match backend PascalCase -> camelCase from JSON serialization
 }
 
 export const mediaApi = {
@@ -27,7 +27,8 @@ export const mediaApi = {
   },
 
   async getUrl(id: string): Promise<string> {
-    const response = await apiClient.get<{ url: string }>(`/api/media/${id}/url`);
-    return response.data.url;
+    // Get media asset details and return its publicUrl
+    const response = await apiClient.get<{ publicUrl: string }>(`/api/media/${id}`);
+    return response.data.publicUrl;
   },
 };

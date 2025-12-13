@@ -78,7 +78,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
         <TabsContent value="profile" className="space-y-4">
           <AvatarUpload
-            avatarUrl={profile.avatarAssetId ? `/api/media/${profile.avatarAssetId}/url` : undefined}
+            avatarAssetId={profile.avatarAssetId}
             displayName={profile.displayName}
             onUpload={(assetId) => updateAvatarMutation.mutate({ profileId: profile.id, assetId })}
             isUploading={updateAvatarMutation.isPending}

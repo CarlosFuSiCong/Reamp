@@ -28,6 +28,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       { title: "Profile", href: "/dashboard/profile", icon: User },
     ];
 
+    // Admin sees everything - check this FIRST before organization roles
+    if (user.role === UserRole.Admin) {
+      const adminItems: SidebarNavItem[] = [
+        { title: "Admin Panel", href: "/admin", icon: Settings },
+      ];
+      
+      // Admins might also have organization roles, so include those too
+      const orgItems: SidebarNavItem[] = [];
+      
+      // Add agency navigation if admin is also an agency member
+      if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
+        orgItems.push({ title: "Agency", href: "/dashboard/agency", icon: Building2 });
+      }
+      
+      // Add studio navigation if admin is also a studio member
+      if (profile.studioRole !== undefined && profile.studioRole !== null) {
+        orgItems.push({ title: "Studio", href: "/dashboard/studio", icon: Building2 });
+      }
+      
+      return [...baseItems, ...adminItems, ...orgItems];
+    }
+
     // For regular Staff (no organization)
     if (user.role === UserRole.Staff && 
         (profile.agencyRole === undefined || profile.agencyRole === null) && 
@@ -86,14 +108,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       // Add more studio-specific items here as needed
 
       return [...baseItems, ...studioItems];
-    }
-
-    // Admin sees everything (optional)
-    if (user.role === UserRole.Admin) {
-      return [
-        ...baseItems,
-        { title: "Admin Panel", href: "/admin", icon: Settings },
-      ];
     }
 
     return baseItems;

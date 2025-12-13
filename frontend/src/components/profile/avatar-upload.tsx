@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +10,14 @@ import { mediaApi } from "@/lib/api";
 import { toast } from "sonner";
 
 interface AvatarUploadProps {
-  avatarUrl?: string;
+  avatarAssetId?: string;  // Changed from avatarUrl to avatarAssetId
   displayName?: string;
   onUpload: (assetId: string) => void;
   isUploading?: boolean;
 }
 
 export function AvatarUpload({ 
-  avatarUrl, 
+  avatarAssetId, 
   displayName, 
   onUpload, 
   isUploading 
@@ -26,6 +26,21 @@ export function AvatarUpload({
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+  // Fetch avatar URL when avatarAssetId changes
+  useEffect(() => {
+    if (avatarAssetId) {
+      mediaApi.getUrl(avatarAssetId)
+        .then(url => setAvatarUrl(url))
+        .catch(err => {
+          console.error("Failed to load avatar:", err);
+          setAvatarUrl("");
+        });
+    } else {
+      setAvatarUrl("");
+    }
+  }, [avatarAssetId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -44,7 +59,7 @@ export function AvatarUpload({
     setUploadProgress(0);
     
     try {
-      // First upload the file to get an assetId
+      // First upload the file to get an assetId and publicUrl
       const response = await mediaApi.upload(file, setUploadProgress);
       
       // Then update the profile with the assetId
