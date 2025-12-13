@@ -48,17 +48,21 @@ export function ProfileInfoForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate data
-    if (!formData.firstName?.trim()) {
-      console.error("First name is required");
-      return;
-    }
-    if (!formData.lastName?.trim()) {
-      console.error("Last name is required");
+    // Only validate if values are provided
+    const trimmedFirstName = formData.firstName?.trim() || "";
+    const trimmedLastName = formData.lastName?.trim() || "";
+    
+    // If both are empty, show error
+    if (!trimmedFirstName && !trimmedLastName) {
+      console.error("At least one of First Name or Last Name is required");
       return;
     }
     
-    console.log("Submitting profile data:", formData);
+    console.log("Submitting profile data:", {
+      firstName: trimmedFirstName,
+      lastName: trimmedLastName,
+    });
+    
     onSubmit(formData);
   };
 
@@ -97,12 +101,14 @@ export function ProfileInfoForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
+            <Label htmlFor="displayName">
+              Display Name <span className="text-xs text-muted-foreground">(Auto-generated)</span>
+            </Label>
             <Input
               id="displayName"
               value={formData.displayName}
-              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              disabled={!isEditing || isSubmitting}
+              disabled
+              className="bg-muted"
             />
           </div>
 

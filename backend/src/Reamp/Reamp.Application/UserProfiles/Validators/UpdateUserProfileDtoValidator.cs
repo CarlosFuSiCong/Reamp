@@ -8,16 +8,18 @@ namespace Reamp.Application.UserProfiles.Validators
         public UpdateUserProfileDtoValidator()
         {
             RuleFor(x => x.FirstName)
-                .NotEmpty()
-                .WithMessage("First name is required")
+                .NotNull()
+                .WithMessage("First name cannot be null")
                 .MaximumLength(40)
-                .WithMessage("First name must not exceed 40 characters");
+                .WithMessage("First name must not exceed 40 characters")
+                .When(x => !string.IsNullOrEmpty(x.FirstName));
 
             RuleFor(x => x.LastName)
-                .NotEmpty()
-                .WithMessage("Last name is required")
+                .NotNull()
+                .WithMessage("Last name cannot be null")
                 .MaximumLength(40)
-                .WithMessage("Last name must not exceed 40 characters");
+                .WithMessage("Last name must not exceed 40 characters")
+                .When(x => !string.IsNullOrEmpty(x.LastName));
         }
     }
 }
