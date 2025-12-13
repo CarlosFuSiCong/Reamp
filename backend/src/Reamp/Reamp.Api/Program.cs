@@ -156,9 +156,12 @@ namespace Reamp.Api
                         },
                         OnTokenValidated = context =>
                         {
+                            var allClaims = context.Principal?.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
                             var userId = context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
-                            Log.Debug("JWT token validated for user: {UserId} at path: {Path}", 
-                                userId ?? "unknown", context.Request.Path);
+                            Log.Debug("JWT token validated. UserId: {UserId}, Claims: {Claims}, Path: {Path}", 
+                                userId ?? "unknown", 
+                                allClaims != null ? string.Join(", ", allClaims) : "none",
+                                context.Request.Path);
                             return Task.CompletedTask;
                         }
                     };
