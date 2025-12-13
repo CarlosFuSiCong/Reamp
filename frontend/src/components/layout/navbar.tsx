@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, User, FileText, Users } from "lucide-react";
+import { Building2, LogOut, User, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,12 +41,14 @@ export function Navbar() {
               <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />
             ) : isAuthenticated && user ? (
               <>
-                <Link href="/dashboard/profile/apply">
-                  <Button variant="outline" size="sm">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Apply
-                  </Button>
-                </Link>
+                {user.role === 3 && ( // UserRole.Staff
+                  <Link href="/apply">
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Apply
+                    </Button>
+                  </Link>
+                )}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -69,30 +71,28 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="cursor-pointer">
+                        <Building2 className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href="/dashboard/profile" className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/agency/team" className="cursor-pointer">
-                        <Users className="mr-2 h-4 w-4" />
-                        Agency Team
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/studio/team" className="cursor-pointer">
-                        <Users className="mr-2 h-4 w-4" />
-                        Studio Team
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile/apply" className="cursor-pointer">
-                        <FileText className="mr-2 h-4 w-4" />
-                        Apply for Organization
-                      </Link>
-                    </DropdownMenuItem>
+                    {user.role === 3 && ( // UserRole.Staff
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/apply" className="cursor-pointer">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Apply for Organization
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />
