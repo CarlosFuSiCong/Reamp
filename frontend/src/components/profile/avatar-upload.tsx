@@ -81,8 +81,10 @@ export function AvatarUpload({
 
   // Clear state when the entire upload process (media + profile update) completes
   useEffect(() => {
-    // When profile update finishes (success or error)
-    if (uploading && !isUploading && file) {
+    // When profile update finishes (success or error), clear the UI state
+    // We check !isUploading to detect when the mutation completes
+    // We check uploading to ensure we only clean up after our own upload
+    if (uploading && !isUploading) {
       // Profile update completed, now we can clear the UI state
       // Note: Don't show toast here - the mutation hook already handles notifications
       setFile(null);
@@ -90,7 +92,8 @@ export function AvatarUpload({
       setUploadProgress(0);
       setUploading(false);
     }
-  }, [isUploading, uploading, file]);
+  }, [isUploading, uploading]);
+  // Note: removed 'file' from dependencies to avoid re-triggering after state cleanup
 
   const isProcessing = uploading || isUploading;
 

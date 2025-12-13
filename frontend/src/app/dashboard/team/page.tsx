@@ -25,13 +25,18 @@ export default function TeamPage() {
     return <LoadingState message="Loading team..." />;
   }
 
-  // Show agency team if user is part of an agency
-  if (profile?.agencyId) {
+  // For users with both agency and studio roles, prioritize agency
+  // TODO: Consider adding a tab/toggle UI to switch between agency and studio teams
+  const hasAgencyRole = profile?.agencyId && (profile?.agencyRole !== undefined && profile?.agencyRole !== null);
+  const hasStudioRole = profile?.studioId && (profile?.studioRole !== undefined && profile?.studioRole !== null);
+
+  // Show agency team if user has agency role
+  if (hasAgencyRole) {
     return <AgencyTeamPage />;
   }
 
-  // Show studio team if user is part of a studio
-  if (profile?.studioId) {
+  // Show studio team if user has studio role (and no agency role)
+  if (hasStudioRole) {
     return <StudioTeamPage />;
   }
 
