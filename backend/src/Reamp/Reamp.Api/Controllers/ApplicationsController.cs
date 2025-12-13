@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Applications.Dtos;
 using Reamp.Application.Applications.Services;
 using Reamp.Domain.Accounts.Enums;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Shared;
 using System;
@@ -18,14 +19,27 @@ namespace Reamp.Api.Controllers
     public sealed class ApplicationsController : ControllerBase
     {
         private readonly IApplicationService _applicationService;
+        private readonly IUserProfileRepository _userProfileRepo;
         private readonly ILogger<ApplicationsController> _logger;
 
         public ApplicationsController(
             IApplicationService applicationService,
+            IUserProfileRepository userProfileRepo,
             ILogger<ApplicationsController> logger)
         {
             _applicationService = applicationService;
+            _userProfileRepo = userProfileRepo;
             _logger = logger;
+        }
+
+        private async Task<Guid?> GetUserProfileIdAsync(CancellationToken ct)
+        {
+            var applicationUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (applicationUserIdClaim == null || !Guid.TryParse(applicationUserIdClaim, out var applicationUserId))
+                return null;
+
+            var profile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId, includeDeleted: false, asNoTracking: true, ct);
+            return profile?.Id;
         }
 
         [HttpPost("agency")]
@@ -33,13 +47,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitAgencyApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
-            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(userId, dto, ct);
+            var applicationId = await _applicationService.SubmitAgencyApplicationAsync(userProfileId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", userId, applicationId);
+            _logger.LogInformation("User {UserId} submitted agency application {ApplicationId}", userProfileId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Agency application submitted successfully"));
         }
 
@@ -48,13 +62,13 @@ namespace Reamp.Api.Controllers
             [FromBody] SubmitStudioApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
-            var applicationId = await _applicationService.SubmitStudioApplicationAsync(userId, dto, ct);
+            var applicationId = await _applicationService.SubmitStudioApplicationAsync(userProfileId.Value, dto, ct);
 
-            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", userId, applicationId);
+            _logger.LogInformation("User {UserId} submitted studio application {ApplicationId}", userProfileId, applicationId);
             return Ok(ApiResponse<Guid>.Ok(applicationId, "Studio application submitted successfully"));
         }
 
@@ -77,11 +91,11 @@ namespace Reamp.Api.Controllers
         [HttpGet("my")]
         public async Task<IActionResult> GetMyApplications(CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
-            var applications = await _applicationService.GetMyApplicationsAsync(userId, ct);
+            var applications = await _applicationService.GetMyApplicationsAsync(userProfileId.Value, ct);
 
             return Ok(ApiResponse<List<ApplicationListDto>>.Ok(applications));
         }
@@ -89,14 +103,14 @@ namespace Reamp.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationDetail(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
             var application = await _applicationService.GetApplicationDetailAsync(id, ct);
 
             var isAdmin = User.IsInRole(nameof(UserRole.Admin));
-            if (!isAdmin && application.ApplicantUserId != userId)
+            if (!isAdmin && application.ApplicantUserId != userProfileId)
                 return Forbid();
 
             return Ok(ApiResponse<ApplicationDetailDto>.Ok(application));
@@ -109,14 +123,14 @@ namespace Reamp.Api.Controllers
             [FromBody] ReviewApplicationDto dto,
             CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
-            await _applicationService.ReviewApplicationAsync(id, userId, dto, ct);
+            await _applicationService.ReviewApplicationAsync(id, userProfileId.Value, dto, ct);
 
             var action = dto.Approved ? "approved" : "rejected";
-            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", userId, action, id);
+            _logger.LogInformation("Admin {AdminId} {Action} application {ApplicationId}", userProfileId, action, id);
             
             return Ok(ApiResponse.Ok($"Application {action} successfully"));
         }
@@ -124,13 +138,13 @@ namespace Reamp.Api.Controllers
         [HttpPost("{id}/cancel")]
         public async Task<IActionResult> CancelApplication(Guid id, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-                return Unauthorized(ApiResponse.Fail("Invalid token"));
+            var userProfileId = await GetUserProfileIdAsync(ct);
+            if (userProfileId == null)
+                return Unauthorized(ApiResponse.Fail("User profile not found"));
 
-            await _applicationService.CancelApplicationAsync(id, userId, ct);
+            await _applicationService.CancelApplicationAsync(id, userProfileId.Value, ct);
 
-            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", userId, id);
+            _logger.LogInformation("User {UserId} cancelled application {ApplicationId}", userProfileId, id);
             return Ok(ApiResponse.Ok("Application cancelled successfully"));
         }
     }
