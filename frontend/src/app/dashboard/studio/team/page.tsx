@@ -54,31 +54,42 @@ export default function StudioTeamPage({ params }: { params: Promise<{ studioId?
   const removeMember = useRemoveStudioMember();
   const cancelInvitation = useCancelInvitation();
 
+  const getRoleName = (role: StudioRole | undefined | null): string => {
+    if (role === undefined || role === null) return "Member";
+    
+    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
+    
+    switch (roleValue) {
+      case 0: return "Member";
+      case 1: return "Editor";
+      case 2: return "Photographer";
+      case 3: return "Manager";
+      case 4: return "Owner";
+      default: return "Unknown";
+    }
+  };
+
   const getRoleBadge = (role: StudioRole | undefined | null) => {
     if (role === undefined || role === null) {
       return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
     }
     
-    // Convert to number if it's a string
     const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    
-    // Debug log
-    console.log('Studio Role Value:', { original: role, converted: roleValue, type: typeof role });
+    const roleName = getRoleName(role);
     
     switch (roleValue) {
-      case StudioRole.Owner: // 4
-        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
-      case StudioRole.Manager: // 3
-        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-      case StudioRole.Photographer: // 2
-        return <Badge className="bg-green-50 text-green-700 border-green-200">Photographer</Badge>;
-      case StudioRole.Editor: // 1
-        return <Badge className="bg-orange-50 text-orange-700 border-orange-200">Editor</Badge>;
-      case StudioRole.Member: // 0
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
+      case 4: // Owner
+        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">{roleName}</Badge>;
+      case 3: // Manager
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">{roleName}</Badge>;
+      case 2: // Photographer
+        return <Badge className="bg-green-50 text-green-700 border-green-200">{roleName}</Badge>;
+      case 1: // Editor
+        return <Badge className="bg-orange-50 text-orange-700 border-orange-200">{roleName}</Badge>;
+      case 0: // Member
+        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">{roleName}</Badge>;
       default:
-        console.warn('Unknown studio role:', roleValue);
-        return <Badge>Role: {roleValue}</Badge>;
+        return <Badge>{roleName}</Badge>;
     }
   };
 

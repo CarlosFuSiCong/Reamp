@@ -54,29 +54,39 @@ export default function AgencyTeamPage({ params }: { params: Promise<{ agencyId?
   const removeMember = useRemoveAgencyMember();
   const cancelInvitation = useCancelInvitation();
 
+  const getRoleName = (role: AgencyRole | undefined | null): string => {
+    if (role === undefined || role === null) return "Member";
+    
+    const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
+    
+    switch (roleValue) {
+      case 0: return "Member";
+      case 1: return "Agent";
+      case 2: return "Manager";
+      case 3: return "Owner";
+      default: return "Unknown";
+    }
+  };
+
   const getRoleBadge = (role: AgencyRole | undefined | null) => {
     if (role === undefined || role === null) {
       return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
     }
     
-    // Convert to number if it's a string
     const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
-    
-    // Debug log
-    console.log('Agency Role Value:', { original: role, converted: roleValue, type: typeof role });
+    const roleName = getRoleName(role);
     
     switch (roleValue) {
-      case AgencyRole.Owner: // 3
-        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">Owner</Badge>;
-      case AgencyRole.Manager: // 2
-        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-      case AgencyRole.Agent: // 1
-        return <Badge className="bg-green-50 text-green-700 border-green-200">Agent</Badge>;
-      case AgencyRole.Member: // 0
-        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">Member</Badge>;
+      case 3: // Owner
+        return <Badge className="bg-purple-50 text-purple-700 border-purple-200">{roleName}</Badge>;
+      case 2: // Manager
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-200">{roleName}</Badge>;
+      case 1: // Agent
+        return <Badge className="bg-green-50 text-green-700 border-green-200">{roleName}</Badge>;
+      case 0: // Member
+        return <Badge className="bg-gray-50 text-gray-700 border-gray-200">{roleName}</Badge>;
       default:
-        console.warn('Unknown agency role:', roleValue);
-        return <Badge>Role: {roleValue}</Badge>;
+        return <Badge>{roleName}</Badge>;
     }
   };
 
