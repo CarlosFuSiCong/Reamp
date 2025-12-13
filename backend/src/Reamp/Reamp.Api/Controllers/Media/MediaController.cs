@@ -6,6 +6,7 @@ using Reamp.Application.Media.Dtos;
 using Reamp.Application.Media.Services;
 using Reamp.Domain.Media.Enums;
 using Reamp.Shared;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Reamp.Api.Controllers.Media
@@ -446,7 +447,7 @@ namespace Reamp.Api.Controllers.Media
 
         private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
         }
     }

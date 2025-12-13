@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.UserProfiles.Dtos;
 using Reamp.Application.UserProfiles.Services;
 using Reamp.Shared;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Reamp.Api.Controllers
@@ -25,7 +26,7 @@ namespace Reamp.Api.Controllers
 
         private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             {
                 _logger.LogWarning("Invalid or missing user ID claim in token");

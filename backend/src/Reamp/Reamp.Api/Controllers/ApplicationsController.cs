@@ -7,6 +7,7 @@ using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Shared;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Reamp.Api.Controllers
 
         private Guid? GetApplicationUserId()
         {
-            var applicationUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var applicationUserIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             if (applicationUserIdClaim == null || !Guid.TryParse(applicationUserIdClaim, out var applicationUserId))
                 return null;
             
