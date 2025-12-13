@@ -269,9 +269,26 @@ namespace Reamp.Application.Applications.Services
 
         private async Task<Guid> CreateAgencyFromApplicationAsync(OrganizationApplication application, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, true, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, false, ct);
             if (ownerProfile == null)
-                throw new InvalidOperationException("Applicant user profile not found");
+            {
+                // Try to get the ApplicationUser to create a profile if missing
+                var appUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
+                if (appUser == null)
+                    throw new InvalidOperationException("Applicant user not found");
+
+                // Create a default user profile
+                ownerProfile = UserProfile.Create(
+                    applicationUserId: application.ApplicantUserId,
+                    firstName: appUser.Email?.Split('@')[0] ?? "User",
+                    lastName: string.Empty,
+                    role: UserRole.User
+                );
+                await _userProfileRepo.AddAsync(ownerProfile, ct);
+                await _uow.SaveChangesAsync(ct);
+                
+                _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
+            }
 
             var agency = Agency.Create(
                 name: application.OrganizationName,
@@ -298,9 +315,26 @@ namespace Reamp.Application.Applications.Services
 
         private async Task<Guid> CreateStudioFromApplicationAsync(OrganizationApplication application, CancellationToken ct)
         {
-            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, true, ct);
+            var ownerProfile = await _userProfileRepo.GetByApplicationUserIdAsync(application.ApplicantUserId, false, false, ct);
             if (ownerProfile == null)
-                throw new InvalidOperationException("Applicant user profile not found");
+            {
+                // Try to get the ApplicationUser to create a profile if missing
+                var appUser = await _dbContext.Users.FindAsync(new object[] { application.ApplicantUserId }, ct);
+                if (appUser == null)
+                    throw new InvalidOperationException("Applicant user not found");
+
+                // Create a default user profile
+                ownerProfile = UserProfile.Create(
+                    applicationUserId: application.ApplicantUserId,
+                    firstName: appUser.Email?.Split('@')[0] ?? "User",
+                    lastName: string.Empty,
+                    role: UserRole.User
+                );
+                await _userProfileRepo.AddAsync(ownerProfile, ct);
+                await _uow.SaveChangesAsync(ct);
+                
+                _logger.LogInformation("Created missing UserProfile for user {UserId}", application.ApplicantUserId);
+            }
 
             var studio = Studio.Create(
                 name: application.OrganizationName,
