@@ -1,22 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, ShoppingCart, Users, Clock, UserPlus } from "lucide-react";
+import { Camera, ShoppingCart, Users, Clock } from "lucide-react";
 import { PageHeader } from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { InviteStaffDialog } from "@/components/studios";
-import { useProfile } from "@/lib/hooks";
-import { StudioRole } from "@/types/enums";
 import Link from "next/link";
 
 export default function StudioDashboardPage() {
-  const { user: profile } = useProfile();
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-
-  // Check if user can invite (Owner or Manager)
-  const canInvite = profile?.studioRole === StudioRole.Owner || profile?.studioRole === StudioRole.Manager;
-
   // Placeholder stats - replace with real data later
   const stats = {
     totalOrders: 0,
@@ -30,14 +20,6 @@ export default function StudioDashboardPage() {
       <PageHeader
         title="Studio Dashboard"
         description="Welcome back! Here's an overview of your studio activities"
-        action={
-          canInvite && (
-            <Button onClick={() => setInviteDialogOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Staff
-            </Button>
-          )
-        }
       />
 
       {/* Stats Cards */}
@@ -94,16 +76,6 @@ export default function StudioDashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {canInvite && (
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => setInviteDialogOpen(true)}
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Invite Team Member
-              </Button>
-            )}
             <Link href="/dashboard/studio/team">
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
@@ -130,14 +102,6 @@ export default function StudioDashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {canInvite && profile?.studioId && (
-        <InviteStaffDialog
-          studioId={profile.studioId}
-          open={inviteDialogOpen}
-          onOpenChange={setInviteDialogOpen}
-        />
-      )}
     </div>
   );
 }
