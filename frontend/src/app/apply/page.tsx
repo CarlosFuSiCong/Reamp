@@ -17,12 +17,12 @@ export default function ApplyPage() {
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      router.push("/login?redirect=/profile/apply");
+      router.push("/login?redirect=/apply");
     }
   }, [isAuthenticated, isLoading, router]);
 
   const handleSuccess = () => {
-    router.push("/profile?tab=applications");
+    router.push("/dashboard/profile?tab=applications");
   };
 
   if (isLoading) {
