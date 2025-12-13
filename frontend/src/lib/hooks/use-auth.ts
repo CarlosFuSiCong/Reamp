@@ -21,7 +21,7 @@ function getRedirectPath(role: UserRole): string {
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, setUser, logout: logoutStore, isAuthenticated } = useAuthStore();
+  const { user, setUser, logout: logoutStore, isAuthenticated, isLoading } = useAuthStore();
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
@@ -98,6 +98,7 @@ export function useAuth() {
   return {
     user,
     isAuthenticated,
+    isLoading,
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,

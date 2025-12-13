@@ -99,16 +99,33 @@ namespace Reamp.Application.Applications.Services
         {
             var pagedApplications = await _applicationRepo.GetPagedAsync(pageRequest, status, type, ct);
 
-            var dtos = new List<ApplicationListDto>();
-            foreach (var app in pagedApplications.Items)
+            if (!pagedApplications.Items.Any())
+                return new PagedList<ApplicationListDto>(new List<ApplicationListDto>(), 0, pageRequest.Page, pageRequest.PageSize);
+
+            var applicantUserIds = pagedApplications.Items.Select(x => x.ApplicantUserId).Distinct().ToList();
+
+            var profiles = await _dbContext.UserProfiles
+                .AsNoTracking()
+                .Where(p => applicantUserIds.Contains(p.ApplicationUserId))
+                .ToListAsync(ct);
+
+            var users = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => applicantUserIds.Contains(u.Id))
+                .ToListAsync(ct);
+
+            var profileLookup = profiles.ToDictionary(p => p.ApplicationUserId);
+            var userLookup = users.ToDictionary(u => u.Id);
+
+            var dtos = pagedApplications.Items.Select(app =>
             {
-                var profile = await _userProfileRepo.GetByApplicationUserIdAsync(app.ApplicantUserId, true, false, ct);
+                var profile = profileLookup.GetValueOrDefault(app.ApplicantUserId);
                 var fullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Unknown";
                 
-                var applicantUser = await _dbContext.Users.FindAsync(new object[] { app.ApplicantUserId }, ct);
+                var applicantUser = userLookup.GetValueOrDefault(app.ApplicantUserId);
                 var applicantEmail = applicantUser?.Email ?? "Unknown";
-                
-                dtos.Add(new ApplicationListDto
+
+                return new ApplicationListDto
                 {
                     Id = app.Id,
                     Type = app.Type,
@@ -120,8 +137,8 @@ namespace Reamp.Application.Applications.Services
                     ApplicantName = fullName,
                     CreatedAtUtc = app.CreatedAtUtc,
                     ReviewedAtUtc = app.ReviewedAtUtc
-                });
-            }
+                };
+            }).ToList();
 
             return new PagedList<ApplicationListDto>(dtos, pagedApplications.TotalCount, pagedApplications.Page, pagedApplications.PageSize);
         }
