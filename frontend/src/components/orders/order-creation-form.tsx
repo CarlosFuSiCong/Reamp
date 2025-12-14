@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
+import { useListings, useStudios, useCreateOrder, useProfile } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
 import { Plus, Trash2 } from "lucide-react";
@@ -52,6 +52,7 @@ export function OrderCreationForm() {
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
   const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
+  const { data: profile } = useProfile();
   const createMutation = useCreateOrder();
 
   const isLoadingData = isLoadingListings || isLoadingStudios;
@@ -84,15 +85,14 @@ export function OrderCreationForm() {
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
     try {
-      // Get the selected listing to retrieve ownerAgencyId
-      const selectedListing = listingsData?.items?.find(l => l.id === values.listingId);
-      if (!selectedListing) {
-        throw new Error("Selected listing not found");
+      // Get agencyId from current user's profile
+      if (!profile?.agencyId) {
+        throw new Error("No agency ID found for current user");
       }
 
       // Create the order (studioId is optional - if not provided, order will be available for claiming)
       const orderData: any = {
-        agencyId: selectedListing.ownerAgencyId,
+        agencyId: profile.agencyId,
         listingId: values.listingId,
         currency: values.currency,
       };
