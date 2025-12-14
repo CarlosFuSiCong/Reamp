@@ -32,7 +32,7 @@ namespace Reamp.Application.Authentication.Validators
                 .When(x => !string.IsNullOrEmpty(x.LastName));
 
             RuleFor(x => x.Role)
-                .Equal(UserRole.Client).WithMessage("Public registration is only available for Client users. Please contact an administrator for other account types.");
+                .Equal(UserRole.User).WithMessage("Public registration is only available for User accounts. Please contact an administrator for other account types.");
         }
     }
 }
