@@ -10,8 +10,8 @@ namespace Reamp.Application.Orders.Validators
             RuleFor(x => x.AgencyId)
                 .NotEmpty().WithMessage("AgencyId is required.");
 
-            RuleFor(x => x.StudioId)
-                .NotEmpty().WithMessage("StudioId is required.");
+            // StudioId is optional - order can be published for studios to claim
+            // RuleFor(x => x.StudioId) - removed validation
 
             RuleFor(x => x.ListingId)
                 .NotEmpty().WithMessage("ListingId is required.");
