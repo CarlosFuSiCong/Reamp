@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { UserRole } from "@/types";
 
 export function Navbar() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -26,22 +28,20 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b bg-white">
+    <nav className="border-b bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo - goes to home for unauthenticated users, dashboard for authenticated */}
           <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-blue-600" />
+            <Building2 className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Reamp</span>
           </Link>
 
-          {/* Navigation Items */}
           <div className="flex items-center gap-4">
             {isLoading ? (
-              <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />
+              <Skeleton className="h-8 w-20" />
             ) : isAuthenticated && user ? (
               <>
-                {user.role === 3 && ( // UserRole.Staff
+                {user.role === UserRole.Staff && (
                   <Link href="/apply">
                     <Button variant="outline" size="sm">
                       <FileText className="h-4 w-4 mr-2" />
@@ -54,7 +54,7 @@ export function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-blue-600 text-white">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
                           {user.email?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -82,7 +82,7 @@ export function Navbar() {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    {user.role === 3 && ( // UserRole.Staff
+                    {user.role === UserRole.Staff && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>

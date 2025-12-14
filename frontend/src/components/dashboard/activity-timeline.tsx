@@ -18,13 +18,13 @@ export function ActivityTimeline({ activities, className }: ActivityTimelineProp
   const getActivityColor = (type: Activity["type"]) => {
     switch (type) {
       case "order":
-        return "bg-blue-500";
+        return "bg-chart-2";
       case "listing":
-        return "bg-green-500";
+        return "bg-chart-4";
       case "message":
-        return "bg-purple-500";
+        return "bg-chart-1";
       default:
-        return "bg-gray-500";
+        return "bg-muted-foreground";
     }
   };
 

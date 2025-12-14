@@ -7,7 +7,6 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/shared/role-badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface HeaderProps {
   breadcrumbs?: { label: string; href?: string }[];
@@ -27,9 +26,8 @@ export function Header({ breadcrumbs }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
-      {/* Logo - Link to home */}
       <Link href="/" className="flex items-center gap-2 mr-4">
-        <Building2 className="h-5 w-5 text-blue-600" />
+        <Building2 className="h-5 w-5 text-primary" />
         <span className="font-semibold">Reamp</span>
       </Link>
 
@@ -49,7 +47,7 @@ export function Header({ breadcrumbs }: HeaderProps) {
       <div className="ml-auto flex items-center gap-4">
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">
             3
           </span>
         </Button>
