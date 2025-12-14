@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
+import { useListings, useCreateOrder } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
 import { Plus, Trash2 } from "lucide-react";
@@ -33,7 +33,6 @@ import { ordersApi } from "@/lib/api";
 
 const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
-  studioId: z.string().min(1, "Please select a studio"),
   currency: z.string().min(1),
   tasks: z.array(
     z.object({
@@ -51,10 +50,9 @@ export function OrderCreationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
-  const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
   const createMutation = useCreateOrder();
 
-  const isLoadingData = isLoadingListings || isLoadingStudios;
+  const isLoadingData = isLoadingListings;
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -90,10 +88,9 @@ export function OrderCreationForm() {
         throw new Error("Selected listing not found");
       }
 
-      // Create the order first
+      // Create the order first (without studioId - will be claimed by studios later)
       const result = await createMutation.mutateAsync({
         agencyId: selectedListing.ownerAgencyId,
-        studioId: values.studioId,
         listingId: values.listingId,
         currency: values.currency,
       });
@@ -159,36 +156,9 @@ export function OrderCreationForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="studioId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Photography Studio</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a studio" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {(!studiosData?.items || studiosData.items.length === 0) && (
-                        <SelectItem value="no-studios" disabled>
-                          No studios available
-                        </SelectItem>
-                      )}
-                      {studiosData?.items.map((studio) => (
-                        <SelectItem key={studio.id} value={studio.id}>
-                          {studio.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormDescription>
+                    Select the property listing for this photography order
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -217,6 +187,12 @@ export function OrderCreationForm() {
                 </FormItem>
               )}
             />
+
+            <div className="rounded-lg bg-muted p-4">
+              <p className="text-sm text-muted-foreground">
+                📢 This order will be published to the marketplace. Photography studios can view and claim it.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -355,7 +331,7 @@ export function OrderCreationForm() {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Order"}
+            {isSubmitting ? "Publishing..." : "Publish Order"}
           </Button>
         </div>
       </form>
