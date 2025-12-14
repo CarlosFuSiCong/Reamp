@@ -1,7 +1,9 @@
 ---
-globs: |
-  frontend/**/*.{ts,tsx,js,jsx}
-  frontend/**/global.css
+globs:
+  - frontend/**/*.{ts,tsx,js,jsx}
+  - frontend/**/global.css
+  - frontend/tailwind.config.js
+  - frontend/tailwind.config.ts
 alwaysApply: false
 ---
 # Next.js Frontend Rules
@@ -57,3 +59,8 @@ Follow these rules when generating or modifying frontend code.
   - schemas → validation
 - Avoid deeply nested components and excessive prop drilling (3+ levels).
 - Prefer composition, context, or hooks for shared logic.
+
+## 8. Package Management
+- Use **pnpm** as the only package manager.
+- Do not use npm or yarn.
+- All install, build, and dev commands must use pnpm (e.g., `pnpm install`, `pnpm dev`, `pnpm build`).

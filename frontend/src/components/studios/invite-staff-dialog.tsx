@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { StudioRole } from "@/types";
 import { useSendStudioInvitation } from "@/lib/hooks";
+import { getStudioRoleName } from "@/lib/utils";
 
 const schema = z.object({
   inviteeEmail: z.string().email("Invalid email address"),
@@ -74,19 +75,6 @@ export function InviteStaffDialog({
     }
   };
 
-  const getRoleLabel = (role: StudioRole): string => {
-    switch (role) {
-      case StudioRole.Owner:
-        return "Owner";
-      case StudioRole.Manager:
-        return "Manager";
-      case StudioRole.Member:
-        return "Member";
-      default:
-        return "Unknown";
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -126,13 +114,19 @@ export function InviteStaffDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={StudioRole.Member.toString()}>
-                  {getRoleLabel(StudioRole.Member)}
+                  {getStudioRoleName(StudioRole.Member)}
+                </SelectItem>
+                <SelectItem value={StudioRole.Editor.toString()}>
+                  {getStudioRoleName(StudioRole.Editor)}
+                </SelectItem>
+                <SelectItem value={StudioRole.Photographer.toString()}>
+                  {getStudioRoleName(StudioRole.Photographer)}
                 </SelectItem>
                 <SelectItem value={StudioRole.Manager.toString()}>
-                  {getRoleLabel(StudioRole.Manager)}
+                  {getStudioRoleName(StudioRole.Manager)}
                 </SelectItem>
                 <SelectItem value={StudioRole.Owner.toString()}>
-                  {getRoleLabel(StudioRole.Owner)}
+                  {getStudioRoleName(StudioRole.Owner)}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -142,6 +136,8 @@ export function InviteStaffDialog({
             <p className="text-xs text-gray-500">
               {selectedRole === StudioRole.Owner && "Full control over the studio"}
               {selectedRole === StudioRole.Manager && "Can manage team and settings"}
+              {selectedRole === StudioRole.Photographer && "Can capture and upload photos"}
+              {selectedRole === StudioRole.Editor && "Can edit and process media"}
               {selectedRole === StudioRole.Member && "Basic staff access"}
             </p>
           </div>

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { AgencyRole } from "@/types";
 import { useSendAgencyInvitation } from "@/lib/hooks";
+import { getAgencyRoleName } from "@/lib/utils";
 
 const schema = z.object({
   inviteeEmail: z.string().email("Invalid email address"),
@@ -79,19 +80,6 @@ export function InviteMemberDialog({
     }
   };
 
-  const getRoleLabel = (role: AgencyRole): string => {
-    switch (role) {
-      case AgencyRole.Owner:
-        return "Owner";
-      case AgencyRole.Manager:
-        return "Manager";
-      case AgencyRole.Member:
-        return "Member";
-      default:
-        return "Unknown";
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -131,13 +119,16 @@ export function InviteMemberDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={AgencyRole.Member.toString()}>
-                  {getRoleLabel(AgencyRole.Member)}
+                  {getAgencyRoleName(AgencyRole.Member)}
+                </SelectItem>
+                <SelectItem value={AgencyRole.Agent.toString()}>
+                  {getAgencyRoleName(AgencyRole.Agent)}
                 </SelectItem>
                 <SelectItem value={AgencyRole.Manager.toString()}>
-                  {getRoleLabel(AgencyRole.Manager)}
+                  {getAgencyRoleName(AgencyRole.Manager)}
                 </SelectItem>
                 <SelectItem value={AgencyRole.Owner.toString()}>
-                  {getRoleLabel(AgencyRole.Owner)}
+                  {getAgencyRoleName(AgencyRole.Owner)}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -147,6 +138,7 @@ export function InviteMemberDialog({
             <p className="text-xs text-gray-500">
               {selectedRole === AgencyRole.Owner && "Full control over the agency"}
               {selectedRole === AgencyRole.Manager && "Can manage team and settings"}
+              {selectedRole === AgencyRole.Agent && "Can manage listings and orders"}
               {selectedRole === AgencyRole.Member && "Basic member access"}
             </p>
           </div>

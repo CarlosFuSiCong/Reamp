@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+globs: frontend/**/*.ts, frontend/**/*.tsx, frontend/**/*.js, frontend/**/*.jsx, frontend/**/global.css, frontend/tailwind.config.js, frontend/tailwind.config.ts
+alwaysApply: false
 ---
 # Common Development Rules
 
