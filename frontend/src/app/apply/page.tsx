@@ -26,7 +26,11 @@ export default function ApplyPage() {
   };
 
   if (isLoading) {
-    return <LoadingState message="Loading..." />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingState message="Loading..." />
+      </div>
+    );
   }
 
   if (!isAuthenticated || !user) {
@@ -34,10 +38,10 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Apply for Organization</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Submit an application to create an Agency or Studio. Your application will be reviewed by
           our administrators.
         </p>
