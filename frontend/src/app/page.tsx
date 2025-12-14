@@ -30,7 +30,7 @@ export default function HomePage() {
           <div className="mt-10 flex items-center justify-center gap-4">
             {isAuthenticated && user ? (
               <>
-                {user.role === UserRole.User && (
+                {user.role === UserRole.Client && (
                   <>
                     <Link href="/apply">
                       <Button size="lg" className="gap-2">
@@ -46,7 +46,7 @@ export default function HomePage() {
                     </Link>
                   </>
                 )}
-                {user.role !== UserRole.User && (
+                {user.role !== UserRole.Client && (
                   <Link href="/dashboard">
                     <Button size="lg" className="gap-2">
                       Go to Dashboard
@@ -163,7 +163,7 @@ export default function HomePage() {
             Join the platform and start managing your real estate photography workflow today.
           </p>
           {isAuthenticated && user ? (
-            user.role === UserRole.User ? (
+            user.role === UserRole.Client ? (
               <Link href="/apply">
                 <Button size="lg" variant="secondary" className="gap-2">
                   <Building2 className="h-5 w-5" />

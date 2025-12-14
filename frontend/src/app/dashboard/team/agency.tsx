@@ -192,11 +192,11 @@ export default function AgencyTeamPage() {
                                   updateRole.mutate({
                                     agencyId,
                                     memberId: member.id,
-                                    data: { newRole: AgencyRole.Member },
+                                    data: { newRole: AgencyRole.Agent },
                                   });
                                 }}
                               >
-                                Change to Member
+                                Change to Agent
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => {

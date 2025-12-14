@@ -206,11 +206,11 @@ export default function StudioTeamPage() {
                                   updateRole.mutate({
                                     studioId,
                                     memberId: member.id,
-                                    data: { newRole: StudioRole.Member },
+                                    data: { newRole: StudioRole.Staff },
                                   });
                                 }}
                               >
-                                Change to Member
+                                Change to Staff
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => {
