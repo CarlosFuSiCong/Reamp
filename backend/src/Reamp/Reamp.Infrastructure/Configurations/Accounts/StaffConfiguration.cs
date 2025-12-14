@@ -37,7 +37,7 @@ namespace Reamp.Infrastructure.Configurations.Accounts
 
             b.ToTable(tb =>
             {
-                tb.HasCheckConstraint("CK_Staffs_Role_Valid", "[Role] >= 0 AND [Role] <= 4");
+                tb.HasCheckConstraint("CK_Staffs_Role_Valid", "[Role] >= 1 AND [Role] <= 3");
                 tb.HasCheckConstraint("CK_Staffs_Skills_Valid", "[Skills] >= 0");
             });
         }

@@ -46,6 +46,15 @@ namespace Reamp.Infrastructure.Migrations
                 END
             ");
 
+            // Drop old check constraint and create new one for AgencyRole
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Agents')
+                BEGIN
+                    ALTER TABLE Agents DROP CONSTRAINT IF EXISTS CK_Agents_Role_Valid;
+                    ALTER TABLE Agents ADD CONSTRAINT CK_Agents_Role_Valid CHECK ([Role] >= 1 AND [Role] <= 3);
+                END
+            ");
+
             // Update StudioRole enum values
             // Old: Member=0, Editor=1, Photographer=2, Manager=3, Owner=4
             // New: Staff=1, Manager=2, Owner=3
@@ -69,6 +78,15 @@ namespace Reamp.Infrastructure.Migrations
                     END;
                 END
             ");
+
+            // Drop old check constraint and create new one for StudioRole
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Staff')
+                BEGIN
+                    ALTER TABLE Staff DROP CONSTRAINT IF EXISTS CK_Staffs_Role_Valid;
+                    ALTER TABLE Staff ADD CONSTRAINT CK_Staffs_Role_Valid CHECK ([Role] >= 1 AND [Role] <= 3);
+                END
+            ");
         }
 
         /// <inheritdoc />
@@ -87,23 +105,44 @@ namespace Reamp.Infrastructure.Migrations
                 WHERE Role = 10;
             ");
 
+            // Revert AgencyRole check constraint (back to 0-3)
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Agents')
+                BEGIN
+                    ALTER TABLE Agents DROP CONSTRAINT IF EXISTS CK_Agents_Role_Valid;
+                    ALTER TABLE Agents ADD CONSTRAINT CK_Agents_Role_Valid CHECK ([Role] >= 0 AND [Role] <= 3);
+                END
+            ");
+
             // Revert AgencyRole enum values
             // New: Agent=1, Manager=2, Owner=3
             // Old: Member=0, Agent=1, Manager=2, Owner=3
             // Note: Cannot accurately revert Agent (1) back to Member (0) or Agent (1)
             // Assuming all Agent (1) stay as Agent (1)
 
+            // Revert StudioRole check constraint (back to 0-4)
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Staff')
+                BEGIN
+                    ALTER TABLE Staff DROP CONSTRAINT IF EXISTS CK_Staffs_Role_Valid;
+                    ALTER TABLE Staff ADD CONSTRAINT CK_Staffs_Role_Valid CHECK ([Role] >= 0 AND [Role] <= 4);
+                END
+            ");
+
             // Revert StudioRole enum values
             // New: Staff=1, Manager=2, Owner=3
             // Old: Member=0, Editor=1, Photographer=2, Manager=3, Owner=4
             migrationBuilder.Sql(@"
-                UPDATE Staff 
-                SET Role = CASE 
-                    WHEN Role = 1 THEN 0  -- Staff -> Member (default)
-                    WHEN Role = 2 THEN 3  -- Manager -> Manager
-                    WHEN Role = 3 THEN 4  -- Owner -> Owner
-                    ELSE Role
-                END;
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Staff')
+                BEGIN
+                    UPDATE Staff 
+                    SET Role = CASE 
+                        WHEN Role = 1 THEN 0  -- Staff -> Member (default)
+                        WHEN Role = 2 THEN 3  -- Manager -> Manager
+                        WHEN Role = 3 THEN 4  -- Owner -> Owner
+                        ELSE Role
+                    END;
+                END
             ");
         }
     }
