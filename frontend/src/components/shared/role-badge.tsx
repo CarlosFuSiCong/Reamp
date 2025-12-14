@@ -4,16 +4,16 @@ import { Badge } from "@/components/ui/badge";
 const ROLE_COLORS = {
   [UserRole.Admin]: "bg-red-500",
   [UserRole.Staff]: "bg-blue-500",
+  [UserRole.Agent]: "bg-purple-500",
   [UserRole.Client]: "bg-green-500",
-  [UserRole.User]: "bg-gray-500",
   [UserRole.None]: "bg-gray-500",
 };
 
 const ROLE_NAMES = {
   [UserRole.Admin]: "Admin",
   [UserRole.Staff]: "Staff",
+  [UserRole.Agent]: "Agent",
   [UserRole.Client]: "Client",
-  [UserRole.User]: "User",
   [UserRole.None]: "None",
 };
 
