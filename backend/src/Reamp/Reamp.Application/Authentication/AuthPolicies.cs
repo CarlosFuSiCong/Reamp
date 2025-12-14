@@ -8,10 +8,12 @@ namespace Reamp.Application.Authentication
         public const string RequireStaffRole = "RequireStaffRole";
         public const string RequireClientRole = "RequireClientRole";
         public const string RequireUserRole = "RequireUserRole";
+        public const string RequireAgentRole = "RequireAgentRole";
 
         // Combined policies
         public const string RequireStaffOrAdmin = "RequireStaffOrAdmin";
         public const string RequireClientOrAdmin = "RequireClientOrAdmin";
+        public const string RequireAgentOrAdmin = "RequireAgentOrAdmin";
     }
 }
 

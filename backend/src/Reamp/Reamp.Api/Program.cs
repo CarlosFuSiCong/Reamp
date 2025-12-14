@@ -118,10 +118,14 @@ namespace Reamp.Api
                     policy.RequireRole("Client"));
                 options.AddPolicy(AuthPolicies.RequireUserRole, policy =>
                     policy.RequireRole("User"));
+                options.AddPolicy(AuthPolicies.RequireAgentRole, policy =>
+                    policy.RequireRole("Agent"));
                 options.AddPolicy(AuthPolicies.RequireStaffOrAdmin, policy =>
                     policy.RequireRole("Staff", "Admin"));
                 options.AddPolicy(AuthPolicies.RequireClientOrAdmin, policy =>
                     policy.RequireRole("Client", "Admin"));
+                options.AddPolicy(AuthPolicies.RequireAgentOrAdmin, policy =>
+                    policy.RequireRole("Agent", "Admin"));
             });
 
             // Validation
