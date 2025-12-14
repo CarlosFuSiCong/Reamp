@@ -1,7 +1,7 @@
 import { AgencyRole, StudioRole } from "@/types";
 
 export function getAgencyRoleName(role: AgencyRole | undefined | null): string {
-  if (role === undefined || role === null) return "Member";
+  if (role === undefined || role === null) return "Agent";
   
   const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
   
@@ -12,15 +12,13 @@ export function getAgencyRoleName(role: AgencyRole | undefined | null): string {
       return "Manager";
     case AgencyRole.Agent:
       return "Agent";
-    case AgencyRole.Member:
-      return "Member";
     default:
       return "Unknown";
   }
 }
 
 export function getStudioRoleName(role: StudioRole | undefined | null): string {
-  if (role === undefined || role === null) return "Member";
+  if (role === undefined || role === null) return "Staff";
   
   const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
   
@@ -29,12 +27,8 @@ export function getStudioRoleName(role: StudioRole | undefined | null): string {
       return "Owner";
     case StudioRole.Manager:
       return "Manager";
-    case StudioRole.Photographer:
-      return "Photographer";
-    case StudioRole.Editor:
-      return "Editor";
-    case StudioRole.Member:
-      return "Member";
+    case StudioRole.Staff:
+      return "Staff";
     default:
       return "Unknown";
   }
