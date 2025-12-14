@@ -8,15 +8,15 @@
 ```csharp
 // 旧版本
 None = 0,
-User = 1,      // 已移除
-Client = 2,
+User = 1,
+Client = 2,    // 已删除（改为 Agent）
 Staff = 3,
 Admin = 4
 
 // 新版本
 None = 0,
-Client = 1,    // 所有注册用户的默认角色
-Agent = 2,     // Agency 成员的用户级别角色
+User = 1,      // 所有注册用户的默认角色（保持不变）
+Agent = 2,     // Agency 成员的用户级别角色（原 Client）
 Staff = 3,
 Admin = 4
 ```

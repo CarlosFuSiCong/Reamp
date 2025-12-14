@@ -12,26 +12,13 @@ namespace Reamp.Infrastructure.Migrations
         {
             // Update UserRole enum values
             // Old: None=0, User=1, Client=2, Staff=3, Admin=4
-            // New: None=0, Client=1, Agent=2, Staff=3, Admin=4
-            // Update User (1) -> Client (1) - No change needed for value
-            // Update Client (2) -> Agent (2) - This needs to be changed
+            // New: None=0, User=1, Agent=2, Staff=3, Admin=4
+            // User (1) stays as 1 - no change needed
+            // Client (2) -> Agent (2) - rename only, value unchanged
             
-            // First, update any Client (old value 2) to a temporary value to avoid conflicts
-            migrationBuilder.Sql(@"
-                UPDATE UserProfiles 
-                SET Role = 10 
-                WHERE Role = 2;
-            ");
-            
-            // Update User (old value 1) to Client (new value 1) - No change in value needed
-            // Users with value 1 stay as 1 (but semantically changed from User to Client)
-            
-            // Update temporary Client (10) to Agent (new value 2)
-            migrationBuilder.Sql(@"
-                UPDATE UserProfiles 
-                SET Role = 2 
-                WHERE Role = 10;
-            ");
+            // Note: No database updates needed for UserRole
+            // Value 1 remains 1 (User), value 2 remains 2 (now Agent instead of Client)
+            // This is a semantic rename only - Client role renamed to Agent
 
             // Update AgencyRole enum values
             // Old: Member=0, Agent=1, Manager=2, Owner=3
@@ -93,17 +80,10 @@ namespace Reamp.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             // Revert UserRole enum values
-            // New: None=0, Client=1, Agent=2, Staff=3, Admin=4
+            // New: None=0, User=1, Agent=2, Staff=3, Admin=4
             // Old: None=0, User=1, Client=2, Staff=3, Admin=4
-            migrationBuilder.Sql(@"
-                UPDATE UserProfiles 
-                SET Role = 10 
-                WHERE Role = 2;
-                
-                UPDATE UserProfiles 
-                SET Role = 2 
-                WHERE Role = 10;
-            ");
+            // Note: No database changes needed - this was a semantic rename only
+            // Agent (2) reverts to Client (2), User (1) remains User (1)
 
             // Revert AgencyRole check constraint (back to 0-3)
             migrationBuilder.Sql(@"
