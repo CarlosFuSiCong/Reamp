@@ -7,6 +7,8 @@ using Reamp.Application.Listings.Services;
 using Reamp.Application.Read.Listings;
 using Reamp.Application.Read.Shared;
 using Reamp.Domain.Listings.Enums;
+using Reamp.Domain.Accounts.Repositories;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Reamp.Api.Controllers
 {
@@ -16,20 +18,61 @@ namespace Reamp.Api.Controllers
     {
         private readonly IListingAppService _appService;
         private readonly IListingReadService _readService;
+        private readonly IAgentRepository _agentRepo;
+        private readonly IUserProfileRepository _userProfileRepo;
         private readonly ILogger<ListingsController> _logger;
 
-        public ListingsController(IListingAppService appService, IListingReadService readService, ILogger<ListingsController> logger)
+        public ListingsController(
+            IListingAppService appService, 
+            IListingReadService readService, 
+            IAgentRepository agentRepo,
+            IUserProfileRepository userProfileRepo,
+            ILogger<ListingsController> logger)
         {
             _appService = appService;
             _readService = readService;
+            _agentRepo = agentRepo;
+            _userProfileRepo = userProfileRepo;
             _logger = logger;
         }
 
-        // Create listing - requires Client or Admin role
+        private Guid GetCurrentApplicationUserId()
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                throw new UnauthorizedAccessException("User ID claim not found or invalid.");
+            return userId;
+        }
+
+        // Create listing - requires Agent or Admin role
         [HttpPost]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Create([FromBody] CreateListingDto dto, CancellationToken ct)
         {
+            // Get current user's ApplicationUserId from JWT
+            var applicationUserId = GetCurrentApplicationUserId();
+            
+            // Get UserProfile to find UserProfileId
+            var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId, asNoTracking: true, ct: ct);
+            if (userProfile == null)
+            {
+                _logger.LogWarning("User {ApplicationUserId} attempted to create listing but has no user profile", applicationUserId);
+                return Forbid();
+            }
+
+            // Get Agent record using UserProfileId
+            var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
+            if (agent == null)
+            {
+                _logger.LogWarning("UserProfile {UserProfileId} (ApplicationUser {ApplicationUserId}) attempted to create listing but has no agent record", 
+                    userProfile.Id, applicationUserId);
+                return Forbid();
+            }
+
+            // Set ownerAgencyId and agentUserId
+            dto.OwnerAgencyId = agent.AgencyId;
+            dto.AgentUserId = userProfile.Id;  // Use UserProfileId, not ApplicationUserId
+
             var id = await _appService.CreateAsync(dto, ct);
             return CreatedAtAction(nameof(GetDetail), new { id }, new { id });
         }
@@ -70,27 +113,27 @@ namespace Reamp.Api.Controllers
             return listing is null ? NotFound() : Ok(listing);
         }
 
-        // Get editor detail - requires Client or Admin
+        // Get editor detail - requires Agent or Admin
         [HttpGet("{id:guid}/editor")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> GetEditorDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var listing = await _readService.GetEditorDetailAsync(id, ct);
             return listing is null ? NotFound() : Ok(listing);
         }
 
-        // Update listing details - requires Client or Admin
+        // Update listing details - requires Agent or Admin
         [HttpPut("{id:guid}")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> UpdateDetails([FromRoute] Guid id, [FromBody] UpdateListingDetailsDto dto, CancellationToken ct)
         {
             await _appService.UpdateDetailsAsync(id, dto, ct);
             return NoContent();
         }
 
-        // Publish listing - requires Client or Admin
+        // Publish listing - requires Agent or Admin
         [HttpPost("{id:guid}/publish")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Publish([FromRoute] Guid id, CancellationToken ct)
         {
             _logger.LogInformation("API request to publish listing {ListingId}", id);
@@ -106,9 +149,9 @@ namespace Reamp.Api.Controllers
             }
         }
 
-        // Archive listing - requires Client or Admin
+        // Archive listing - requires Agent or Admin
         [HttpPost("{id:guid}/archive")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Archive([FromRoute] Guid id, CancellationToken ct)
         {
             _logger.LogInformation("API request to archive listing {ListingId}", id);
@@ -124,92 +167,108 @@ namespace Reamp.Api.Controllers
             }
         }
 
+        // Create listing agent - requires Agent or Admin
         [HttpPost("{id:guid}/agents")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> CreateAgent([FromRoute] Guid id, [FromBody] CreateListingAgentDto dto, CancellationToken ct)
         {
             var agentId = await _appService.CreateAgentAsync(id, dto, ct);
             return CreatedAtAction(nameof(GetDetail), new { id }, new { agentId });
         }
 
+        // Assign agent to listing - requires Agent or Admin
         [HttpPost("{id:guid}/agents/{agentUserId:guid}/assign/{agentSnapshotId:guid}")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> AssignAgent([FromRoute] Guid id, [FromRoute] Guid agentUserId, [FromRoute] Guid agentSnapshotId, CancellationToken ct)
         {
             await _appService.AssignAgentAsync(id, agentUserId, agentSnapshotId, ct);
             return NoContent();
         }
 
+        // Unassign primary agent - requires Agent or Admin
         [HttpDelete("{id:guid}/agents/primary")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> UnassignPrimaryAgent([FromRoute] Guid id, CancellationToken ct)
         {
             await _appService.UnassignPrimaryAgentAsync(id, ct);
             return NoContent();
         }
 
+        // Remove agent from listing - requires Agent or Admin
         [HttpDelete("{id:guid}/agents/{agentSnapshotId:guid}")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> RemoveAgent([FromRoute] Guid id, [FromRoute] Guid agentSnapshotId, CancellationToken ct)
         {
             await _appService.RemoveAgentAsync(id, agentSnapshotId, ct);
             return NoContent();
         }
 
+        // Reorder agents - requires Agent or Admin
         [HttpPut("{id:guid}/agents/reorder")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> ReorderAgents([FromRoute] Guid id, [FromBody] ReorderAgentsDto dto, CancellationToken ct)
         {
             await _appService.ReorderAgentsAsync(id, dto, ct);
             return NoContent();
         }
 
+        // Reorder media - requires Agent or Admin
         [HttpPut("{id:guid}/media/reorder")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> ReorderMedia([FromRoute] Guid id, [FromBody] ReorderMediaDto dto, CancellationToken ct)
         {
             await _appService.ReorderMediaAsync(id, dto, ct);
             return NoContent();
         }
 
+        // Set media visibility - requires Agent or Admin
         [HttpPut("{id:guid}/media/visibility")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> SetMediaVisibility([FromRoute] Guid id, [FromBody] SetMediaVisibilityDto dto, CancellationToken ct)
         {
             await _appService.SetMediaVisibilityAsync(id, dto, ct);
             return NoContent();
         }
 
+        // Set cover image - requires Agent or Admin
         [HttpPut("{id:guid}/media/{mediaId:guid}/cover")]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> SetCover([FromRoute] Guid id, [FromRoute] Guid mediaId, CancellationToken ct)
         {
             await _appService.SetCoverAsync(id, mediaId, ct);
             return NoContent();
         }
 
-        // Add media to listing - requires Client or Admin
+        // Add media to listing - requires Agent or Admin
         [HttpPost("{id:guid}/media")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> AddMedia([FromRoute] Guid id, [FromBody] AddMediaDto dto, CancellationToken ct)
         {
             var mediaRefId = await _appService.AddMediaAsync(id, dto, ct);
             return Ok(new { mediaRefId });
         }
 
-        // Remove media from listing - requires Client or Admin
+        // Remove media from listing - requires Agent or Admin
         [HttpDelete("{id:guid}/media/{mediaRefId:guid}")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> RemoveMedia([FromRoute] Guid id, [FromRoute] Guid mediaRefId, CancellationToken ct)
         {
             await _appService.RemoveMediaAsync(id, mediaRefId, ct);
             return NoContent();
         }
 
-        // Soft delete listing - requires Client or Admin
+        // Soft delete listing - requires Agent or Admin
         [HttpDelete("{id:guid}")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
         {
             await _appService.DeleteAsync(id, ct);
             return NoContent();
         }
 
-        // Restore deleted listing - requires Client or Admin (changed from Admin only)
+        // Restore deleted listing - requires Agent or Admin
         [HttpPost("{id:guid}/restore")]
-        [Authorize(Policy = AuthPolicies.RequireClientOrAdmin)]
+        [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Restore([FromRoute] Guid id, CancellationToken ct)
         {
             await _appService.RestoreAsync(id, ct);
