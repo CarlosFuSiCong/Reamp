@@ -28,7 +28,7 @@ namespace Reamp.Api.Controllers
         /// Get all agency members
         /// </summary>
         [HttpGet]
-        [RequireAgencyRole(AgencyRole.Member)]
+        [RequireAgencyRole(AgencyRole.Agent)]
         public async Task<IActionResult> GetMembers(
             Guid agencyId,
             CancellationToken ct)
@@ -101,7 +101,7 @@ namespace Reamp.Api.Controllers
         /// Get all studio members
         /// </summary>
         [HttpGet]
-        [RequireStudioRole(StudioRole.Member)]
+        [RequireStudioRole(StudioRole.Staff)]
         public async Task<IActionResult> GetMembers(
             Guid studioId,
             CancellationToken ct)

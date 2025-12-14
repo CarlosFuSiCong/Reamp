@@ -76,7 +76,7 @@ namespace Reamp.Api.Controllers
 
         // GET /api/agencies/{agencyId}/invitations - Get agency invitations
         [HttpGet("{agencyId:guid}/invitations")]
-        [RequireAgencyRole(AgencyRole.Member)]
+        [RequireAgencyRole(AgencyRole.Agent)]
         public async Task<IActionResult> GetInvitations(Guid agencyId, CancellationToken ct)
         {
             try
