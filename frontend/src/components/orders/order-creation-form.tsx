@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useListings, useCreateOrder } from "@/lib/hooks";
+import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
 import { Plus, Trash2 } from "lucide-react";
@@ -33,6 +33,7 @@ import { ordersApi } from "@/lib/api";
 
 const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
+  studioId: z.string().optional(), // Optional - can be left empty for marketplace claiming
   currency: z.string().min(1),
   tasks: z.array(
     z.object({
@@ -50,9 +51,10 @@ export function OrderCreationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
+  const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
   const createMutation = useCreateOrder();
 
-  const isLoadingData = isLoadingListings;
+  const isLoadingData = isLoadingListings || isLoadingStudios;
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
@@ -88,12 +90,19 @@ export function OrderCreationForm() {
         throw new Error("Selected listing not found");
       }
 
-      // Create the order first (without studioId - will be claimed by studios later)
-      const result = await createMutation.mutateAsync({
+      // Create the order (studioId is optional - if not provided, order will be available for claiming)
+      const orderData: any = {
         agencyId: selectedListing.ownerAgencyId,
         listingId: values.listingId,
         currency: values.currency,
-      });
+      };
+      
+      // Only include studioId if a studio was selected
+      if (values.studioId) {
+        orderData.studioId = values.studioId;
+      }
+
+      const result = await createMutation.mutateAsync(orderData);
 
       // Add tasks to the order
       for (const task of values.tasks) {
@@ -166,6 +175,41 @@ export function OrderCreationForm() {
 
             <FormField
               control={form.control}
+              name="studioId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Photography Studio (Optional)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Leave empty to publish to marketplace" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">No studio (publish to marketplace)</SelectItem>
+                      {(!studiosData?.items || studiosData.items.length === 0) ? (
+                        <SelectItem value="no-studios" disabled>
+                          No studios available
+                        </SelectItem>
+                      ) : (
+                        studiosData.items.map((studio) => (
+                          <SelectItem key={studio.id} value={studio.id}>
+                            {studio.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose a specific studio or leave empty to let studios claim this order
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="currency"
               render={({ field }) => (
                 <FormItem>
@@ -187,12 +231,6 @@ export function OrderCreationForm() {
                 </FormItem>
               )}
             />
-
-            <div className="rounded-lg bg-muted p-4">
-              <p className="text-sm text-muted-foreground">
-                📢 This order will be published to the marketplace. Photography studios can view and claim it.
-              </p>
-            </div>
           </CardContent>
         </Card>
 
