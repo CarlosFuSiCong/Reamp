@@ -70,9 +70,7 @@ export function getRoleDashboard(role: UserRole): string {
     case UserRole.Admin:
       return "/admin";
     case UserRole.User:
-      return "/";
     case UserRole.Agent:
-      return "/dashboard/profile";
     case UserRole.Staff:
       return "/dashboard/profile";
     default:

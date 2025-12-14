@@ -40,8 +40,8 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
         return "/admin";
       case UserRole.Agent:
       case UserRole.Staff:
-        return "/dashboard/profile";
       case UserRole.User:
+        return "/dashboard/profile";
       default:
         return "/";
     }
@@ -116,27 +116,15 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     
-                    {/* Dashboard Link */}
-                    {user.role !== UserRole.User && (
-                      <DropdownMenuItem asChild>
-                        <Link href={getDashboardLink()} className="cursor-pointer">
-                          <Building2 className="mr-2 h-4 w-4" />
-                          Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
+                    {/* Dashboard Link - for all authenticated users */}
+                    <DropdownMenuItem asChild>
+                      <Link href={getDashboardLink()} className="cursor-pointer">
+                        <Building2 className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
                     
-                    {/* Profile Link */}
-                    {user.role !== UserRole.User && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard/profile" className="cursor-pointer">
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {/* Apply Link for User role */}
+                    {/* Apply Link for User role only */}
                     {user.role === UserRole.User && (
                       <DropdownMenuItem asChild>
                         <Link href="/apply" className="cursor-pointer">
