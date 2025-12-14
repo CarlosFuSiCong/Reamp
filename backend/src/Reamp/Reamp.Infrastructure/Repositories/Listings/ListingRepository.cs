@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Reamp.Domain.Listings.Entities;
 using Reamp.Domain.Listings.Repositories;
@@ -69,8 +69,8 @@ namespace Reamp.Infrastructure.Repositories.Listings
         public async Task<Listing?> GetAggregateAsync(Guid id, CancellationToken ct = default)
         {
             return await _set
-                .Include("_mediaRefs")
-                .Include("_agentSnapshots")
+                .Include(x => x.MediaRefs)
+                .Include(x => x.AgentSnapshots)
                 .FirstOrDefaultAsync(x => x.Id == id, ct);
         }
     }
