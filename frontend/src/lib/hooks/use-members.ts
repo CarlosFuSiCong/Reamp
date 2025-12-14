@@ -6,9 +6,8 @@ import {
   UpdateAgencyMemberRoleDto,
   UpdateStudioMemberRoleDto,
 } from "@/types";
-import { toast } from "sonner";
+import { handleMutationError, handleMutationSuccess } from "@/lib/utils";
 
-// Get agency members
 export function useAgencyMembers(agencyId: string) {
   return useQuery<AgencyMemberDto[]>({
     queryKey: ["agencies", agencyId, "members"],
@@ -17,7 +16,6 @@ export function useAgencyMembers(agencyId: string) {
   });
 }
 
-// Update agency member role
 export function useUpdateAgencyMemberRole() {
   const queryClient = useQueryClient();
 
@@ -35,19 +33,14 @@ export function useUpdateAgencyMemberRole() {
       queryClient.invalidateQueries({
         queryKey: ["agencies", variables.agencyId, "members"],
       });
-      toast.success("Member role updated", {
-        description: "The member's role has been updated successfully",
-      });
+      handleMutationSuccess("Member role updated", "The member's role has been updated successfully");
     },
     onError: (error: any) => {
-      toast.error("Failed to update member role", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to update member role");
     },
   });
 }
 
-// Remove agency member
 export function useRemoveAgencyMember() {
   const queryClient = useQueryClient();
 
@@ -63,19 +56,14 @@ export function useRemoveAgencyMember() {
       queryClient.invalidateQueries({
         queryKey: ["agencies", variables.agencyId, "members"],
       });
-      toast.success("Member removed", {
-        description: "The member has been removed from the agency",
-      });
+      handleMutationSuccess("Member removed", "The member has been removed from the agency");
     },
     onError: (error: any) => {
-      toast.error("Failed to remove member", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to remove member");
     },
   });
 }
 
-// Get studio members
 export function useStudioMembers(studioId: string) {
   return useQuery<StudioMemberDto[]>({
     queryKey: ["studios", studioId, "members"],
@@ -84,7 +72,6 @@ export function useStudioMembers(studioId: string) {
   });
 }
 
-// Update studio member role
 export function useUpdateStudioMemberRole() {
   const queryClient = useQueryClient();
 
@@ -102,19 +89,14 @@ export function useUpdateStudioMemberRole() {
       queryClient.invalidateQueries({
         queryKey: ["studios", variables.studioId, "members"],
       });
-      toast.success("Member role updated", {
-        description: "The member's role has been updated successfully",
-      });
+      handleMutationSuccess("Member role updated", "The member's role has been updated successfully");
     },
     onError: (error: any) => {
-      toast.error("Failed to update member role", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to update member role");
     },
   });
 }
 
-// Remove studio member
 export function useRemoveStudioMember() {
   const queryClient = useQueryClient();
 
@@ -130,14 +112,10 @@ export function useRemoveStudioMember() {
       queryClient.invalidateQueries({
         queryKey: ["studios", variables.studioId, "members"],
       });
-      toast.success("Member removed", {
-        description: "The member has been removed from the studio",
-      });
+      handleMutationSuccess("Member removed", "The member has been removed from the studio");
     },
     onError: (error: any) => {
-      toast.error("Failed to remove member", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to remove member");
     },
   });
 }

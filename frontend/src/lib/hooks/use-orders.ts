@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ordersApi } from "@/lib/api";
 import { ShootOrder, PagedResponse, OrderStatus } from "@/types";
-import { toast } from "sonner";
+import { handleMutationError, handleMutationSuccess } from "@/lib/utils";
 
 export function useOrders(params?: {
   agencyId?: string;
@@ -36,10 +36,10 @@ export function useCreateOrder() {
     mutationFn: ordersApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.success("Order created successfully");
+      handleMutationSuccess("Order created successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to create order");
+      handleMutationError(error, "Failed to create order");
     },
   });
 }
@@ -52,10 +52,10 @@ export function useCancelOrder() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", variables.id] });
-      toast.success("Order cancelled successfully");
+      handleMutationSuccess("Order cancelled successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to cancel order");
+      handleMutationError(error, "Failed to cancel order");
     },
   });
 }

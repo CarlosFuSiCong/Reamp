@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Reamp.Infrastructure;
 
@@ -11,9 +12,11 @@ using Reamp.Infrastructure;
 namespace Reamp.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251214013949_UpdateRoleEnums")]
+    partial class UpdateRoleEnums
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,7 +310,7 @@ namespace Reamp.Infrastructure.Migrations
 
                     b.ToTable("Agents", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Agents_Role_Valid", "[Role] >= 1 AND [Role] <= 3");
+                            t.HasCheckConstraint("CK_Agents_Role_Valid", "[Role] >= 0 AND [Role] <= 3");
                         });
                 });
 
@@ -595,7 +598,7 @@ namespace Reamp.Infrastructure.Migrations
 
                     b.ToTable("Staffs", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Staffs_Role_Valid", "[Role] >= 1 AND [Role] <= 3");
+                            t.HasCheckConstraint("CK_Staffs_Role_Valid", "[Role] >= 0 AND [Role] <= 4");
 
                             t.HasCheckConstraint("CK_Staffs_Skills_Valid", "[Skills] >= 0");
                         });

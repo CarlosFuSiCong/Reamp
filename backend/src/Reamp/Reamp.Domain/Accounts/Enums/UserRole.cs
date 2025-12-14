@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace Reamp.Domain.Accounts.Enums
     {
         None = 0,
         User = 1,
-        Client = 2,
+        Agent = 2,
         Staff = 3,
         Admin = 4
     }

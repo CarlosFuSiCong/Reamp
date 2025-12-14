@@ -52,7 +52,7 @@ export function InviteStaffDialog({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      targetRole: StudioRole.Member,
+      targetRole: StudioRole.Staff,
     },
   });
 
@@ -113,14 +113,8 @@ export function InviteStaffDialog({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={StudioRole.Member.toString()}>
-                  {getStudioRoleName(StudioRole.Member)}
-                </SelectItem>
-                <SelectItem value={StudioRole.Editor.toString()}>
-                  {getStudioRoleName(StudioRole.Editor)}
-                </SelectItem>
-                <SelectItem value={StudioRole.Photographer.toString()}>
-                  {getStudioRoleName(StudioRole.Photographer)}
+                <SelectItem value={StudioRole.Staff.toString()}>
+                  {getStudioRoleName(StudioRole.Staff)}
                 </SelectItem>
                 <SelectItem value={StudioRole.Manager.toString()}>
                   {getStudioRoleName(StudioRole.Manager)}
@@ -136,9 +130,7 @@ export function InviteStaffDialog({
             <p className="text-xs text-gray-500">
               {selectedRole === StudioRole.Owner && "Full control over the studio"}
               {selectedRole === StudioRole.Manager && "Can manage team and settings"}
-              {selectedRole === StudioRole.Photographer && "Can capture and upload photos"}
-              {selectedRole === StudioRole.Editor && "Can edit and process media"}
-              {selectedRole === StudioRole.Member && "Basic staff access"}
+              {selectedRole === StudioRole.Staff && "Can capture, edit, and process media"}
             </p>
           </div>
 

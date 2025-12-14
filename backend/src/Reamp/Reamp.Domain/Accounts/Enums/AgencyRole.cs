@@ -8,7 +8,6 @@ namespace Reamp.Domain.Accounts.Enums
 {
     public enum AgencyRole : int
     {
-        Member = 0,
         Agent = 1,
         Manager = 2,
         Owner = 3

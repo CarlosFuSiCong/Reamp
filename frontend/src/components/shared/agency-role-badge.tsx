@@ -1,6 +1,7 @@
 import { AgencyRole } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { getAgencyRoleName } from "@/lib/utils/role-utils";
+import { cn } from "@/lib/utils";
 
 interface AgencyRoleBadgeProps {
   role: AgencyRole | undefined | null;
@@ -9,23 +10,26 @@ interface AgencyRoleBadgeProps {
 
 export function AgencyRoleBadge({ role, className }: AgencyRoleBadgeProps) {
   if (role === undefined || role === null) {
-    return <Badge className={`bg-gray-50 text-gray-700 border-gray-200 ${className || ""}`}>Member</Badge>;
+    return (
+      <Badge className={cn("bg-muted/50 text-foreground border-border", className)}>
+        Agent
+      </Badge>
+    );
   }
   
   const roleValue = typeof role === 'string' ? parseInt(role, 10) : Number(role);
   const roleName = getAgencyRoleName(role);
   
   const colorClasses: Record<AgencyRole, string> = {
-    [AgencyRole.Owner]: "bg-purple-50 text-purple-700 border-purple-200",
-    [AgencyRole.Manager]: "bg-blue-50 text-blue-700 border-blue-200",
-    [AgencyRole.Agent]: "bg-green-50 text-green-700 border-green-200",
-    [AgencyRole.Member]: "bg-gray-50 text-gray-700 border-gray-200",
+    [AgencyRole.Owner]: "bg-primary/10 text-primary border-primary/20",
+    [AgencyRole.Manager]: "bg-chart-2/10 text-chart-2 border-chart-2/20 dark:text-chart-2",
+    [AgencyRole.Agent]: "bg-chart-4/10 text-chart-4 border-chart-4/20 dark:text-chart-4",
   };
   
-  const colorClass = colorClasses[roleValue as AgencyRole] || "bg-gray-50 text-gray-700 border-gray-200";
+  const colorClass = colorClasses[roleValue as AgencyRole] || "bg-muted/50 text-foreground border-border";
   
   return (
-    <Badge className={`${colorClass} ${className || ""}`}>
+    <Badge className={cn(colorClass, className)}>
       {roleName}
     </Badge>
   );

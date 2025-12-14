@@ -8,11 +8,9 @@ namespace Reamp.Domain.Accounts.Enums
 {
     public enum StudioRole : int
     {
-        Member = 0,
-        Editor = 1,
-        Photographer = 2,
-        Manager = 3,
-        Owner = 4
+        Staff = 1,
+        Manager = 2,
+        Owner = 3
     }
 }
 

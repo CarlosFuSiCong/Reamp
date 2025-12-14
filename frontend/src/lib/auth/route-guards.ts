@@ -68,11 +68,11 @@ export function redirectIfAuthenticated(redirectTo?: string): boolean {
 export function getRoleDashboard(role: UserRole): string {
   switch (role) {
     case UserRole.Admin:
-      return "/admin/dashboard";
-    case UserRole.Client:
-      return "/agent/dashboard";
+      return "/admin";
+    case UserRole.User:
+    case UserRole.Agent:
     case UserRole.Staff:
-      return "/studio/dashboard";
+      return "/dashboard/profile";
     default:
       return "/";
   }

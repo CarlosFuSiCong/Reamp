@@ -22,7 +22,6 @@ export function OrderStatusTimeline({
 }: OrderStatusTimelineProps) {
   let currentIndex = orderSteps.findIndex((step) => step.status === currentStatus);
   
-  // Handle cancelled status not in orderSteps array
   if (currentIndex === -1 && isCancelled) {
     currentIndex = 0;
   }
@@ -46,24 +45,24 @@ export function OrderStatusTimeline({
                     className={cn(
                       "flex items-center justify-center w-8 h-8 rounded-full border-2",
                       isCompleted &&
-                        "border-green-500 bg-green-500 text-white",
+                        "border-chart-4 bg-chart-4 text-white",
                       isCurrent && !isCancelled &&
-                        "border-blue-500 bg-blue-500 text-white",
+                        "border-primary bg-primary text-primary-foreground",
                       isCurrent && isCancelled &&
                         "border-destructive bg-destructive text-white",
-                      isPending && "border-gray-300 bg-white"
+                      isPending && "border-border bg-background"
                     )}
                   >
                     {isCompleted && <CheckCircle2 className="h-5 w-5" />}
                     {isCurrent && !isCancelled && <Circle className="h-5 w-5" />}
                     {isCurrent && isCancelled && <XCircle className="h-5 w-5" />}
-                    {isPending && <Circle className="h-5 w-5 text-gray-300" />}
+                    {isPending && <Circle className="h-5 w-5 text-muted-foreground" />}
                   </div>
                   {index < orderSteps.length - 1 && (
                     <div
                       className={cn(
                         "w-0.5 h-8 mt-1",
-                        isCompleted ? "bg-green-500" : "bg-gray-300"
+                        isCompleted ? "bg-chart-4" : "bg-border"
                       )}
                     />
                   )}

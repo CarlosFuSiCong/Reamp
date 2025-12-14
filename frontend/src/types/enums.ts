@@ -1,24 +1,21 @@
 export enum UserRole {
   None = 0,
   User = 1,
-  Client = 2,
+  Agent = 2,
   Staff = 3,
   Admin = 4,
 }
 
 export enum AgencyRole {
-  Member = 0,
   Agent = 1,
   Manager = 2,
   Owner = 3,
 }
 
 export enum StudioRole {
-  Member = 0,
-  Editor = 1,
-  Photographer = 2,
-  Manager = 3,
-  Owner = 4,
+  Staff = 1,
+  Manager = 2,
+  Owner = 3,
 }
 
 export enum UserStatus {

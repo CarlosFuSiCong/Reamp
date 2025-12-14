@@ -56,7 +56,7 @@ export function InviteMemberDialog({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      targetRole: AgencyRole.Member,
+      targetRole: AgencyRole.Agent,
     },
   });
 
@@ -118,9 +118,6 @@ export function InviteMemberDialog({
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={AgencyRole.Member.toString()}>
-                  {getAgencyRoleName(AgencyRole.Member)}
-                </SelectItem>
                 <SelectItem value={AgencyRole.Agent.toString()}>
                   {getAgencyRoleName(AgencyRole.Agent)}
                 </SelectItem>
@@ -139,7 +136,6 @@ export function InviteMemberDialog({
               {selectedRole === AgencyRole.Owner && "Full control over the agency"}
               {selectedRole === AgencyRole.Manager && "Can manage team and settings"}
               {selectedRole === AgencyRole.Agent && "Can manage listings and orders"}
-              {selectedRole === AgencyRole.Member && "Basic member access"}
             </p>
           </div>
 

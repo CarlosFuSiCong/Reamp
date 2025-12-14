@@ -6,7 +6,7 @@ namespace Reamp.Application.Accounts.Staff.Dtos
     {
         public Guid UserProfileId { get; set; }
         public Guid StudioId { get; set; }
-        public StudioRole Role { get; set; } = StudioRole.Member;
+        public StudioRole Role { get; set; } = StudioRole.Staff;
         public StaffSkills Skills { get; set; } = StaffSkills.None;
     }
 }

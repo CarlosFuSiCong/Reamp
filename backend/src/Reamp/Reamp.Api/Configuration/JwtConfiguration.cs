@@ -39,7 +39,7 @@ namespace Reamp.Api.Configuration
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                         ClockSkew = TimeSpan.Zero,
                         NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "role"
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role
                     };
 
                     options.Events = CreateJwtBearerEvents();
