@@ -1,13 +1,16 @@
+import { cn } from "@/lib/utils";
+
 interface ErrorAlertProps {
   message?: string;
+  className?: string;
 }
 
-export function ErrorAlert({ message }: ErrorAlertProps) {
+export function ErrorAlert({ message, className }: ErrorAlertProps) {
   if (!message) return null;
 
   return (
-    <div className="rounded-md bg-red-50 p-4">
-      <p className="text-sm text-red-800">{message}</p>
+    <div className={cn("rounded-md bg-destructive/10 p-4 border border-destructive/20", className)}>
+      <p className="text-sm text-destructive">{message}</p>
     </div>
   );
 }
