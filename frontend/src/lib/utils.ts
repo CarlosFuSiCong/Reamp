@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 export * from "./utils/enum-labels";
 export * from "./utils/activity-utils";
 export * from "./utils/role-utils";
+export * from "./utils/mutation-utils";
