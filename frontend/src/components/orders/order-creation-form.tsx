@@ -102,6 +102,7 @@ export function OrderCreationForm() {
         orderData.studioId = values.studioId;
       }
 
+      console.log('📤 Submitting order data:', orderData);
       const result = await createMutation.mutateAsync(orderData);
 
       // Add tasks to the order

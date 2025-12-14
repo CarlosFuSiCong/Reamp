@@ -23,7 +23,7 @@ export const ordersApi = {
 
   async create(data: {
     agencyId: string;
-    studioId: string;
+    studioId?: string; // Optional - if not provided, order is published to marketplace
     listingId: string;
     currency?: string;
   }): Promise<{ id: string }> {
