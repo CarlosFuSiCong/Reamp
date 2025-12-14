@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +9,8 @@ namespace Reamp.Domain.Accounts.Enums
     public enum UserRole : int
     {
         None = 0,
-        User = 1,
-        Client = 2,
+        Client = 1,
+        Agent = 2,
         Staff = 3,
         Admin = 4
     }
