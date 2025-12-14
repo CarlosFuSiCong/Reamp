@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Common.Entities;
+using Reamp.Domain.Common.Entities;
 using Reamp.Domain.Shoots.Enums;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace Reamp.Domain.Shoots.Entities
     public sealed class ShootOrder : AuditableEntity
     {
         public Guid AgencyId { get; private set; }   // Ordering agency
-        public Guid StudioId { get; private set; }   // Executing studio
+        public Guid? StudioId { get; private set; }  // Executing studio (nullable for marketplace orders)
         public Guid ListingId { get; private set; }  // Linked listing
         public Guid? AssignedPhotographerId { get; private set; }  // Assigned photographer (Staff)
 
@@ -32,10 +32,11 @@ namespace Reamp.Domain.Shoots.Entities
 
         private ShootOrder() { }
 
-        public static ShootOrder Place(Guid agencyId, Guid studioId, Guid listingId, Guid createdBy, string currency = "AUD")
+        public static ShootOrder Place(Guid agencyId, Guid? studioId, Guid listingId, Guid createdBy, string currency = "AUD")
         {
             if (agencyId == Guid.Empty) throw new ArgumentException("AgencyId required");
-            if (studioId == Guid.Empty) throw new ArgumentException("StudioId required");
+            // StudioId is optional - can be null for marketplace orders
+            if (studioId.HasValue && studioId.Value == Guid.Empty) throw new ArgumentException("StudioId cannot be empty Guid");
             if (listingId == Guid.Empty) throw new ArgumentException("ListingId required");
             if (createdBy == Guid.Empty) throw new ArgumentException("CreatedBy required");
 

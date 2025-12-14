@@ -37,6 +37,21 @@ namespace Reamp.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderDto dto, CancellationToken ct)
         {
+            _logger.LogInformation("PlaceOrder called with: AgencyId={AgencyId}, StudioId={StudioId}, ListingId={ListingId}, Currency={Currency}",
+                dto.AgencyId, dto.StudioId, dto.ListingId, dto.Currency);
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+                _logger.LogWarning("PlaceOrder validation failed: {Errors}", System.Text.Json.JsonSerializer.Serialize(errors));
+                return BadRequest(errors);
+            }
+
             var currentUserId = GetCurrentUserId();
             var result = await _appService.PlaceOrderAsync(dto, currentUserId, ct);
 
