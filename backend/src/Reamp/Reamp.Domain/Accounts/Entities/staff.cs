@@ -18,7 +18,7 @@ namespace Reamp.Domain.Accounts.Entities
 
         private Staff() { } // EF
 
-        public Staff(Guid userProfileId, Guid studioId, StudioRole role = StudioRole.Member, StaffSkills skills = StaffSkills.None)
+        public Staff(Guid userProfileId, Guid studioId, StudioRole role = StudioRole.Staff, StaffSkills skills = StaffSkills.None)
         {
             if (userProfileId == Guid.Empty) throw new ArgumentException("UserProfileId required.");
             if (studioId == Guid.Empty) throw new ArgumentException("StudioId required.");

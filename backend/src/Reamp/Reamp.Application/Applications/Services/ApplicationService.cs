@@ -282,7 +282,7 @@ namespace Reamp.Application.Applications.Services
                     applicationUserId: application.ApplicantUserId,
                     firstName: appUser.Email?.Split('@')[0] ?? "User",
                     lastName: string.Empty,
-                    role: UserRole.User
+                    role: UserRole.Client
                 );
                 await _userProfileRepo.AddAsync(ownerProfile, ct);
                 
@@ -331,7 +331,7 @@ namespace Reamp.Application.Applications.Services
                     applicationUserId: application.ApplicantUserId,
                     firstName: appUser.Email?.Split('@')[0] ?? "User",
                     lastName: string.Empty,
-                    role: UserRole.User
+                    role: UserRole.Client
                 );
                 await _userProfileRepo.AddAsync(ownerProfile, ct);
                 

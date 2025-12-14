@@ -18,12 +18,12 @@ namespace Reamp.Domain.Accounts.Entities
 
         public Guid? AvatarAssetId { get; private set; }
 
-        public UserRole Role { get; private set; } = UserRole.User;
+        public UserRole Role { get; private set; } = UserRole.Client;
         public UserStatus Status { get; private set; } = UserStatus.Active;
 
         private UserProfile() { }
 
-        public static UserProfile Create(Guid applicationUserId, string firstName, string lastName, UserRole role = UserRole.User, Guid? avatarAssetId = null)
+        public static UserProfile Create(Guid applicationUserId, string firstName, string lastName, UserRole role = UserRole.Client, Guid? avatarAssetId = null)
         {
             if (applicationUserId == Guid.Empty)
                 throw new ArgumentException("ApplicationUserId is required.", nameof(applicationUserId));
