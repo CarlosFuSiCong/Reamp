@@ -40,7 +40,7 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: UserRole.Client,
+      role: UserRole.User,
     },
     mode: "onChange",
   });

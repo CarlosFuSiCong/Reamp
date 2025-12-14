@@ -10,7 +10,7 @@ namespace Reamp.Application.Authentication.Dtos
         public string ConfirmPassword { get; set; } = default!;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
-        public UserRole Role { get; set; } = UserRole.Client;
+        public UserRole Role { get; set; } = UserRole.User;
     }
 }
 

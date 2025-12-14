@@ -9,7 +9,7 @@ namespace Reamp.Domain.Accounts.Enums
     public enum UserRole : int
     {
         None = 0,
-        Client = 1,
+        User = 1,
         Agent = 2,
         Staff = 3,
         Admin = 4

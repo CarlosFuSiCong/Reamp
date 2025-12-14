@@ -69,7 +69,7 @@ export function getRoleDashboard(role: UserRole): string {
   switch (role) {
     case UserRole.Admin:
       return "/admin";
-    case UserRole.Client:
+    case UserRole.User:
       return "/";
     case UserRole.Agent:
       return "/dashboard/agency";
