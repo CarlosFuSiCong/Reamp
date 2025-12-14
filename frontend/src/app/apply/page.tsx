@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ApplicationForm } from "@/components/applications";
-import { ApplicationType } from "@/types";
+import { ApplicationType, UserRole } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Camera } from "lucide-react";
+import { Building2, Camera, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/hooks";
 import { LoadingState } from "@/components/shared";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function ApplyPage() {
   const router = useRouter();
@@ -19,7 +22,12 @@ export default function ApplyPage() {
     if (!isAuthenticated && !isLoading) {
       router.push("/login?redirect=/apply");
     }
-  }, [isAuthenticated, isLoading, router]);
+    
+    // Redirect Staff and Agent to their dashboard
+    if (isAuthenticated && user && (user.role === UserRole.Staff || user.role === UserRole.Agent)) {
+      router.push("/dashboard/profile");
+    }
+  }, [isAuthenticated, isLoading, user, router]);
 
   const handleSuccess = () => {
     router.push("/dashboard/profile?tab=applications");
@@ -35,6 +43,52 @@ export default function ApplyPage() {
 
   if (!isAuthenticated || !user) {
     return null;
+  }
+
+  // Block Staff and Agent from accessing this page
+  if (user.role === UserRole.Staff || user.role === UserRole.Agent) {
+    return (
+      <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+        <Alert variant="destructive">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Access Restricted</AlertTitle>
+          <AlertDescription>
+            You already belong to an organization. Only users without an organization can apply.
+          </AlertDescription>
+        </Alert>
+        <div className="mt-6 flex gap-4">
+          <Link href="/dashboard/profile">
+            <Button>Go to Dashboard</Button>
+          </Link>
+          <Link href="/">
+            <Button variant="outline">Go to Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin should also not access this page
+  if (user.role === UserRole.Admin) {
+    return (
+      <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+        <Alert>
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Not Applicable</AlertTitle>
+          <AlertDescription>
+            As an administrator, you do not need to apply for an organization.
+          </AlertDescription>
+        </Alert>
+        <div className="mt-6 flex gap-4">
+          <Link href="/admin">
+            <Button>Go to Admin Panel</Button>
+          </Link>
+          <Link href="/">
+            <Button variant="outline">Go to Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
