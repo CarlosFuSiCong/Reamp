@@ -12,9 +12,9 @@ function getRedirectPath(role: UserRole): string {
     case UserRole.User:
       return "/";
     case UserRole.Agent:
-      return "/dashboard/agency";
+      return "/dashboard/profile";
     case UserRole.Staff:
-      return "/dashboard/studio";
+      return "/dashboard/profile";
     default:
       return "/";
   }
