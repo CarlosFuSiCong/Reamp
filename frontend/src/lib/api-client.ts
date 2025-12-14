@@ -24,6 +24,9 @@ apiClient.interceptors.request.use(
         url: config.url,
         data: config.data,
       });
+      if (config.data) {
+        console.log("Request data (detailed):", JSON.stringify(config.data, null, 2));
+      }
     }
 
     return config;
@@ -85,13 +88,20 @@ apiClient.interceptors.response.use(
       });
     }
 
-    // Handle 401 Unauthorized - token expired
-    if (error.response?.status === 401) {
-      const originalRequest = error.config;
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-      if (!originalRequest) {
+    // Handle 401 Unauthorized - token expired
+    if (error.response?.status === 401 && originalRequest) {
+      // Prevent infinite loop - don't retry if already retried or if it's the refresh endpoint
+      if (originalRequest._retry || originalRequest.url?.includes('/api/auth/refresh')) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(error);
       }
+
+      // Mark this request as retried
+      originalRequest._retry = true;
 
       // If already refreshing, queue this request
       if (isRefreshing) {

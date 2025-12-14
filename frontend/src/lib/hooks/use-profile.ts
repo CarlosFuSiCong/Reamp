@@ -1,18 +1,19 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { profilesApi } from "@/lib/api/profiles";
+import { profilesApi, UpdateProfileDto } from "@/lib/api/profiles";
 import { toast } from "sonner";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: profilesApi.update,
+    mutationFn: ({ profileId, data }: { profileId: string; data: UpdateProfileDto }) => 
+      profilesApi.update(profileId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to update profile");
+      toast.error(error?.message || "Failed to update profile");
     },
   });
 }
@@ -21,14 +22,14 @@ export function useUpdateAvatar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ profileId, file }: { profileId: string; file: File }) => 
-      profilesApi.updateAvatar(profileId, file),
+    mutationFn: ({ profileId, assetId }: { profileId: string; assetId: string }) => 
+      profilesApi.updateAvatar(profileId, assetId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Avatar updated successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to update avatar");
+      toast.error(error?.message || "Failed to update avatar");
     },
   });
 }
@@ -40,7 +41,7 @@ export function useChangePassword() {
       toast.success("Password changed successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to change password");
+      toast.error(error?.message || "Failed to change password");
     },
   });
 }

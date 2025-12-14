@@ -1,0 +1,152 @@
+---
+globs: backend/**/*.cs, backend/**/*.csproj, backend/**/*.sln
+alwaysApply: false
+---
+# Cursor Rules — C# DDD Architecture (Full)
+
+## 1. Architecture
+- Use DDD-inspired layered architecture:
+  Api → Application → Domain → Infrastructure
+- Organize by feature / bounded context (Users, Orders, Media, etc.).
+- Enforce strict one-way dependencies:
+  - Domain depends on nothing.
+  - Application depends on Domain only.
+  - Infrastructure depends on Application + Domain.
+  - Api depends on Application only.
+
+## 2. Api Layer (Controllers)
+- Controllers are HTTP boundaries only:
+  - Bind request DTOs
+  - Invoke Application use cases
+  - Map results to ApiResponse<T> + correct HTTP status code
+- No business logic.
+- No EF Core/DbContext access.
+- Do not call SaveChangesAsync() in Controllers.
+- Controllers must not catch generic exceptions (handled by global middleware).
+- Pass CancellationToken through to Application.
+
+## 3. Application Layer (Use Cases)
+- Implements use cases and orchestration:
+  - Coordinate repositories and domain models
+  - Handle transactions / unit-of-work boundaries
+  - Apply authorization checks if not globally handled
+- Return Result<T> (recommended) or Application DTOs.
+- No HttpContext usage.
+- No EF Core queries (data access is Infrastructure responsibility).
+- Expected failures must be expressed as Result<T> (not exceptions).
+
+## 4. Domain Layer
+- Domain contains:
+  - Entities, Value Objects, Domain Services, Domain Events
+- Enforce invariants inside domain models.
+- Domain is pure:
+  - No EF Core, DbContext, HttpClient, ILogger, config, file/network IO
+  - No DTOs
+  - No ApiResponse/Result coupling
+- Prefer explicit methods on entities over public setters.
+
+## 5. Infrastructure Layer
+- Contains:
+  - EF Core DbContext
+  - Repository implementations
+  - External services (email, payment, storage, etc.)
+- Infrastructure can map persistence models to Domain models if needed.
+- All database access must be through repositories.
+
+## 6. Validation
+### Request Validation (Api)
+- Use FluentValidation for request DTOs.
+- Validators live inside feature folders (e.g., Users/Api/Validators).
+- Validation errors must be returned as ApiResponse with field-level errors.
+
+### Business Validation (Domain + Application)
+- Business rules belong in Domain models when possible.
+- Application should not duplicate domain invariants.
+- Expected business failures return Result<T> with stable error codes.
+
+## 7. Mapping
+- Mapping rules:
+  - Api ↔ Application mapping allowed (Mapster/AutoMapper).
+  - Infrastructure ↔ Domain persistence mapping allowed.
+  - Domain must not participate in mapping.
+- No business logic inside mappers.
+- Do not expose sensitive fields in DTOs.
+
+## 8. Unified API Response (ApiResponse)
+- All endpoints return ApiResponse<T>.
+- ApiResponse<T> exists ONLY at API boundary.
+- Application/Domain/Infrastructure must not reference ApiResponse<T>.
+
+ApiResponse<T> shape:
+- Success: bool
+- Code: string (machine-readable, stable)
+- Message: string (user-friendly)
+- Data: T?
+- Errors: ApiError[]? (field-level or detailed errors)
+
+Rules:
+- Do not hardcode business error messages in controllers.
+- Do not return stack traces or raw exception messages to clients.
+
+## 9. Result / Error Contract (Application)
+- Application use cases should return Result<T> for expected outcomes:
+  - Validation failures
+  - Not found
+  - Conflict
+  - Unauthorized/Forbidden (if handled in app layer)
+- Do not mix Result and exceptions for the same failure category.
+- Exceptions represent unexpected failures only.
+
+## 10. HTTP Status Codes
+- Status code must reflect outcome (do not always return 200).
+- Recommended mapping:
+  - Success → 200 / 201
+  - Validation failure → 400
+  - Unauthorized → 401
+  - Forbidden → 403
+  - Not found → 404
+  - Conflict → 409
+  - Unexpected error → 500
+
+## 11. Global Exception Middleware
+- Use global exception middleware for unhandled exceptions:
+  - Log exception with correlation id
+  - Map exception to ApiResponse
+  - Return appropriate HTTP status code
+- Controllers must not wrap endpoints in try/catch for generic exceptions.
+- Never swallow exceptions.
+
+## 12. Logging (ILogger)
+- Use ILogger<T> everywhere.
+- Prefer structured logging with templates:
+  - LogInformation("Created order {OrderId}", orderId)
+- Do not log sensitive data (passwords, tokens, secrets, PII).
+- Do not log expected validation/business failures as Error (use Warning/Information).
+- Never use string concatenation for logs.
+
+## 13. CorrelationId / Tracing
+- Every request must have a CorrelationId:
+  - Read from header "X-Correlation-Id" if present
+  - Generate if missing
+- Include CorrelationId in:
+  - Logs
+  - ApiResponse (optional but recommended)
+
+## 14. EF Core Rules (Infrastructure)
+- Prefer AsNoTracking() for reads unless updates are needed.
+- Avoid N+1 queries; use Include or projection when appropriate.
+- Explicit decimal precision (HasPrecision) and date/time configuration.
+- Use migrations for schema changes only.
+- No SaveChangesAsync() in loops.
+- Always use SaveChangesAsync(ct).
+
+## 15. Async & Performance
+- All IO must be async/await.
+- No .Result or .Wait().
+- Async methods end with Async.
+- Pass CancellationToken through layers.
+
+## 16. Security
+- Never return raw exception details to clients.
+- Never expose sensitive fields in DTOs.
+- Avoid leaking internal IDs or debug-only data unless required.

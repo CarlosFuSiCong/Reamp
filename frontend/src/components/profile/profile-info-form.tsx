@@ -45,12 +45,30 @@ export function ProfileInfoForm({
     }
   }, [isSuccess]);
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // FirstName is required per backend validation
+    const trimmedFirstName = formData.firstName?.trim() || "";
+    
+    if (!trimmedFirstName) {
+      // Don't submit if firstName is empty (required field)
+      return;
+    }
+    
     onSubmit(formData);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setFormData(initialData);
     setIsEditing(false);
   };
@@ -89,8 +107,8 @@ export function ProfileInfoForm({
             <Input
               id="displayName"
               value={formData.displayName}
-              onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              disabled={!isEditing || isSubmitting}
+              disabled
+              className="bg-muted"
             />
           </div>
 
@@ -108,7 +126,7 @@ export function ProfileInfoForm({
 
           <div className="flex gap-2">
             {!isEditing ? (
-              <Button type="button" onClick={() => setIsEditing(true)}>
+              <Button type="button" onClick={handleEdit}>
                 Edit Profile
               </Button>
             ) : (

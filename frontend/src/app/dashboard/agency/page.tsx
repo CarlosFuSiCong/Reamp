@@ -20,15 +20,15 @@ export default function AgentDashboardPage() {
   const recentActivities = generateRecentActivities(listings, orders, 5);
 
   const quickActions = [
-    { href: "/agent/listings/new", label: "Create New Listing", icon: Plus },
-    { href: "/agent/orders/new", label: "Create New Order", icon: Plus },
-    { href: "/agent/listings", label: "View All Listings", icon: Home },
+    { href: "/dashboard/agency/listings/new", label: "Create New Listing", icon: Plus },
+    { href: "/dashboard/agency/orders/new", label: "Create New Order", icon: Plus },
+    { href: "/dashboard/agency/listings", label: "View All Listings", icon: Home },
   ];
 
   return (
     <div>
       <PageHeader
-        title="Dashboard"
+        title="Agency Dashboard"
         description="Welcome back! Here's an overview of your activities"
       />
 

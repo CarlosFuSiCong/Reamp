@@ -3,10 +3,9 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.SqlServer;
 using Mapster;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Reamp.Api.Configuration;
 using Reamp.Application.Accounts.Agencies.Services;
 using Reamp.Application.Accounts.Clients.Services;
 using Reamp.Application.Accounts.Staff.Services;
@@ -37,7 +36,6 @@ using Reamp.Infrastructure.Repositories.Orders;
 using Reamp.Shared;
 using Reamp.Shared.Middlewares;
 using Serilog;
-using System.Text;
 
 namespace Reamp.Api
 {
@@ -45,6 +43,9 @@ namespace Reamp.Api
     {
         public static void Main(string[] args)
         {
+            // Disable automatic claim type mapping to preserve original JWT claim names
+            System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Logging
@@ -100,63 +101,13 @@ namespace Reamp.Api
                 .AddDefaultTokenProviders();
 
             // Configuration
-            var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
-            if (jwtSettings == null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
-                throw new InvalidOperationException("JWT settings are not configured properly.");
-
-            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
             builder.Services.Configure<Reamp.Infrastructure.Configuration.CloudinarySettings>(
                 builder.Configuration.GetSection("CloudinarySettings"));
             builder.Services.Configure<Reamp.Infrastructure.Configuration.MediaUploadSettings>(
                 builder.Configuration.GetSection("MediaUploadSettings"));
 
-            // Authentication
-            builder.Services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                        ClockSkew = TimeSpan.Zero
-                    };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            // Try to read token from cookie first, fallback to Authorization header
-                            var accessToken = context.Request.Cookies["accessToken"];
-                            if (!string.IsNullOrEmpty(accessToken))
-                            {
-                                context.Token = accessToken;
-                            }
-                            return Task.CompletedTask;
-                        },
-                        OnAuthenticationFailed = context =>
-                        {
-                            Log.Warning("JWT authentication failed: {Error}", context.Exception.Message);
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
-                        {
-                            Log.Debug("JWT token validated for user: {UserId}", context.Principal?.Identity?.Name);
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-
-            // Authorization
+            // Authentication & Authorization
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy(AuthPolicies.RequireAdminRole, policy =>

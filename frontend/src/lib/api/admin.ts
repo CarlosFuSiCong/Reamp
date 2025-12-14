@@ -21,7 +21,6 @@ export interface Activity {
   type: "order" | "listing" | "message" | "other";
   title: string;
   description: string;
-  user?: string;
   timestamp: string;
 }
 

@@ -1,3 +1,156 @@
 ---
-alwaysApply: true
+globs: backend/**/*.py
+alwaysApply: false
 ---
+# Cursor Rules — Django (DRF) Simple 3-Layer Architecture (Full)
+
+## 1. Architecture
+- Use simple three-layer architecture:
+  View/Controller (DRF ViewSet/APIView) → Service → Repository
+- Organize code by feature apps (users, orders, media, etc.).
+- Each app is independent and contains its own API, services, repositories, validators, and tests.
+
+Recommended structure per app:
+- <app>/
+  - api/
+    - urls.py
+    - views.py
+    - serializers.py
+    - permissions.py (optional)
+  - services/
+    - <feature>_service.py
+  - repositories/
+    - <feature>_repo.py
+  - domain/
+    - rules.py (optional, pure business rules)
+  - models.py
+  - tests/
+
+## 2. Layer Responsibilities
+
+### Views / Controllers (DRF)
+- HTTP boundary only:
+  - parse request
+  - validate via serializer
+  - call service
+  - return ApiResponse with correct HTTP status code
+- No business logic.
+- No direct ORM queries (no Model.objects.* in views).
+- No try/except for generic exceptions (handled by global exception middleware/handler).
+- Must pass request-scoped context (user, correlation id) into service if needed.
+
+### Services (Business logic)
+- Implement business rules and use-case orchestration.
+- Call repositories for DB access.
+- Perform business validation (state rules, permissions if not global).
+- Manage transactions using @transaction.atomic when needed.
+- Must not depend on HttpRequest objects (pass only required data).
+- Return Result-like object or raise well-defined business exceptions (pick one approach and keep consistent).
+
+### Repositories (ORM access)
+- ORM access only:
+  - queries, filtering, pagination helpers
+  - create/update/delete persistence operations
+- Return model instances / domain entities only.
+- Never return API serializers / response DTOs.
+- No business rules.
+
+## 3. Unified API Response (ApiResponse)
+- All endpoints return a consistent structure:
+  ApiResponse<T> { success, code, message, data, errors, correlation_id }
+- ApiResponse exists ONLY at API boundary.
+- Services/repositories must not reference ApiResponse.
+
+Rules:
+- Do not hardcode business error messages in views.
+- Do not return raw exception messages or stack traces to clients.
+
+## 4. Validation
+
+### Request Validation (Serializer-level)
+- Use DRF serializers for request validation.
+- Prefer explicit field types:
+  - UUIDField for uuid inputs
+  - IntegerField/DecimalField with min/max
+  - ChoiceField for enums
+- Validation must live in serializers (field validation + validate()).
+- Keep serializer validation free of heavy DB work; DB existence checks may be delegated to repositories/services when necessary.
+
+### UUID Rules
+- All UUID route params must be validated:
+  - Use path converters: <uuid:id> where possible
+  - Otherwise validate via serializer or explicit UUID parsing
+- Never accept arbitrary strings as UUID without validation.
+
+### Business Validation (Service-level)
+- Business validation happens in services:
+  - status transitions, ownership rules, invariant checks
+- Expected failures should be represented consistently:
+  - either Result-style return OR custom BusinessException subclasses (choose one and standardize)
+- Do not use bare Exception for expected business failures.
+
+## 5. Mapping / Serialization
+- Views serialize responses using DRF serializers (response serializers if needed).
+- Services return domain objects or plain dicts; views decide final serialization.
+- Never expose sensitive fields (password, tokens, secrets, internal flags).
+- Repositories must not do serializer mapping.
+
+## 6. Database & ORM Rules
+- All ORM access must be in repositories.
+- Avoid N+1:
+  - use select_related / prefetch_related in repositories
+- Reads:
+  - use .only() / .values() when appropriate for large payloads
+- Writes:
+  - keep transaction boundaries in services via @transaction.atomic
+- Use migrations for schema changes only.
+- Do not call save() repeatedly in loops if bulk operations exist (bulk_create/bulk_update) when appropriate.
+
+## 7. Error Handling (Global)
+- Use a global exception handler (DRF EXCEPTION_HANDLER) or middleware to:
+  - log unexpected exceptions
+  - map exceptions to ApiResponse
+  - return correct HTTP status codes
+- Views must not wrap endpoints with broad try/except.
+
+Recommended status mapping:
+- ValidationError → 400
+- AuthenticationFailed / NotAuthenticated → 401
+- PermissionDenied → 403
+- NotFound → 404
+- Conflict (custom) → 409
+- Unexpected error → 500
+
+## 8. Logging (Python logging)
+- Use module-level logger:
+  - logger = logging.getLogger(__name__)
+- Prefer structured logging style (key=value) or extra fields.
+- Do not log sensitive data (passwords, tokens, secrets, PII).
+- Do not log expected validation/business failures as ERROR.
+- Unexpected exceptions:
+  - logger.exception("message", extra={...}) is preferred.
+
+## 9. CorrelationId / Request ID
+- Every request must have a CorrelationId:
+  - Read from header "X-Correlation-Id" if present
+  - Generate if missing
+- CorrelationId must be included in:
+  - logs (as a field)
+  - ApiResponse (correlation_id)
+
+## 10. Async & Performance
+- Keep API endpoints synchronous unless the project explicitly uses async views.
+- For slow IO tasks (email, heavy processing):
+  - offload to Celery (if available) or background worker
+- Do not block request lifecycle with long-running tasks.
+
+## 11. Security
+- Never return raw exception details to clients.
+- Never expose sensitive fields in serializers.
+- Validate all user-controlled input (including UUIDs and query params).
+- Permissions must be explicit (DRF permission classes or service checks).
+
+## 12. General Rules
+- Prefer explicit, readable code over clever one-liners.
+- Follow existing project patterns consistently.
+- Keep changes small and testable.

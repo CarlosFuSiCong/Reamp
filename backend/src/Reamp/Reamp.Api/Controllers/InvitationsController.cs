@@ -42,9 +42,19 @@ namespace Reamp.Api.Controllers
 
         private string GetCurrentUserEmail()
         {
-            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+            // Try standard "email" claim first
+            var emailClaim = User.FindFirst("email")?.Value;
+            
+            // Fallback to ClaimTypes.Email if standard claim not found
             if (string.IsNullOrEmpty(emailClaim))
+                emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            if (string.IsNullOrEmpty(emailClaim))
+            {
+                _logger.LogWarning("Email claim not found in token. Available claims: {Claims}", 
+                    string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}")));
                 throw new UnauthorizedAccessException("User email claim not found.");
+            }
             
             return emailClaim;
         }

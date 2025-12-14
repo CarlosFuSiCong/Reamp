@@ -1,0 +1,132 @@
+---
+globs: backend/**/*.cs, backend/**/*.csproj, backend/**/*.sln
+alwaysApply: false
+---
+# Cursor Rules — C# Simple 3-Layer Architecture (Full)
+
+## 1. Architecture
+- Use three-layer architecture:
+  Controller → Service → Repository
+- Organize by feature/domain (Users, Orders, Media, etc.).
+
+## 2. Controllers (HTTP boundary)
+- Controllers handle HTTP only:
+  - Bind request DTOs
+  - Call Services
+  - Map Result to ApiResponse<T> + correct HTTP status code
+- No business logic.
+- No DbContext usage.
+- Do not call SaveChangesAsync() in Controllers.
+- Do not catch generic exceptions in Controllers (global middleware handles them).
+- Pass CancellationToken to Service.
+
+## 3. Services (Business logic)
+- Services implement all business rules and use-case orchestration:
+  - Business validation
+  - Authorization checks (if not global)
+  - Transaction boundary (if applicable)
+- Services call repositories only (no direct EF Core queries).
+- Services are responsible for calling SaveChangesAsync().
+- Expected failures should return Result<T> with stable error codes.
+- No HttpContext dependency.
+
+## 4. Repositories (EF Core access)
+- Repositories contain EF Core data access only.
+- Use async methods and accept CancellationToken where applicable.
+- Return domain entities/aggregates only.
+- Never return DTOs/view models.
+- No business logic in repositories.
+
+## 5. Validation
+### Request Validation
+- Use FluentValidation for request DTOs.
+- Validators live in feature folders.
+- Validation errors must be returned as ApiResponse with field-level errors.
+
+### Business Validation
+- Performed inside Services.
+- Use Result<T> for expected failures or custom exceptions consistently (prefer Result<T>).
+
+## 6. Mapping
+- Mapping handled in Service layer or via mapper (Mapster/AutoMapper).
+- No business logic inside mappers.
+- Do not expose sensitive fields in DTOs.
+- Repositories must not map to DTOs.
+
+## 7. Unified API Response (ApiResponse)
+- All endpoints return ApiResponse<T>.
+- ApiResponse<T> exists ONLY at API boundary.
+- Service/Repository must not reference ApiResponse<T>.
+
+ApiResponse<T> shape:
+- Success: bool
+- Code: string
+- Message: string
+- Data: T?
+- Errors: ApiError[]?
+
+Rules:
+- Controllers should not hardcode business error messages.
+- Never return stack traces or raw exception messages to clients.
+
+## 8. Result / Error Contract (Service)
+- Services should return Result<T> for expected failures:
+  - Validation failure
+  - Not found
+  - Conflict
+  - Unauthorized/Forbidden (if handled here)
+- Do not use null as failure.
+- Do not mix Result and exceptions for the same failure category.
+- Exceptions represent unexpected failures only.
+
+## 9. HTTP Status Codes
+- Status code must reflect outcome (do not always return 200).
+- Recommended mapping:
+  - Success → 200 / 201
+  - Validation failure → 400
+  - Unauthorized → 401
+  - Forbidden → 403
+  - Not found → 404
+  - Conflict → 409
+  - Unexpected error → 500
+
+## 10. Global Exception Middleware
+- Use global exception middleware for unhandled exceptions:
+  - Log exception with correlation id
+  - Map exception to ApiResponse
+  - Return appropriate HTTP status code
+- Controllers must not wrap endpoints in try/catch for generic exceptions.
+- Never swallow exceptions.
+
+## 11. Logging (ILogger)
+- Use ILogger<T> everywhere.
+- Prefer structured logging:
+  - LogInformation("User {UserId} created project {ProjectId}", userId, projectId)
+- Do not log sensitive data (passwords, tokens, secrets, PII).
+- Do not log expected validation/business failures as Error.
+- Never use string concatenation for logs.
+
+## 12. CorrelationId / Tracing
+- Every request must have a CorrelationId:
+  - Read from header "X-Correlation-Id" if present
+  - Generate if missing
+- Include CorrelationId in logs (and optionally ApiResponse).
+
+## 13. EF Core Rules (Repository)
+- Prefer AsNoTracking() for reads unless updates are needed.
+- Avoid N+1 queries; use Include or projection when appropriate.
+- Explicit decimal precision (HasPrecision) and date/time configuration.
+- Use migrations for schema changes.
+- No SaveChangesAsync() in loops.
+- Always use SaveChangesAsync(ct).
+
+## 14. Async & Performance
+- All IO must be async/await.
+- No .Result or .Wait().
+- Async methods end with Async.
+- Pass CancellationToken through layers.
+
+## 15. Security
+- Never return raw exception details to clients.
+- Never expose sensitive fields in DTOs.
+- Avoid leaking debug-only fields.

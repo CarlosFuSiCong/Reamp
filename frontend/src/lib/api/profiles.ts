@@ -2,9 +2,8 @@ import apiClient from "@/lib/api-client";
 import { UserProfile } from "@/types";
 
 export interface UpdateProfileDto {
-  firstName?: string;
-  lastName?: string;
-  displayName?: string;
+  firstName: string;
+  lastName?: string;  // Optional to match backend domain model
 }
 
 export interface ChangePasswordDto {
@@ -19,8 +18,8 @@ export const profilesApi = {
     return response.data;
   },
 
-  async update(data: UpdateProfileDto): Promise<void> {
-    await apiClient.put("/api/profiles/me", data);
+  async update(profileId: string, data: UpdateProfileDto): Promise<void> {
+    await apiClient.put(`/api/profiles/${profileId}`, data);
   },
 
   async getById(id: string): Promise<UserProfile> {
@@ -28,10 +27,8 @@ export const profilesApi = {
     return response.data;
   },
 
-  async updateAvatar(id: string, file: File): Promise<void> {
-    const formData = new FormData();
-    formData.append("file", file);
-    await apiClient.put(`/api/profiles/${id}/avatar`, formData);
+  async updateAvatar(profileId: string, assetId: string): Promise<void> {
+    await apiClient.put(`/api/profiles/${profileId}/avatar`, { avatarAssetId: assetId });
   },
 
   async changePassword(data: ChangePasswordDto): Promise<void> {

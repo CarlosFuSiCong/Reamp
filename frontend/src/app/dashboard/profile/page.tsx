@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Lock, FileText } from "lucide-react";
+import { User, Lock, FileText, Mail } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
-import { AvatarUpload, ProfileInfoForm, ChangePasswordForm } from "@/components/profile";
+import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations } from "@/components/profile";
 import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 
-export default function ProfilePage() {
+export default function ProfilePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { user } = useAuthStore();
-  const searchParams = useSearchParams();
-  const defaultTab = searchParams?.get("tab") || "profile";
+  const resolvedSearchParams = use(searchParams);
+  const defaultTab = resolvedSearchParams?.tab || "profile";
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile"],
@@ -67,6 +66,10 @@ export default function ProfilePage() {
             <Lock className="h-4 w-4 mr-2" />
             Security
           </TabsTrigger>
+          <TabsTrigger value="invitations">
+            <Mail className="h-4 w-4 mr-2" />
+            Invitations
+          </TabsTrigger>
           <TabsTrigger value="applications">
             <FileText className="h-4 w-4 mr-2" />
             Applications
@@ -75,9 +78,9 @@ export default function ProfilePage() {
 
         <TabsContent value="profile" className="space-y-4">
           <AvatarUpload
-            avatarUrl={profile.avatarAssetId}
+            avatarAssetId={profile.avatarAssetId}
             displayName={profile.displayName}
-            onUpload={(file) => updateAvatarMutation.mutate({ profileId: profile.id, file })}
+            onUpload={(assetId) => updateAvatarMutation.mutate({ profileId: profile.id, assetId })}
             isUploading={updateAvatarMutation.isPending}
           />
 
@@ -85,7 +88,13 @@ export default function ProfilePage() {
             initialData={profileFormData}
             email={user?.email || ""}
             role={profile.role}
-            onSubmit={(data) => updateProfileMutation.mutate(data)}
+            onSubmit={(data) => updateProfileMutation.mutate({ 
+              profileId: profile.id, 
+              data: {
+                firstName: data.firstName,
+                lastName: data.lastName
+              }
+            })}
             isSubmitting={updateProfileMutation.isPending}
             isSuccess={updateProfileMutation.isSuccess}
           />
@@ -97,6 +106,10 @@ export default function ProfilePage() {
             isSubmitting={changePasswordMutation.isPending}
             isSuccess={changePasswordMutation.isSuccess}
           />
+        </TabsContent>
+
+        <TabsContent value="invitations">
+          <MyInvitations />
         </TabsContent>
 
         <TabsContent value="applications">

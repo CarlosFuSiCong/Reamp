@@ -29,8 +29,8 @@ export function Navbar() {
     <nav className="border-b bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          {/* Logo - goes to home for unauthenticated users, dashboard for authenticated */}
+          <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">Reamp</span>
           </Link>
@@ -41,12 +41,14 @@ export function Navbar() {
               <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />
             ) : isAuthenticated && user ? (
               <>
-                <Link href="/profile/apply">
-                  <Button variant="outline" size="sm">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Apply
-                  </Button>
-                </Link>
+                {user.role === 3 && ( // UserRole.Staff
+                  <Link href="/apply">
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Apply
+                    </Button>
+                  </Link>
+                )}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -69,17 +71,28 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
+                      <Link href="/dashboard" className="cursor-pointer">
+                        <Building2 className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile" className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile/apply" className="cursor-pointer">
-                        <FileText className="mr-2 h-4 w-4" />
-                        Apply for Organization
-                      </Link>
-                    </DropdownMenuItem>
+                    {user.role === 3 && ( // UserRole.Staff
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/apply" className="cursor-pointer">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Apply for Organization
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />

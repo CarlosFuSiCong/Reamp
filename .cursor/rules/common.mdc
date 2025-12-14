@@ -1,5 +1,6 @@
 ---
-alwaysApply: true
+globs: frontend/**/*.ts, frontend/**/*.tsx, frontend/**/*.js, frontend/**/*.jsx, frontend/**/global.css, frontend/tailwind.config.js, frontend/tailwind.config.ts
+alwaysApply: false
 ---
 # Common Development Rules
 
@@ -9,6 +10,8 @@ alwaysApply: true
 - Branch naming: `<type>/<scope>-<short-desc>`  
   - e.g. `feat/auth-login`, `fix/workflow-crash`
 - All work for that task must be completed inside the new feature branch.
+- Do not commit directly to `dev/main`.
+- Do not reuse branches for multiple tasks.
 - **Before backend development**, check whether the project uses Docker:
   - If Docker / Docker Compose files exist, follow them as the default setup.
   - If no Docker setup exists, **confirm the local runtime and environment assumptions before proceeding**.
@@ -25,23 +28,29 @@ alwaysApply: true
   - `docs:` for documentation changes
   - `chore:` for tools, config, formatting, build scripts
 - Commit messages must be **simple, short English sentences**.
+- A commit message should clearly explain **what changed** and **why**, without reading the code.
 
 ## 3. Comments & Code Style
 - Prefer **self-explanatory code** over long comments.
 - Only add comments for **non-obvious logic or caveats**.
 - Use **simple one-line English comments** when necessary.
 - Avoid long descriptive block comments.
+- Do not use comments to explain what the code does — the code should explain itself.
 
 ## 4. General Development Principles
-- Write clean, readable, maintainable code.
+- Write code that is easy to read, modify, and debug.
+- Prefer explicit, readable logic over clever or compact implementations.
 - Keep concerns separated (UI vs logic, mapping vs validation, etc.).
 - Follow project formatting rules (Prettier, dotnet format, editorconfig).
 
 ## 5. Documentation (Important)
 - **Do NOT generate full Markdown documents unless explicitly requested.**
 - For documentation tasks, **update only the necessary sections or paragraphs**.
+- Avoid over-documentation; documentation should serve a clear purpose.
 - If a long document is required, **ask for confirmation first**.
 
 ## 6. Task Summary (Required)
-- After completing a task or PR, **summarize what was done in 2–3 short sentences**.
-- Focus on *what changed* and *why*, not on implementation details.
+- After completing a task or PR, **summarize what was done in 2–3 short sentences**:
+  - What was changed
+  - Why it was changed
+  - Any notable impact or risk (if applicable)

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   PageHeader,
   LoadingState,
@@ -23,10 +23,10 @@ import { ArrowLeft, XCircle, Building2, Camera, Home } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
-export default function OrderDetailPage() {
-  const params = useParams();
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
-  const orderId = params.id as string;
+  const orderId = resolvedParams.id;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data: order, isLoading, error } = useOrder(orderId);
@@ -62,7 +62,7 @@ export default function OrderDetailPage() {
         action={
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/agent/orders">
+              <Link href="/dashboard/agency/orders">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Orders
               </Link>
@@ -118,7 +118,7 @@ export default function OrderDetailPage() {
                   {listing.city}, {listing.state} {listing.postcode}
                 </p>
                 <Button variant="outline" size="sm" asChild className="mt-2">
-                  <Link href={`/agent/listings/${listing.id}`}>
+                  <Link href={`/dashboard/agency/listings/${listing.id}`}>
                     View Listing
                   </Link>
                 </Button>
@@ -140,7 +140,7 @@ export default function OrderDetailPage() {
 
           {order.status === OrderStatus.Completed && (
             <Button className="w-full" asChild>
-              <Link href={`/agent/orders/${order.id}/delivery`}>
+              <Link href={`/dashboard/agency/orders/${order.id}/delivery`}>
                 View Delivery
               </Link>
             </Button>
