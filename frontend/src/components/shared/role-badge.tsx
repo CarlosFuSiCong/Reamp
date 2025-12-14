@@ -1,15 +1,16 @@
 import { UserRole } from "@/types/enums";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-const ROLE_COLORS = {
-  [UserRole.Admin]: "bg-red-500",
-  [UserRole.Staff]: "bg-blue-500",
-  [UserRole.Agent]: "bg-purple-500",
-  [UserRole.Client]: "bg-green-500",
-  [UserRole.None]: "bg-gray-500",
+const ROLE_COLORS: Record<UserRole, string> = {
+  [UserRole.Admin]: "bg-destructive text-white border-transparent",
+  [UserRole.Staff]: "bg-chart-2 text-white border-transparent",
+  [UserRole.Agent]: "bg-chart-1 text-white border-transparent",
+  [UserRole.Client]: "bg-chart-4 text-foreground border-transparent",
+  [UserRole.None]: "bg-muted text-muted-foreground border-border",
 };
 
-const ROLE_NAMES = {
+const ROLE_NAMES: Record<UserRole, string> = {
   [UserRole.Admin]: "Admin",
   [UserRole.Staff]: "Staff",
   [UserRole.Agent]: "Agent",
@@ -24,7 +25,7 @@ interface RoleBadgeProps {
 
 export function RoleBadge({ role, className }: RoleBadgeProps) {
   return (
-    <Badge className={`${ROLE_COLORS[role]} ${className || ""}`}>
+    <Badge className={cn(ROLE_COLORS[role], className)}>
       {ROLE_NAMES[role]}
     </Badge>
   );
