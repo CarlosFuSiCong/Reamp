@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listingsApi } from "@/lib/api/listings";
 import { Listing, PagedResponse, ListingStatus } from "@/types";
-import { toast } from "sonner";
+import { handleMutationError, handleMutationSuccess } from "@/lib/utils";
 
 export function useListings(params?: {
   status?: ListingStatus;
@@ -33,10 +33,10 @@ export function useCreateListing() {
     mutationFn: (data: Partial<Listing>) => listingsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
-      toast.success("Listing created successfully");
+      handleMutationSuccess("Listing created successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to create listing");
+      handleMutationError(error, "Failed to create listing");
     },
   });
 }
@@ -50,10 +50,10 @@ export function useUpdateListing() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
       queryClient.invalidateQueries({ queryKey: ["listing", variables.id] });
-      toast.success("Listing updated successfully");
+      handleMutationSuccess("Listing updated successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to update listing");
+      handleMutationError(error, "Failed to update listing");
     },
   });
 }
@@ -65,10 +65,10 @@ export function useDeleteListing() {
     mutationFn: (id: string) => listingsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
-      toast.success("Listing deleted successfully");
+      handleMutationSuccess("Listing deleted successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to delete listing");
+      handleMutationError(error, "Failed to delete listing");
     },
   });
 }
@@ -81,10 +81,10 @@ export function usePublishListing() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
       queryClient.invalidateQueries({ queryKey: ["listing", id] });
-      toast.success("Listing published successfully");
+      handleMutationSuccess("Listing published successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to publish listing");
+      handleMutationError(error, "Failed to publish listing");
     },
   });
 }
@@ -97,10 +97,10 @@ export function useArchiveListing() {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
       queryClient.invalidateQueries({ queryKey: ["listing", id] });
-      toast.success("Listing archived successfully");
+      handleMutationSuccess("Listing archived successfully");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to archive listing");
+      handleMutationError(error, "Failed to archive listing");
     },
   });
 }

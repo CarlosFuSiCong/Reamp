@@ -6,9 +6,8 @@ import {
   SendAgencyInvitationDto,
   SendStudioInvitationDto,
 } from "@/types";
-import { toast } from "sonner";
+import { handleMutationError, handleMutationSuccess } from "@/lib/utils";
 
-// Get my invitations
 export function useMyInvitations() {
   return useQuery<InvitationListDto[]>({
     queryKey: ["invitations", "me"],
@@ -16,7 +15,6 @@ export function useMyInvitations() {
   });
 }
 
-// Get invitation by ID
 export function useInvitation(invitationId: string) {
   return useQuery<InvitationDetailDto>({
     queryKey: ["invitations", invitationId],
@@ -25,7 +23,6 @@ export function useInvitation(invitationId: string) {
   });
 }
 
-// Accept invitation
 export function useAcceptInvitation() {
   const queryClient = useQueryClient();
 
@@ -34,19 +31,14 @@ export function useAcceptInvitation() {
       invitationsApi.acceptInvitation(invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
-      toast.success("Invitation accepted", {
-        description: "You have successfully joined the team!",
-      });
+      handleMutationSuccess("Invitation accepted", "You have successfully joined the team!");
     },
     onError: (error: any) => {
-      toast.error("Failed to accept invitation", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to accept invitation");
     },
   });
 }
 
-// Reject invitation
 export function useRejectInvitation() {
   const queryClient = useQueryClient();
 
@@ -55,19 +47,14 @@ export function useRejectInvitation() {
       invitationsApi.rejectInvitation(invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
-      toast.success("Invitation rejected", {
-        description: "The invitation has been declined",
-      });
+      handleMutationSuccess("Invitation rejected", "The invitation has been declined");
     },
     onError: (error: any) => {
-      toast.error("Failed to reject invitation", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to reject invitation");
     },
   });
 }
 
-// Cancel invitation
 export function useCancelInvitation() {
   const queryClient = useQueryClient();
 
@@ -76,19 +63,14 @@ export function useCancelInvitation() {
       invitationsApi.cancelInvitation(invitationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
-      toast.success("Invitation cancelled", {
-        description: "The invitation has been cancelled",
-      });
+      handleMutationSuccess("Invitation cancelled", "The invitation has been cancelled");
     },
     onError: (error: any) => {
-      toast.error("Failed to cancel invitation", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to cancel invitation");
     },
   });
 }
 
-// Send agency invitation
 export function useSendAgencyInvitation() {
   const queryClient = useQueryClient();
 
@@ -102,19 +84,14 @@ export function useSendAgencyInvitation() {
     }) => invitationsApi.sendAgencyInvitation(agencyId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
-      toast.success("Invitation sent", {
-        description: "The invitation has been sent successfully",
-      });
+      handleMutationSuccess("Invitation sent", "The invitation has been sent successfully");
     },
     onError: (error: any) => {
-      toast.error("Failed to send invitation", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to send invitation");
     },
   });
 }
 
-// Get agency invitations
 export function useAgencyInvitations(agencyId: string) {
   return useQuery<InvitationDetailDto[]>({
     queryKey: ["agencies", agencyId, "invitations"],
@@ -123,7 +100,6 @@ export function useAgencyInvitations(agencyId: string) {
   });
 }
 
-// Send studio invitation
 export function useSendStudioInvitation() {
   const queryClient = useQueryClient();
 
@@ -137,19 +113,14 @@ export function useSendStudioInvitation() {
     }) => invitationsApi.sendStudioInvitation(studioId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
-      toast.success("Invitation sent", {
-        description: "The invitation has been sent successfully",
-      });
+      handleMutationSuccess("Invitation sent", "The invitation has been sent successfully");
     },
     onError: (error: any) => {
-      toast.error("Failed to send invitation", {
-        description: error?.message || "Please try again",
-      });
+      handleMutationError(error, "Failed to send invitation");
     },
   });
 }
 
-// Get studio invitations
 export function useStudioInvitations(studioId: string) {
   return useQuery<InvitationDetailDto[]>({
     queryKey: ["studios", studioId, "invitations"],

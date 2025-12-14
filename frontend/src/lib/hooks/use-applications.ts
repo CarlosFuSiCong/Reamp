@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { applicationsApi } from "@/lib/api";
 import { ApplicationStatus, ApplicationType } from "@/types";
-import { toast } from "sonner";
+import { handleMutationError, handleMutationSuccess } from "@/lib/utils";
 
 export function useApplications(
   page: number = 1,
@@ -36,20 +36,11 @@ export function useSubmitAgencyApplication() {
   return useMutation({
     mutationFn: applicationsApi.submitAgencyApplication,
     onSuccess: () => {
-      toast.success("Agency application submitted successfully");
+      handleMutationSuccess("Agency application submitted successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || "Failed to submit agency application";
-      const errors = error?.errors;
-      
-      toast.error(errorMessage, { duration: 5000 });
-      
-      if (errors && Array.isArray(errors) && errors.length > 0) {
-        errors.forEach((err: string) => {
-          toast.error(err, { duration: 5000 });
-        });
-      }
+      handleMutationError(error, "Failed to submit agency application");
     },
   });
 }
@@ -60,20 +51,11 @@ export function useSubmitStudioApplication() {
   return useMutation({
     mutationFn: applicationsApi.submitStudioApplication,
     onSuccess: () => {
-      toast.success("Studio application submitted successfully");
+      handleMutationSuccess("Studio application submitted successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || "Failed to submit studio application";
-      const errors = error?.errors;
-      
-      toast.error(errorMessage, { duration: 5000 });
-      
-      if (errors && Array.isArray(errors) && errors.length > 0) {
-        errors.forEach((err: string) => {
-          toast.error(err, { duration: 5000 });
-        });
-      }
+      handleMutationError(error, "Failed to submit studio application");
     },
   });
 }
@@ -85,22 +67,11 @@ export function useReviewApplication() {
     mutationFn: ({ id, approved, notes }: { id: string; approved: boolean; notes?: string }) =>
       applicationsApi.reviewApplication(id, { approved, notes }),
     onSuccess: () => {
-      toast.success("Application reviewed successfully");
+      handleMutationSuccess("Application reviewed successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || "Failed to review application";
-      const errors = error?.errors;
-      
-      // Show main error message with longer duration
-      toast.error(errorMessage, { duration: 5000 });
-      
-      // Show additional error details if available
-      if (errors && Array.isArray(errors) && errors.length > 0) {
-        errors.forEach((err: string) => {
-          toast.error(err, { duration: 5000 });
-        });
-      }
+      handleMutationError(error, "Failed to review application");
     },
   });
 }
@@ -111,20 +82,11 @@ export function useCancelApplication() {
   return useMutation({
     mutationFn: (id: string) => applicationsApi.cancelApplication(id),
     onSuccess: () => {
-      toast.success("Application cancelled successfully");
+      handleMutationSuccess("Application cancelled successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || "Failed to cancel application";
-      const errors = error?.errors;
-      
-      toast.error(errorMessage, { duration: 5000 });
-      
-      if (errors && Array.isArray(errors) && errors.length > 0) {
-        errors.forEach((err: string) => {
-          toast.error(err, { duration: 5000 });
-        });
-      }
+      handleMutationError(error, "Failed to cancel application");
     },
   });
 }
