@@ -85,14 +85,24 @@ export function OrderCreationForm() {
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
     try {
-      // Get agencyId from current user's profile
-      if (!profile?.agencyId) {
-        throw new Error("No agency ID found for current user");
+      // Get agencyId - try from profile first, then from selected listing's owner
+      let agencyId = profile?.agencyId;
+      
+      if (!agencyId) {
+        // Fallback: get agencyId from the listing's owner
+        const selectedListing = listingsData?.items?.find(l => l.id === values.listingId);
+        if (selectedListing?.ownerAgencyId) {
+          agencyId = selectedListing.ownerAgencyId;
+        }
+      }
+      
+      if (!agencyId) {
+        throw new Error("Unable to create order: No agency ID found. Please ensure you are part of an agency.");
       }
 
       // Create the order (studioId is optional - if not provided, order will be available for claiming)
       const orderData: any = {
-        agencyId: profile.agencyId,
+        agencyId,
         listingId: values.listingId,
         currency: values.currency,
       };
