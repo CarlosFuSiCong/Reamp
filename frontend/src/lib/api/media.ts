@@ -8,6 +8,38 @@ interface ApiResponse<T> {
   errors?: string[];
 }
 
+export interface MediaAssetDetailDto {
+  id: string;
+  ownerStudioId: string;
+  studioName?: string;
+  uploaderUserId: string;
+  uploaderName?: string;
+  mediaProvider: number;
+  providerAssetId: string;
+  resourceType: number;
+  processStatus: number;
+  contentType: string;
+  sizeBytes: number;
+  widthPx?: number;
+  heightPx?: number;
+  durationSeconds?: number;
+  originalFileName: string;
+  publicUrl: string;
+  checksumSha256?: string;
+  description?: string;
+  tags?: string[];
+  variants: Array<{
+    variantName: string;
+    transformedUrl: string;
+    widthPx?: number;
+    heightPx?: number;
+    sizeBytes?: number;
+  }>;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+
+// Simplified interface for upload response (only includes essential fields)
 export interface MediaUploadResponse {
   id: string;
   publicUrl: string;
@@ -35,8 +67,13 @@ export const mediaApi = {
     await apiClient.delete(`/api/media/${id}`);
   },
 
+  async getById(id: string): Promise<MediaAssetDetailDto> {
+    const response = await apiClient.get<ApiResponse<MediaAssetDetailDto>>(`/api/media/${id}`);
+    return response.data.data;
+  },
+
   async getUrl(id: string): Promise<string> {
-    const response = await apiClient.get<ApiResponse<{ publicUrl: string }>>(`/api/media/${id}`);
+    const response = await apiClient.get<ApiResponse<MediaAssetDetailDto>>(`/api/media/${id}`);
     return response.data.data.publicUrl;
   },
 };
