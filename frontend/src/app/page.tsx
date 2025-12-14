@@ -46,10 +46,26 @@ export default function HomePage() {
                     </Link>
                   </>
                 )}
-                {user.role !== UserRole.Client && (
-                  <Link href="/dashboard">
+                {user.role === UserRole.Agent && (
+                  <Link href="/dashboard/agency">
                     <Button size="lg" className="gap-2">
-                      Go to Dashboard
+                      Go to Agency Dashboard
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+                {user.role === UserRole.Staff && (
+                  <Link href="/dashboard/studio">
+                    <Button size="lg" className="gap-2">
+                      Go to Studio Dashboard
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+                {user.role === UserRole.Admin && (
+                  <Link href="/admin">
+                    <Button size="lg" className="gap-2">
+                      Go to Admin Dashboard
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -171,10 +187,24 @@ export default function HomePage() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-            ) : (
-              <Link href="/dashboard">
+            ) : user.role === UserRole.Agent ? (
+              <Link href="/dashboard/agency">
                 <Button size="lg" variant="secondary" className="gap-2">
-                  Go to Dashboard
+                  Go to Agency Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : user.role === UserRole.Staff ? (
+              <Link href="/dashboard/studio">
+                <Button size="lg" variant="secondary" className="gap-2">
+                  Go to Studio Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/admin">
+                <Button size="lg" variant="secondary" className="gap-2">
+                  Go to Admin Dashboard
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>

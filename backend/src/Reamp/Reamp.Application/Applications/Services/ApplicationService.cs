@@ -306,9 +306,8 @@ namespace Reamp.Application.Applications.Services
             var ownerAgent = new Agent(ownerProfile.Id, agency.Id, AgencyRole.Owner);
             await _agentRepo.AddAsync(ownerAgent, ct);
 
-            // Update user role to Client when they become an agency owner
-            // This must be done before SaveChangesAsync to ensure all changes are persisted together
-            ownerProfile.SetRole(UserRole.Client);
+            // Update user role to Agent when they become an agency owner
+            ownerProfile.SetRole(UserRole.Agent);
 
             _logger.LogInformation("Agency {AgencyName} created from application with owner {OwnerId}", 
                 application.OrganizationName, application.ApplicantUserId);
@@ -357,7 +356,6 @@ namespace Reamp.Application.Applications.Services
             await _staffRepo.AddAsync(ownerStaff, ct);
 
             // Update user role to Staff when they become a studio owner
-            // This must be done before SaveChangesAsync to ensure all changes are persisted together
             ownerProfile.SetRole(UserRole.Staff);
 
             _logger.LogInformation("Studio {StudioName} created from application with owner {OwnerId}", 
