@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export function AvatarUpload({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const prevIsUploadingRef = useRef(isUploading);
 
   useEffect(() => {
     if (avatarAssetId) {
@@ -70,14 +71,15 @@ export function AvatarUpload({
     }
   };
 
-  // Clear UI state after profile update completes
+  // Clear UI state when profile update completes (isUploading: true -> false)
   useEffect(() => {
-    if (!isUploading && (file || preview)) {
+    if (prevIsUploadingRef.current && !isUploading) {
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
     }
-  }, [isUploading, file, preview]);
+    prevIsUploadingRef.current = isUploading;
+  }, [isUploading]);
 
   const isProcessing = uploading || isUploading;
 
