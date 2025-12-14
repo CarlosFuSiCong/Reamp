@@ -8,7 +8,6 @@ import { Sidebar, SidebarNavItem } from "@/components/layout/sidebar";
 import { 
   User, 
   Users, 
-  Briefcase,
   ShoppingCart,
   Settings,
   ClipboardList,
@@ -67,24 +66,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         ? parseInt(profile.agencyRole, 10) 
         : Number(profile.agencyRole);
 
-      // Owner & Manager can manage team and clients
+      // Owner & Manager can manage team
       if (roleValue === AgencyRole.Owner || roleValue === AgencyRole.Manager) {
-        agencyItems.push(
-          { title: "Team", href: "/dashboard/team", icon: Users },
-          { title: "Clients", href: "/dashboard/agency/clients", icon: Briefcase }
-        );
+        agencyItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
       }
 
       // All agency members can view listings and orders
       agencyItems.push(
-        { title: "Listings", href: "/dashboard/agency/listings", icon: ClipboardList },
-        { title: "Orders", href: "/dashboard/agency/orders", icon: ShoppingCart }
+        { title: "Listings", href: "/dashboard/listings", icon: ClipboardList },
+        { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart }
       );
-
-      // Only Owner can access settings
-      if (roleValue === AgencyRole.Owner) {
-        agencyItems.push({ title: "Settings", href: "/dashboard/agency/settings", icon: Settings });
-      }
 
       return [...baseItems, ...agencyItems];
     }

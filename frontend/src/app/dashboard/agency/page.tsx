@@ -20,9 +20,9 @@ export default function AgentDashboardPage() {
   const recentActivities = generateRecentActivities(listings, orders, 5);
 
   const quickActions = [
-    { href: "/dashboard/agency/listings/new", label: "Create New Listing", icon: Plus },
-    { href: "/dashboard/agency/orders/new", label: "Create New Order", icon: Plus },
-    { href: "/dashboard/agency/listings", label: "View All Listings", icon: Home },
+    { href: "/dashboard/listings/new", label: "Create New Listing", icon: Plus },
+    { href: "/dashboard/orders/new", label: "Create New Order", icon: Plus },
+    { href: "/dashboard/listings", label: "View All Listings", icon: Home },
   ];
 
   return (
@@ -32,7 +32,7 @@ export default function AgentDashboardPage() {
         description="Welcome back! Here's an overview of your activities"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
         <StatsCard
           title="Total Listings"
           value={stats.totalListings}
@@ -44,12 +44,6 @@ export default function AgentDashboardPage() {
           value={stats.activeOrders}
           icon={ShoppingCart}
           description="In progress"
-        />
-        <StatsCard
-          title="Clients"
-          value={stats.totalClients}
-          icon={Users}
-          description="Total clients"
         />
         <StatsCard
           title="Pending Review"
