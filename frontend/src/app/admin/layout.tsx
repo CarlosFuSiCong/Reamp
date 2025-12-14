@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && (!user || user.role !== UserRole.Admin)) {
-      router.push("/profile");
+      router.push("/");
     }
   }, [user, isLoading, router]);
 
