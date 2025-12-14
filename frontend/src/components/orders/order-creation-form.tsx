@@ -107,7 +107,7 @@ export function OrderCreationForm() {
         });
       }
 
-      router.push(`/agent/orders/${result.id}`);
+      router.push(`/dashboard/orders/${result.id}`);
     } catch (error) {
       console.error("Failed to create order:", error);
     } finally {
