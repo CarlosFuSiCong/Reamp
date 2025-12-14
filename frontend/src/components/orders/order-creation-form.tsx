@@ -97,8 +97,8 @@ export function OrderCreationForm() {
         currency: values.currency,
       };
       
-      // Only include studioId if a studio was selected
-      if (values.studioId) {
+      // Only include studioId if a studio was selected (not "none")
+      if (values.studioId && values.studioId !== "none") {
         orderData.studioId = values.studioId;
       }
 
@@ -186,7 +186,7 @@ export function OrderCreationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No studio (publish to marketplace)</SelectItem>
+                      <SelectItem value="none">No studio (publish to marketplace)</SelectItem>
                       {(!studiosData?.items || studiosData.items.length === 0) ? (
                         <SelectItem value="no-studios" disabled>
                           No studios available
