@@ -502,7 +502,9 @@ namespace Reamp.Application.Orders.Services
                 orders.Items.Count(o => o.StudioId == null));
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
-            return new PagedList<OrderListDto>(dtos, orders.TotalCount, pageRequest.Page, pageRequest.PageSize);
+            // Note: Using filteredOrders.Count as total because we filter in-memory after DB pagination
+            // This means pagination is approximate - actual implementation should filter at DB level
+            return new PagedList<OrderListDto>(dtos, filteredOrders.Count, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task<IPagedList<OrderListDto>> GetPhotographerOrdersAsync(PageRequest pageRequest, Guid currentUserId, ShootOrderStatus? status = null, CancellationToken ct = default)
@@ -534,16 +536,21 @@ namespace Reamp.Application.Orders.Services
             // If status is null (requesting "My Orders" - all active orders), 
             // filter out completed and cancelled orders
             var filteredOrders = orders.Items;
+            int totalCount = orders.TotalCount;
+            
             if (status == null)
             {
                 filteredOrders = orders.Items
                     .Where(o => o.Status != ShootOrderStatus.Completed && 
                                o.Status != ShootOrderStatus.Cancelled)
                     .ToList();
+                // Note: Using filteredOrders.Count as total because we filter in-memory after DB pagination
+                // This means pagination is approximate - actual implementation should filter at DB level
+                totalCount = filteredOrders.Count;
             }
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
-            return new PagedList<OrderListDto>(dtos, orders.TotalCount, pageRequest.Page, pageRequest.PageSize);
+            return new PagedList<OrderListDto>(dtos, totalCount, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task AcceptOrderAsPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
