@@ -218,8 +218,24 @@ namespace Reamp.Api
                 app.UseCors("dev");
 
                 using var scope = app.Services.CreateScope();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
+                
+                logger.LogInformation("🔄 Checking database migrations...");
+                var pendingMigrations = db.Database.GetPendingMigrations().ToList();
+                
+                if (pendingMigrations.Any())
+                {
+                    logger.LogWarning("⚠️ Found {Count} pending migrations: {Migrations}", 
+                        pendingMigrations.Count, string.Join(", ", pendingMigrations));
+                    logger.LogInformation("▶️ Applying migrations...");
+                    db.Database.Migrate();
+                    logger.LogInformation("✅ Migrations applied successfully");
+                }
+                else
+                {
+                    logger.LogInformation("✅ Database is up to date - no pending migrations");
+                }
             }
 
             app.UseHttpsRedirection();

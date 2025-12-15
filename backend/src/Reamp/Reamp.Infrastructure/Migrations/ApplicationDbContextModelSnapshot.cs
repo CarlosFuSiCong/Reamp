@@ -1242,7 +1242,8 @@ namespace Reamp.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudioId")
+                    b.Property<Guid?>("StudioId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalAmount")
