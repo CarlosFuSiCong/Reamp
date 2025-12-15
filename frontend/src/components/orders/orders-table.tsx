@@ -59,16 +59,25 @@ export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
           {orders.map((order) => (
             <TableRow key={order.id}>
               <TableCell className="font-mono text-sm">
-                {order.id.substring(0, 8)}
+                #{order.id.substring(0, 8)}
               </TableCell>
-              <TableCell className="font-medium">
-                {order.listingId}
+              <TableCell className="max-w-[200px]">
+                <div className="font-medium truncate">
+                  {order.title || order.listingTitle || 'Untitled Order'}
+                </div>
+                {order.listingAddress && (
+                  <div className="text-xs text-muted-foreground truncate">
+                    {order.listingAddress}
+                  </div>
+                )}
               </TableCell>
-              <TableCell>{order.studioId}</TableCell>
-              <TableCell>
+              <TableCell>{order.studioName || 'Not assigned'}</TableCell>
+              <TableCell className="font-semibold">
                 {order.currency} {order.totalAmount.toLocaleString()}
               </TableCell>
-              <TableCell>{order.tasks.length} tasks</TableCell>
+              <TableCell>
+                {order.taskCount ?? order.tasks?.length ?? 0} tasks
+              </TableCell>
               <TableCell>
                 <StatusBadge status={order.status} type="order" />
               </TableCell>

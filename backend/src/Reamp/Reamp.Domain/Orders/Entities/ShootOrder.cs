@@ -15,6 +15,7 @@ namespace Reamp.Domain.Shoots.Entities
         public Guid ListingId { get; private set; }  // Linked listing
         public Guid? AssignedPhotographerId { get; private set; }  // Assigned photographer (Staff)
 
+        public string Title { get; private set; } = string.Empty;
         public string Currency { get; private set; } = "AUD";
         public decimal TotalAmount { get; private set; }
 
@@ -32,13 +33,14 @@ namespace Reamp.Domain.Shoots.Entities
 
         private ShootOrder() { }
 
-        public static ShootOrder Place(Guid agencyId, Guid? studioId, Guid listingId, Guid createdBy, string currency = "AUD")
+        public static ShootOrder Place(Guid agencyId, Guid? studioId, Guid listingId, Guid createdBy, string title, string currency = "AUD")
         {
             if (agencyId == Guid.Empty) throw new ArgumentException("AgencyId required");
             // StudioId is optional - can be null for marketplace orders
             if (studioId.HasValue && studioId.Value == Guid.Empty) throw new ArgumentException("StudioId cannot be empty Guid");
             if (listingId == Guid.Empty) throw new ArgumentException("ListingId required");
             if (createdBy == Guid.Empty) throw new ArgumentException("CreatedBy required");
+            if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Title required");
 
             return new ShootOrder
             {
@@ -46,6 +48,7 @@ namespace Reamp.Domain.Shoots.Entities
                 StudioId = studioId,
                 ListingId = listingId,
                 CreatedBy = createdBy,
+                Title = title.Trim(),
                 Currency = string.IsNullOrWhiteSpace(currency) ? "AUD" : currency.Trim().ToUpperInvariant()
             };
         }
@@ -81,7 +84,7 @@ namespace Reamp.Domain.Shoots.Entities
         public void Accept()
         {
             if (Status != ShootOrderStatus.Placed) throw new InvalidOperationException("Must be placed");
-            if (_tasks.Count == 0) throw new InvalidOperationException("No tasks");
+            // Tasks can be added after acceptance, so we don't enforce this check here
             Status = ShootOrderStatus.Accepted; Touch();
         }
 
@@ -89,12 +92,18 @@ namespace Reamp.Domain.Shoots.Entities
         {
             if (Status != ShootOrderStatus.Accepted && Status != ShootOrderStatus.Scheduled)
                 throw new InvalidOperationException("Must be accepted first");
+            // Require at least one task before scheduling
+            if (_tasks.Count == 0) throw new InvalidOperationException("Cannot schedule order without tasks");
             Status = ShootOrderStatus.Scheduled; Touch();
         }
 
         public void Start()
         {
-            if (Status != ShootOrderStatus.Scheduled) throw new InvalidOperationException("Must be scheduled");
+            // Allow starting from both Accepted and Scheduled status
+            if (Status != ShootOrderStatus.Scheduled && Status != ShootOrderStatus.Accepted) 
+                throw new InvalidOperationException("Order must be accepted or scheduled before starting");
+            // Tasks must exist before starting work
+            if (_tasks.Count == 0) throw new InvalidOperationException("Cannot start order without tasks");
             Status = ShootOrderStatus.InProgress; Touch();
         }
 
@@ -128,6 +137,14 @@ namespace Reamp.Domain.Shoots.Entities
         {
             EnsureNotFinal();
             AssignedPhotographerId = null;
+            Touch();
+        }
+
+        public void AssignStudio(Guid studioId)
+        {
+            if (studioId == Guid.Empty) throw new ArgumentException("StudioId required", nameof(studioId));
+            EnsureNotFinal();
+            StudioId = studioId;
             Touch();
         }
 

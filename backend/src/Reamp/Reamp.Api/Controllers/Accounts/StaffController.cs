@@ -105,6 +105,18 @@ namespace Reamp.Api.Controllers.Accounts
             return Ok(ApiResponse<StaffDetailDto>.Ok(staff, "Staff retrieved successfully"));
         }
 
+        // GET /api/staff/profile/{userProfileId} - Get staff by user profile ID
+        [HttpGet("staff/profile/{userProfileId:guid}")]
+        public async Task<IActionResult> GetByUserProfileId(Guid userProfileId, CancellationToken ct)
+        {
+            var staff = await _staffAppService.GetByUserProfileIdAsync(userProfileId, ct);
+
+            if (staff == null)
+                return NotFound(ApiResponse<object>.Fail("Staff not found"));
+
+            return Ok(ApiResponse<StaffDetailDto>.Ok(staff, "Staff retrieved successfully"));
+        }
+
         // PUT /api/staff/{id}/skills - Update staff skills
         [HttpPut("staff/{id:guid}/skills")]
         [Authorize]

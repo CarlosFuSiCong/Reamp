@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import {
   Form,
   FormControl,
@@ -21,6 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -28,13 +35,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, CalendarIcon } from "lucide-react";
 import { ordersApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const orderFormSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(200),
   listingId: z.string().min(1, "Please select a listing"),
   studioId: z.string().optional(), // Optional - can be left empty for marketplace claiming
   currency: z.string().min(1),
+  scheduledDate: z.date().optional(),
+  scheduledTime: z.string().optional(),
   tasks: z.array(
     z.object({
       taskType: z.nativeEnum(ShootTaskType),
@@ -59,6 +70,7 @@ export function OrderCreationForm() {
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
+      title: "",
       currency: "AUD",
       tasks: [
         {
@@ -87,6 +99,7 @@ export function OrderCreationForm() {
       // Create the order (agencyId and studioId are both optional on frontend)
       // Backend will auto-populate agencyId from the current user's agent record
       const orderData: any = {
+        title: values.title,
         listingId: values.listingId,
         currency: values.currency,
       };
@@ -94,6 +107,11 @@ export function OrderCreationForm() {
       // Only include studioId if a studio was selected (not "none")
       if (values.studioId && values.studioId !== "none") {
         orderData.studioId = values.studioId;
+      }
+
+      // Include scheduled date if provided
+      if (values.scheduledDate) {
+        orderData.scheduledStartUtc = values.scheduledDate.toISOString();
       }
 
       console.log('📤 Submitting order data:', orderData);
@@ -137,6 +155,23 @@ export function OrderCreationForm() {
           <CardContent className="space-y-4">
             <FormField
               control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Order Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Property Photography - 123 Main St" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Give this order a descriptive title
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="listingId"
               render={({ field }) => (
                 <FormItem>
@@ -155,7 +190,7 @@ export function OrderCreationForm() {
                       )}
                       {listingsData?.items.map((listing) => (
                         <SelectItem key={listing.id} value={listing.id}>
-                          {listing.title} - {listing.city}
+                          {listing.title}{listing.city ? ` - ${listing.city}` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -197,6 +232,66 @@ export function OrderCreationForm() {
                   </Select>
                   <FormDescription>
                     Choose a specific studio or leave empty to let studios claim this order
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scheduledDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Scheduled Date & Time (Optional)</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <div className="flex gap-2">
+                    <Input
+                      type="time"
+                      className="flex-1"
+                      onChange={(e) => {
+                        if (field.value && e.target.value) {
+                          const [hours, minutes] = e.target.value.split(':');
+                          const newDate = new Date(field.value);
+                          newDate.setHours(parseInt(hours), parseInt(minutes));
+                          field.onChange(newDate);
+                        }
+                      }}
+                      value={field.value ? format(field.value, "HH:mm") : ""}
+                    />
+                  </div>
+                  <FormDescription>
+                    When should the photoshoot take place?
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

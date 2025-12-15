@@ -13,8 +13,16 @@ namespace Reamp.Application.Orders.Dtos
         [Required]
         public Guid ListingId { get; set; }
 
+        [Required]
+        [StringLength(200, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 200 characters")]
+        public string Title { get; set; } = string.Empty;
+
         [StringLength(3, MinimumLength = 3, ErrorMessage = "Currency must be a 3-character ISO code (e.g., AUD, USD)")]
         public string? Currency { get; set; }
+
+        // Optional scheduling information
+        public DateTime? ScheduledStartUtc { get; set; }
+        public DateTime? ScheduledEndUtc { get; set; }
     }
 }
 

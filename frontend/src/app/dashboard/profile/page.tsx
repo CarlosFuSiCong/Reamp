@@ -3,13 +3,15 @@
 import { use, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Lock, FileText, Mail } from "lucide-react";
+import { User, Lock, FileText, Mail, Briefcase } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
-import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations } from "@/components/profile";
+import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations, StaffSkillsManager } from "@/components/profile";
 import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
+import { useStaffByUserProfileId } from "@/lib/hooks/use-staff";
+import { UserRole } from "@/types/enums";
 
 export default function ProfilePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { user } = useAuthStore();
@@ -41,6 +43,10 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
   const updateAvatarMutation = useUpdateAvatar();
   const changePasswordMutation = useChangePassword();
 
+  // Fetch staff data if user is a staff member
+  const isStaffUser = profile?.role === UserRole.Staff;
+  const { data: staffData } = useStaffByUserProfileId(isStaffUser ? profile?.id || null : null);
+
   if (isLoading) {
     return <LoadingState message="Loading profile..." />;
   }
@@ -66,6 +72,12 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             <Lock className="h-4 w-4 mr-2" />
             Security
           </TabsTrigger>
+          {isStaffUser && staffData && (
+            <TabsTrigger value="skills">
+              <Briefcase className="h-4 w-4 mr-2" />
+              Skills
+            </TabsTrigger>
+          )}
           <TabsTrigger value="invitations">
             <Mail className="h-4 w-4 mr-2" />
             Invitations
@@ -107,6 +119,15 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             isSuccess={changePasswordMutation.isSuccess}
           />
         </TabsContent>
+
+        {isStaffUser && staffData && (
+          <TabsContent value="skills">
+            <StaffSkillsManager 
+              staffId={staffData.id} 
+              currentSkills={staffData.skills} 
+            />
+          </TabsContent>
+        )}
 
         <TabsContent value="invitations">
           <MyInvitations />

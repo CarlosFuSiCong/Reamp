@@ -21,12 +21,15 @@ namespace Reamp.Infrastructure.Repositories.Orders
             return await query.FirstOrDefaultAsync(x => x.Id == id, ct);
         }
 
-        public async Task<ShootOrder?> GetAggregateAsync(Guid id, CancellationToken ct = default)
+        public async Task<ShootOrder?> GetAggregateAsync(Guid id, bool asNoTracking = false, CancellationToken ct = default)
         {
             // Load order with all tasks
-            return await _set
-                .Include(x => x.Tasks)
-                .FirstOrDefaultAsync(x => x.Id == id, ct);
+            IQueryable<ShootOrder> query = _set.Include(x => x.Tasks);
+            
+            if (asNoTracking)
+                query = query.AsNoTracking();
+            
+            return await query.FirstOrDefaultAsync(x => x.Id == id, ct);
         }
 
         public async Task<IPagedList<ShootOrder>> ListAsync(
@@ -36,8 +39,11 @@ namespace Reamp.Infrastructure.Repositories.Orders
             Guid? createdBy = null,
             CancellationToken ct = default)
         {
-            // Build query without Include to avoid cartesian product in pagination
-            var query = _set.AsNoTracking().AsQueryable();
+            // Build query with AsNoTracking first, then Include
+            var query = _set
+                .AsNoTracking()
+                .Include(x => x.Tasks)
+                .AsQueryable();
 
             // Apply filters
             if (agencyId.HasValue)
@@ -52,30 +58,8 @@ namespace Reamp.Infrastructure.Repositories.Orders
             // Order by creation date descending
             query = query.OrderByDescending(x => x.CreatedAtUtc);
 
-            // Get paginated result first
-            var pagedResult = await ToPagedListAsync(query, page, ct);
-
-            // Load tasks for the paginated orders in a separate query
-            if (pagedResult.Items.Any())
-            {
-                var orderIds = pagedResult.Items.Select(x => x.Id).ToList();
-                var ordersWithTasks = await _set
-                    .AsNoTracking()
-                    .Include(x => x.Tasks)
-                    .Where(x => orderIds.Contains(x.Id))
-                    .ToListAsync(ct);
-
-                // Create a dictionary for fast lookup and preserve original ordering
-                var ordersDict = ordersWithTasks.ToDictionary(x => x.Id);
-                var orderedItems = pagedResult.Items
-                    .Select(x => ordersDict.TryGetValue(x.Id, out var order) ? order : x)
-                    .ToList();
-
-                // Replace items with versions that have tasks loaded, preserving order
-                return new PagedList<ShootOrder>(orderedItems, pagedResult.TotalCount, pagedResult.Page, pagedResult.PageSize);
-            }
-
-            return pagedResult;
+            // Get paginated result
+            return await ToPagedListAsync(query, page, ct);
         }
 
         public async Task<IPagedList<ShootOrder>> ListFilteredAsync(
@@ -142,35 +126,35 @@ namespace Reamp.Infrastructure.Repositories.Orders
 
         public Task UpdateAsync(ShootOrder entity, CancellationToken ct = default)
         {
-            // Attach the aggregate root if not tracked
+            // For detached entities, use Update which will mark the entity and
+            // all its navigation properties with appropriate states
             var entry = _db.Entry(entity);
             
             if (entry.State == EntityState.Detached)
             {
-                _set.Attach(entity);
-                entry.State = EntityState.Modified;
+                _set.Update(entity);
             }
-
-            // Manually track child task states
-            // EF needs to know which tasks are new (Added) vs existing (Modified)
+            // If already tracked, EF will handle it automatically
+            
+            return Task.CompletedTask;
+        }
+        
+        public Task MarkOrderUnchangedAsync(ShootOrder entity, CancellationToken ct = default)
+        {
+            // Mark the order itself as Unchanged to prevent UPDATE
+            var orderEntry = _db.Entry(entity);
+            orderEntry.State = EntityState.Unchanged;
+            
+            // Mark all new tasks as Added (they will be in Detached state after AddTask)
             foreach (var task in entity.Tasks)
             {
                 var taskEntry = _db.Entry(task);
-                
-                // If task is detached and has a concrete GUID, check if it exists in DB
                 if (taskEntry.State == EntityState.Detached)
                 {
-                    // New tasks created by AddTask will not be in the database
-                    // Mark them as Added so EF will INSERT instead of UPDATE
                     taskEntry.State = EntityState.Added;
                 }
-                else if (taskEntry.State == EntityState.Modified || taskEntry.State == EntityState.Unchanged)
-                {
-                    // Existing tasks should remain Modified or Unchanged
-                    // EF will handle them correctly
-                }
             }
-
+            
             return Task.CompletedTask;
         }
     }

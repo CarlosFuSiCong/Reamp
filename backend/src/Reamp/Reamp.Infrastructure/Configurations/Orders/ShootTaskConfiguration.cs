@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Shoots.Entities;
 using System;
@@ -27,6 +27,7 @@ namespace Reamp.Infrastructure.Configurations.Shoots
             b.Property(x => x.ShootOrderId).IsRequired();
             b.Property(x => x.Type).HasConversion<int>().IsRequired();
             b.Property(x => x.Status).HasConversion<int>().IsRequired();
+            b.Property(x => x.AssigneeUserId).IsRequired(false); // Optional assignee
 
             b.Property(x => x.Price).HasColumnType("decimal(18,2)");
             b.Property(x => x.Notes).HasMaxLength(4000);

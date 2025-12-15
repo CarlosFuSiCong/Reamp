@@ -10,10 +10,14 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<PagedResponse<ShootOrder>>("/api/orders", {
+    const response = await apiClient.get<any>("/api/orders", {
       params,
     });
-    return response.data;
+    // Map totalCount to total for frontend compatibility
+    return {
+      ...response.data,
+      total: response.data.totalCount || response.data.total || 0,
+    };
   },
 
   async getById(id: string): Promise<ShootOrder> {
@@ -47,7 +51,45 @@ export const ordersApi = {
     await apiClient.post(`/api/orders/${id}/accept`);
   },
 
+  async start(id: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/start`);
+  },
+
   async complete(id: string): Promise<void> {
     await apiClient.post(`/api/orders/${id}/complete`);
+  },
+
+  // Photographer-specific endpoints
+  async getAvailableOrders(params: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<PagedResponse<ShootOrder>> {
+    const response = await apiClient.get<any>("/api/orders/available", {
+      params,
+    });
+    // Map totalCount to total for frontend compatibility
+    return {
+      ...response.data,
+      total: response.data.totalCount || response.data.total || 0,
+    };
+  },
+
+  async getMyOrders(params: {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<PagedResponse<ShootOrder>> {
+    const response = await apiClient.get<any>("/api/orders/my-orders", {
+      params,
+    });
+    // Map totalCount to total for frontend compatibility
+    return {
+      ...response.data,
+      total: response.data.totalCount || response.data.total || 0,
+    };
+  },
+
+  async acceptAsPhotographer(id: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/accept-photographer`);
   },
 };
