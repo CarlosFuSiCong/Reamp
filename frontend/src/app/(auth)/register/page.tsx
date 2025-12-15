@@ -50,14 +50,23 @@ export default function RegisterPage() {
       setErrorMessage("");
       await registerUser(data);
     } catch (error: any) {
-      const message = error?.message || "Registration failed. Please try again.";
-      const errors = error?.errors;
+      console.error("Registration failed:", error);
       
-      if (errors?.length) {
-        setErrorMessage(`${message}: ${errors.join(", ")}`);
-      } else {
-        setErrorMessage(message);
+      let message = "Registration failed. Please try again.";
+      
+      if (error?.statusCode === 409) {
+        message = "This email is already registered. Please use a different email or sign in.";
+      } else if (error?.statusCode === 400) {
+        message = "Invalid input. Please check all fields.";
+      } else if (error?.statusCode === 500) {
+        message = "Server error. Please try again later.";
+      } else if (error?.message) {
+        message = error.message;
+      } else if (error?.errors && Array.isArray(error.errors)) {
+        message = error.errors.join("; ");
       }
+      
+      setErrorMessage(message);
     }
   };
 

@@ -81,13 +81,13 @@ export function ListingsTable({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/agent/listings/${listing.id}`}>
+                      <Link href={`/dashboard/listings/${listing.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/agent/listings/${listing.id}/edit`}>
+                      <Link href={`/dashboard/listings/${listing.id}/edit`}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </Link>

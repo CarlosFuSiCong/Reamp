@@ -19,7 +19,7 @@ import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 const listingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(20, "Description must be at least 20 characters"),
+  description: z.string().max(5000, "Description cannot exceed 5000 characters").optional().or(z.literal("")),
   price: z.number().min(0, "Price must be positive"),
   currency: z.string().min(3, "Currency is required"),
   listingType: z.nativeEnum(ListingType),
@@ -74,14 +74,57 @@ export default function NewListingPage() {
   });
 
   const onSubmit = async (data: ListingFormValues) => {
-    createMutation.mutate(data, {
+    console.log('📝 onSubmit called - Current step:', currentStep, 'Total steps:', STEPS.length);
+    console.log('📝 Stack trace:', new Error().stack);
+    // Only allow submission on the last step
+    if (currentStep !== STEPS.length) {
+      console.log("❌ Form submission blocked - not on final step");
+      return;
+    }
+
+    // Validate all fields before submission
+    const isValid = await form.trigger();
+    if (!isValid) {
+      console.log("❌ Form validation failed - please check all fields");
+      return;
+    }
+    
+    console.log('✅ Proceeding with form submission');
+
+    // Transform form data to API format
+    const apiData = {
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      currency: data.currency,
+      listingType: data.listingType,
+      propertyType: data.propertyType,
+      address: {
+        line1: data.addressLine1,
+        line2: data.addressLine2 || undefined,
+        city: data.city,
+        state: data.state,
+        postcode: data.postcode,
+        country: "AU", // Convert "Australia" to ISO code
+      },
+      bedrooms: data.bedrooms,
+      bathrooms: data.bathrooms,
+      parkingSpaces: data.parkingSpaces,
+      floorAreaSqm: data.floorAreaSqm,
+      landAreaSqm: data.landAreaSqm,
+    };
+
+    createMutation.mutate(apiData as any, {
       onSuccess: () => {
-        router.push("/agent/listings");
+        router.push("/dashboard/listings");
       },
     });
   };
 
-  const nextStep = async () => {
+  const nextStep = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log('➡️ nextStep called - Current step:', currentStep);
     let fieldsToValidate: (keyof ListingFormValues)[] = [];
 
     if (currentStep === 1) {
@@ -91,7 +134,9 @@ export default function NewListingPage() {
     }
 
     const isValid = await form.trigger(fieldsToValidate);
+    console.log('Validation result:', isValid, 'for fields:', fieldsToValidate);
     if (isValid && currentStep < STEPS.length) {
+      console.log('✅ Moving to step:', currentStep + 1);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -99,6 +144,22 @@ export default function NewListingPage() {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    console.log('🔑 Key pressed:', e.key, 'Current step:', currentStep, 'Target:', e.target);
+    // Prevent form submission on Enter key unless on the last step
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      console.log('✋ Prevented Enter key default behavior');
+      
+      if (currentStep !== STEPS.length) {
+        console.log('➡️ Triggering next step from Enter key');
+        nextStep();
+      } else {
+        console.log('📝 On final step, will submit via button click');
+      }
     }
   };
 
@@ -140,7 +201,7 @@ export default function NewListingPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-6">
           {currentStep === 1 && (
             <Card>
               <CardHeader>
@@ -268,7 +329,7 @@ export default function NewListingPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Detailed description of the property..."
@@ -401,7 +462,10 @@ export default function NewListingPage() {
                             type="number"
                             min="0"
                             {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === '' ? 0 : parseInt(value));
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -420,7 +484,10 @@ export default function NewListingPage() {
                             type="number"
                             min="0"
                             {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === '' ? 0 : parseInt(value));
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -512,15 +579,15 @@ export default function NewListingPage() {
               Previous
             </Button>
 
-            {currentStep < STEPS.length ? (
-              <Button type="button" onClick={nextStep}>
-                Next
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
+            {currentStep === STEPS.length ? (
               <Button type="submit" disabled={createMutation.isPending}>
                 <Save className="mr-2 h-4 w-4" />
                 {createMutation.isPending ? "Creating..." : "Create Listing"}
+              </Button>
+            ) : (
+              <Button type="button" onClick={nextStep}>
+                Next
+                <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             )}
           </div>

@@ -22,8 +22,8 @@ export const ordersApi = {
   },
 
   async create(data: {
-    agencyId: string;
-    studioId: string;
+    agencyId?: string; // Optional - will be auto-populated by backend from current user
+    studioId?: string; // Optional - if not provided, order is published to marketplace
     listingId: string;
     currency?: string;
   }): Promise<{ id: string }> {

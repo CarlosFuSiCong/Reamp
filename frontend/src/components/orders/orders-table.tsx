@@ -86,7 +86,7 @@ export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/agent/orders/${order.id}`}>
+                      <Link href={`/dashboard/orders/${order.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         View Details
                       </Link>

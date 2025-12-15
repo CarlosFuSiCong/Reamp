@@ -4,11 +4,11 @@ namespace Reamp.Application.Orders.Dtos
 {
     public class PlaceOrderDto
     {
-        [Required]
+        // AgencyId will be populated by the controller from the current user's agent record
         public Guid AgencyId { get; set; }
 
-        [Required]
-        public Guid StudioId { get; set; }
+        // StudioId is optional - if not provided, order is published for studios to claim
+        public Guid? StudioId { get; set; }
 
         [Required]
         public Guid ListingId { get; set; }

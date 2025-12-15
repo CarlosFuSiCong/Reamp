@@ -12,8 +12,8 @@ namespace Reamp.Application.Listings.Validators
                 .MaximumLength(200).WithMessage("Title cannot exceed 200 characters.");
 
             RuleFor(x => x.Description)
-                .NotEmpty().WithMessage("Description is required.")
-                .MaximumLength(5000).WithMessage("Description cannot exceed 5000 characters.");
+                .MaximumLength(5000).WithMessage("Description cannot exceed 5000 characters.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Description));
 
             RuleFor(x => x.Price)
                 .GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");

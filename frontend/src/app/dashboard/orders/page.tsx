@@ -63,7 +63,7 @@ export default function AgentOrdersPage() {
         description="Manage your photography orders"
         action={
           <Button asChild>
-            <Link href="/agent/orders/new">
+            <Link href="/dashboard/orders/new">
               <Plus className="mr-2 h-4 w-4" />
               New Order
             </Link>

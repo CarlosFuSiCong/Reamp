@@ -36,14 +36,24 @@ export default function LoginPage() {
       setErrorMessage("");
       await login(data);
     } catch (error: any) {
-      const message = error?.message || "Login failed. Please try again.";
-      const errors = error?.errors;
+      console.error("Login failed:", error);
       
-      if (errors?.length) {
-        setErrorMessage(`${message}: ${errors.join(", ")}`);
-      } else {
-        setErrorMessage(message);
+      let message = "Login failed. Please try again.";
+      
+      if (error?.statusCode === 401) {
+        // 401 means account doesn't exist or wrong password
+        message = "Account does not exist or password is incorrect.";
+      } else if (error?.statusCode === 400) {
+        message = "Invalid input. Please check your email and password.";
+      } else if (error?.statusCode === 500) {
+        message = "Server error. Please try again later.";
+      } else if (error?.message) {
+        message = error.message;
+      } else if (error?.errors && Array.isArray(error.errors)) {
+        message = error.errors.join("; ");
       }
+      
+      setErrorMessage(message);
     }
   };
 

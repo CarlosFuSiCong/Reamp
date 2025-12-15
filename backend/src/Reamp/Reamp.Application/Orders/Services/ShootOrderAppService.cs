@@ -51,9 +51,13 @@ namespace Reamp.Application.Orders.Services
             if (agency == null)
                 throw new ArgumentException($"Agency with ID {dto.AgencyId} does not exist", nameof(dto.AgencyId));
 
-            var studio = await _studioRepo.GetByIdAsync(dto.StudioId, asNoTracking: true, ct);
-            if (studio == null)
-                throw new ArgumentException($"Studio with ID {dto.StudioId} does not exist", nameof(dto.StudioId));
+            // StudioId is optional - if provided, validate it exists
+            if (dto.StudioId.HasValue)
+            {
+                var studio = await _studioRepo.GetByIdAsync(dto.StudioId.Value, asNoTracking: true, ct);
+                if (studio == null)
+                    throw new ArgumentException($"Studio with ID {dto.StudioId} does not exist", nameof(dto.StudioId));
+            }
 
             var listing = await _listingRepo.GetByIdAsync(dto.ListingId, asNoTracking: true, ct);
             if (listing == null)
@@ -258,8 +262,12 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
+            // If order doesn't have a studio assigned yet, return empty list
+            if (!order.StudioId.HasValue)
+                return new List<StaffSummaryDto>();
+
             var photographers = await _staffReadService.ListByStudioAsync(
-                order.StudioId,
+                order.StudioId.Value,
                 search: null,
                 hasSkill: StaffSkills.Photographer,
                 pageRequest: new Reamp.Application.Read.Shared.PageRequest { Page = 1, PageSize = 100 },

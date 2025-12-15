@@ -68,7 +68,7 @@ export default function AgentListingsPage() {
         description="Manage your property listings"
         action={
           <Button asChild>
-            <Link href="/agent/listings/new">
+            <Link href="/dashboard/listings/new">
               <Plus className="mr-2 h-4 w-4" />
               New Listing
             </Link>
@@ -111,4 +111,3 @@ export default function AgentListingsPage() {
     </div>
   );
 }
-

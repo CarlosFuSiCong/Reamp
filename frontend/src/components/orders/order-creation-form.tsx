@@ -33,7 +33,7 @@ import { ordersApi } from "@/lib/api";
 
 const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
-  studioId: z.string().min(1, "Please select a studio"),
+  studioId: z.string().optional(), // Optional - can be left empty for marketplace claiming
   currency: z.string().min(1),
   tasks: z.array(
     z.object({
@@ -84,19 +84,20 @@ export function OrderCreationForm() {
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
     try {
-      // Get the selected listing to retrieve ownerAgencyId
-      const selectedListing = listingsData?.items?.find(l => l.id === values.listingId);
-      if (!selectedListing) {
-        throw new Error("Selected listing not found");
-      }
-
-      // Create the order first
-      const result = await createMutation.mutateAsync({
-        agencyId: selectedListing.ownerAgencyId,
-        studioId: values.studioId,
+      // Create the order (agencyId and studioId are both optional on frontend)
+      // Backend will auto-populate agencyId from the current user's agent record
+      const orderData: any = {
         listingId: values.listingId,
         currency: values.currency,
-      });
+      };
+      
+      // Only include studioId if a studio was selected (not "none")
+      if (values.studioId && values.studioId !== "none") {
+        orderData.studioId = values.studioId;
+      }
+
+      console.log('📤 Submitting order data:', orderData);
+      const result = await createMutation.mutateAsync(orderData);
 
       // Add tasks to the order
       for (const task of values.tasks) {
@@ -107,7 +108,7 @@ export function OrderCreationForm() {
         });
       }
 
-      router.push(`/agent/orders/${result.id}`);
+      router.push(`/dashboard/orders/${result.id}`);
     } catch (error) {
       console.error("Failed to create order:", error);
     } finally {
@@ -159,6 +160,9 @@ export function OrderCreationForm() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormDescription>
+                    Select the property listing for this photography order
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -169,26 +173,31 @@ export function OrderCreationForm() {
               name="studioId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Photography Studio</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Photography Studio (Optional)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a studio" />
+                        <SelectValue placeholder="Leave empty to publish to marketplace" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {(!studiosData?.items || studiosData.items.length === 0) && (
+                      <SelectItem value="none">No studio (publish to marketplace)</SelectItem>
+                      {(!studiosData?.items || studiosData.items.length === 0) ? (
                         <SelectItem value="no-studios" disabled>
                           No studios available
                         </SelectItem>
+                      ) : (
+                        studiosData.items.map((studio) => (
+                          <SelectItem key={studio.id} value={studio.id}>
+                            {studio.name}
+                          </SelectItem>
+                        ))
                       )}
-                      {studiosData?.items.map((studio) => (
-                        <SelectItem key={studio.id} value={studio.id}>
-                          {studio.name}
-                        </SelectItem>
-                      ))}
                     </SelectContent>
                   </Select>
+                  <FormDescription>
+                    Choose a specific studio or leave empty to let studios claim this order
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -355,7 +364,7 @@ export function OrderCreationForm() {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Order"}
+            {isSubmitting ? "Publishing..." : "Publish Order"}
           </Button>
         </div>
       </form>
