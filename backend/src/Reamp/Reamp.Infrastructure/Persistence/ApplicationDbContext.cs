@@ -60,6 +60,15 @@ namespace Reamp.Infrastructure
 
             // Apply soft delete query filters
             builder.ApplySoftDeleteQueryFilters();
+            
+            // Disable all concurrency tokens globally to avoid tracking issues
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties().Where(p => p.IsConcurrencyToken))
+                {
+                    property.IsConcurrencyToken = false;
+                }
+            }
         }
 
         public override int SaveChanges()
@@ -84,14 +93,13 @@ namespace Reamp.Infrastructure
                     entry.State = EntityState.Modified;
                 }
 
-                if (entry.Entity is IAuditableEntity a &&
-                    (entry.State == EntityState.Added || entry.State == EntityState.Modified))
+                if (entry.Entity is IAuditableEntity a && entry.State == EntityState.Added)
                 {
-                    if (entry.State == EntityState.Added)
-                        a.MarkCreated();
-
+                    // Only mark as created for new entities
+                    a.MarkCreated();
                     a.MarkUpdated();
                 }
+                // Don't call MarkUpdated() for Modified entities - they should have already been touched by domain methods
             }
         }
     }

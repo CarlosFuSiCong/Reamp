@@ -13,6 +13,14 @@ export interface ShootOrder {
   studioId: string;
   listingId: string;
   assignedPhotographerId?: string;
+  
+  title: string;
+  // Display-friendly fields
+  listingTitle?: string;
+  listingAddress?: string;
+  studioName?: string;
+  agencyName?: string;
+  
   currency: string;
   totalAmount: number;
   status: OrderStatus;
@@ -22,7 +30,8 @@ export interface ShootOrder {
   scheduledEndUtc?: string;
   schedulingNotes?: string;
   cancellationReason?: string;
-  tasks: ShootTask[];
+  tasks?: ShootTask[]; // Optional for list views
+  taskCount?: number;  // Used in list views instead of tasks array
 }
 
 export interface ShootTask {

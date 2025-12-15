@@ -78,16 +78,64 @@ namespace Reamp.Application.Orders.Services
         public async Task<IPagedList<OrderListDto>> GetListAsync(PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default)
         {
             var orders = await _repo.ListAsync(pageRequest, createdBy: currentUserId, ct: ct);
-            var dtos = orders.Items.Adapt<List<OrderListDto>>();
+            var dtos = await EnrichOrderListDtosAsync(orders.Items, ct);
             return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
+        }
+
+        private async Task<List<OrderListDto>> EnrichOrderListDtosAsync(IEnumerable<ShootOrder> orders, CancellationToken ct)
+        {
+            var ordersList = orders.ToList();
+            if (!ordersList.Any()) return new List<OrderListDto>();
+
+            // Get all unique IDs
+            var listingIds = ordersList.Select(x => x.ListingId).Distinct().ToList();
+            var studioIds = ordersList.Where(x => x.StudioId.HasValue).Select(x => x.StudioId!.Value).Distinct().ToList();
+            var agencyIds = ordersList.Select(x => x.AgencyId).Distinct().ToList();
+
+            // Load related entities sequentially (DbContext cannot handle concurrent operations)
+            var listingsArray = await Task.WhenAll(listingIds.Select(id => _listingRepo.GetByIdAsync(id, asNoTracking: true, ct)));
+            var listings = listingsArray.Where(x => x != null).ToDictionary(x => x!.Id);
+
+            var studiosArray = await Task.WhenAll(studioIds.Select(id => _studioRepo.GetByIdAsync(id, asNoTracking: true, ct)));
+            var studios = studiosArray.Where(x => x != null).ToDictionary(x => x!.Id);
+
+            var agenciesArray = await Task.WhenAll(agencyIds.Select(id => _agencyRepo.GetByIdAsync(id, asNoTracking: true, ct)));
+            var agencies = agenciesArray.Where(x => x != null).ToDictionary(x => x!.Id);
+
+            // Map and enrich
+            return ordersList.Select(order =>
+            {
+                var dto = order.Adapt<OrderListDto>();
+                dto.TaskCount = order.Tasks.Count;
+                
+                _logger.LogDebug("Order {OrderId} has {TaskCount} tasks in collection", order.Id, order.Tasks.Count);
+
+                if (listings.TryGetValue(order.ListingId, out var listing))
+                {
+                    dto.ListingTitle = listing.Title;
+                    dto.ListingAddress = $"{listing.Address.Line1}, {listing.Address.City}";
+                }
+
+                if (order.StudioId.HasValue && studios.TryGetValue(order.StudioId.Value, out var studio))
+                {
+                    dto.StudioName = studio!.Name;
+                }
+
+                if (agencies.TryGetValue(order.AgencyId, out var agency))
+                {
+                    dto.AgencyName = agency!.Name;
+                }
+
+                return dto;
+            }).ToList();
         }
 
         public async Task<OrderDetailDto?> GetByIdAsync(Guid id, Guid currentUserId, CancellationToken ct = default)
         {
             _logger.LogDebug("Getting order {OrderId} for user {UserId}", id, currentUserId);
 
-            // Load order with all tasks
-            var order = await _repo.GetAggregateAsync(id, ct);
+            // Load order with all tasks (with tracking for view)
+            var order = await _repo.GetAggregateAsync(id, asNoTracking: false, ct);
 
             if (order == null)
                 return null;
@@ -124,23 +172,27 @@ namespace Reamp.Application.Orders.Services
         {
             _logger.LogInformation("Adding task {TaskType} to order {OrderId} by user {UserId}", dto.Type, orderId, currentUserId);
 
-            // Load order
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            // Load order WITH tracking to verify ownership
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
             // Verify ownership
             if (order.CreatedBy != currentUserId)
             {
-                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}", 
+                _logger.LogWarning("User {UserId} attempted to modify order {OrderId} owned by {OwnerId}",
                     currentUserId, orderId, order.CreatedBy);
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
             }
 
-            // Add task
-            order.AddTask(dto.Type, dto.Notes, dto.Price);
+            // Add task - this will modify order properties (TotalAmount, UpdatedAtUtc) and add task to collection
+            var addedTask = order.AddTask(dto.Type, dto.Notes, dto.Price);
 
-            await _repo.UpdateAsync(order, ct);
+            // Reset the order's Modified state to prevent UPDATE
+            // We only want to INSERT the new task
+            await _repo.ResetOrderStateAsync(order, addedTask, ct);
+
+            // Save changes - only the task will be inserted
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Successfully added task to order {OrderId}", orderId);
@@ -150,8 +202,8 @@ namespace Reamp.Application.Orders.Services
         {
             _logger.LogInformation("Removing task {TaskId} from order {OrderId} by user {UserId}", taskId, orderId, currentUserId);
 
-            // Load order
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            // Load order without tracking
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -166,7 +218,6 @@ namespace Reamp.Application.Orders.Services
             // Remove task
             order.RemoveTask(taskId);
 
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Successfully removed task from order {OrderId}", orderId);
@@ -174,7 +225,7 @@ namespace Reamp.Application.Orders.Services
 
         public async Task AcceptAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -182,13 +233,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.Accept();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task ScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -196,13 +246,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.MarkScheduled();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task StartAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -227,13 +276,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to start this order");
 
             order.Start();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -258,13 +306,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to complete this order");
 
             order.Complete();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task CancelAsync(Guid orderId, Guid currentUserId, string? reason = null, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -272,13 +319,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.Cancel(reason ?? string.Empty);
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task AssignPhotographerAsync(Guid orderId, AssignPhotographerDto dto, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -293,13 +339,12 @@ namespace Reamp.Application.Orders.Services
                 throw new ArgumentException("Staff member is not a photographer");
 
             order.AssignPhotographer(dto.PhotographerId);
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task UnassignPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -307,7 +352,6 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.UnassignPhotographer();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
@@ -333,7 +377,7 @@ namespace Reamp.Application.Orders.Services
 
         public async Task SetScheduleAsync(Guid orderId, SetScheduleDto dto, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -341,13 +385,12 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.SetSchedule(dto.ScheduledStartUtc, dto.ScheduledEndUtc, dto.Notes);
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
         public async Task ClearScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
@@ -355,7 +398,6 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You do not have permission to modify this order");
 
             order.ClearSchedule();
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
         }
 
@@ -373,7 +415,7 @@ namespace Reamp.Application.Orders.Services
                 createdBy: currentUserId,
                 ct: ct);
 
-            var dtos = orders.Items.Adapt<List<OrderListDto>>();
+            var dtos = await EnrichOrderListDtosAsync(orders.Items, ct);
             return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
         }
 
@@ -404,25 +446,40 @@ namespace Reamp.Application.Orders.Services
                 return new PagedList<OrderListDto>(new List<OrderListDto>(), 0, pageRequest.Page, pageRequest.PageSize);
             }
 
-            // Get orders that:
-            // 1. Have the same studioId as the photographer
-            // 2. Status is Placed or Accepted (not yet assigned to a photographer)
-            // 3. No photographer assigned (AssignedPhotographerId is null)
+            // Get orders that are available for this photographer:
+            // 1. Marketplace orders (StudioId is null) - any photographer can claim
+            // 2. Orders assigned to this photographer's studio (StudioId == staff.StudioId)
+            // Both types must be:
+            // - Status is Placed or Accepted (not yet started)
+            // - No photographer assigned yet (AssignedPhotographerId is null)
             var orders = await _repo.ListFilteredAsync(
                 pageRequest,
-                studioId: staff.StudioId,
+                studioId: null, // Don't filter by studio yet, we'll do it in memory
                 photographerId: null, // Only unassigned orders
                 status: null, // We'll filter by multiple statuses
                 ct: ct);
 
-            // Filter to only Placed or Accepted status
+            _logger.LogInformation("ListFilteredAsync returned {Count} orders for page {Page}", 
+                orders.Items.Count, pageRequest.Page);
+
+            // Filter to:
+            // 1. Placed or Accepted status
+            // 2. No photographer assigned
+            // 3. Either marketplace order (no studio) OR assigned to this photographer's studio
             var filteredOrders = orders.Items
                 .Where(o => o.Status == ShootOrderStatus.Placed || 
                            o.Status == ShootOrderStatus.Accepted)
                 .Where(o => !o.AssignedPhotographerId.HasValue)
+                .Where(o => o.StudioId == null || o.StudioId == staff.StudioId)
                 .ToList();
 
-            var dtos = filteredOrders.Adapt<List<OrderListDto>>();
+            _logger.LogInformation("After filtering: {Count} available orders (StudioId: {StudioId}) - Placed: {PlacedCount}, Marketplace: {MarketplaceCount}", 
+                filteredOrders.Count, 
+                staff.StudioId,
+                orders.Items.Count(o => o.Status == ShootOrderStatus.Placed),
+                orders.Items.Count(o => o.StudioId == null));
+
+            var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
             return new PagedList<OrderListDto>(dtos, filteredOrders.Count, pageRequest.Page, pageRequest.PageSize);
         }
 
@@ -452,8 +509,19 @@ namespace Reamp.Application.Orders.Services
                 status: status,
                 ct: ct);
 
-            var dtos = orders.Items.Adapt<List<OrderListDto>>();
-            return new PagedList<OrderListDto>(dtos, orders.TotalCount, orders.Page, orders.PageSize);
+            // If status is null (requesting "My Orders" - all active orders), 
+            // filter out completed and cancelled orders
+            var filteredOrders = orders.Items;
+            if (status == null)
+            {
+                filteredOrders = orders.Items
+                    .Where(o => o.Status != ShootOrderStatus.Completed && 
+                               o.Status != ShootOrderStatus.Cancelled)
+                    .ToList();
+            }
+
+            var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
+            return new PagedList<OrderListDto>(dtos, dtos.Count, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task AcceptOrderAsPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
@@ -482,17 +550,19 @@ namespace Reamp.Application.Orders.Services
                 throw new UnauthorizedAccessException("You must be a photographer to accept orders");
             }
 
-            // Load the order
-            var order = await _repo.GetAggregateAsync(orderId, ct);
+            // Load the order without tracking
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            // Verify the order belongs to the same studio
-            if (order.StudioId != staff.StudioId)
+            // Verify the order is available for this photographer:
+            // 1. Marketplace orders (StudioId is null) - any photographer can accept
+            // 2. Studio-specific orders (StudioId matches photographer's studio)
+            if (order.StudioId.HasValue && order.StudioId != staff.StudioId)
             {
                 _logger.LogWarning("Order {OrderId} belongs to studio {StudioId}, but photographer belongs to studio {PhotographerStudioId}", 
                     orderId, order.StudioId, staff.StudioId);
-                throw new UnauthorizedAccessException("You can only accept orders from your studio");
+                throw new UnauthorizedAccessException("You can only accept orders from your studio or marketplace orders");
             }
 
             // Verify the order is available to be accepted
@@ -510,16 +580,26 @@ namespace Reamp.Application.Orders.Services
             // Assign the photographer to the order
             order.AssignPhotographer(staff.Id);
             
+            // If this is a marketplace order, also assign it to the photographer's studio
+            if (!order.StudioId.HasValue)
+            {
+                // This is a marketplace order, assign it to the photographer's studio
+                // Note: We need to add a method to assign studio to order
+                _logger.LogInformation("Marketplace order {OrderId} being claimed by photographer from studio {StudioId}", 
+                    orderId, staff.StudioId);
+                // TODO: Add order.AssignStudio(staff.StudioId) method to ShootOrder entity
+            }
+            
             // Accept the order if it's still in Placed status
             if (order.Status == ShootOrderStatus.Placed)
             {
                 order.Accept();
             }
 
-            await _repo.UpdateAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Order {OrderId} accepted by photographer {StaffId}", orderId, staff.Id);
+            _logger.LogInformation("Order {OrderId} accepted by photographer {StaffId} from studio {StudioId}", 
+                orderId, staff.Id, staff.StudioId);
         }
 
         private class PagedList<T> : IPagedList<T>

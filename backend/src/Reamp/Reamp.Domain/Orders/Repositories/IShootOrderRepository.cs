@@ -7,7 +7,7 @@ namespace Reamp.Domain.Shoots.Repositories
     public interface IShootOrderRepository : IRepository<ShootOrder>
     {
         // Get order with all tasks included
-        Task<ShootOrder?> GetAggregateAsync(Guid id, CancellationToken ct = default);
+        Task<ShootOrder?> GetAggregateAsync(Guid id, bool asNoTracking = false, CancellationToken ct = default);
 
         // List orders with pagination
         Task<IPagedList<ShootOrder>> ListAsync(
@@ -32,6 +32,9 @@ namespace Reamp.Domain.Shoots.Repositories
 
         // Update order
         Task UpdateAsync(ShootOrder entity, CancellationToken ct = default);
+        
+        // Reset order state after AddTask to prevent UPDATE, only INSERT the new task
+        Task ResetOrderStateAsync(ShootOrder order, ShootTask newTask, CancellationToken ct = default);
     }
 }
 

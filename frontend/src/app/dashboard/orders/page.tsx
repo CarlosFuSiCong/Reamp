@@ -14,7 +14,7 @@ import { OrderStatus, ShootOrder, ShootTaskType } from "@/types";
 import { Plus, Calendar, Package, DollarSign, Clock } from "lucide-react";
 import { format } from "date-fns";
 
-type StaffTabValue = "available" | "scheduled" | "in-progress" | "completed";
+type StaffTabValue = "available" | "my-orders" | "in-progress" | "completed";
 
 export default function AgentOrdersPage() {
   const { user: profile, isLoading: profileLoading } = useProfile();
@@ -27,7 +27,7 @@ export default function AgentOrdersPage() {
   // Staff-specific states
   const [staffTab, setStaffTab] = useState<StaffTabValue>("available");
   const [availablePage, setAvailablePage] = useState(1);
-  const [scheduledPage, setScheduledPage] = useState(1);
+  const [myOrdersPage, setMyOrdersPage] = useState(1);
   const [inProgressPage, setInProgressPage] = useState(1);
   const [completedPage, setCompletedPage] = useState(1);
 
@@ -49,9 +49,10 @@ export default function AgentOrdersPage() {
     pageSize: 20,
   });
 
-  const { data: scheduledData, isLoading: scheduledLoading, error: scheduledError } = usePhotographerOrders({
-    status: OrderStatus.Scheduled,
-    page: scheduledPage,
+  // My Orders: Accepted + Scheduled (orders assigned to this photographer but not started yet)
+  const { data: myOrdersData, isLoading: myOrdersLoading, error: myOrdersError } = usePhotographerOrders({
+    status: undefined, // Get all statuses, will filter on backend
+    page: myOrdersPage,
     pageSize: 20,
   });
 
@@ -152,7 +153,10 @@ export default function AgentOrdersPage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 text-muted-foreground" />
-              <span>{order.tasks.length} task{order.tasks.length !== 1 ? 's' : ''}</span>
+              <span>
+                {order.taskCount ?? order.tasks?.length ?? 0} task
+                {(order.taskCount ?? order.tasks?.length ?? 0) !== 1 ? 's' : ''}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -186,7 +190,18 @@ export default function AgentOrdersPage() {
                 </Button>
               )}
               
-              {staffTab === "scheduled" && (
+              {staffTab === "my-orders" && order.status === OrderStatus.Accepted && (
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleStart(order.id)}
+                  disabled={startMutation.isPending}
+                >
+                  Start Shoot
+                </Button>
+              )}
+              
+              {staffTab === "my-orders" && order.status === OrderStatus.Scheduled && (
                 <Button 
                   size="sm" 
                   className="flex-1"
@@ -272,8 +287,8 @@ export default function AgentOrdersPage() {
             <TabsTrigger value="available">
               Available ({availableData?.total || 0})
             </TabsTrigger>
-            <TabsTrigger value="scheduled">
-              Scheduled ({scheduledData?.total || 0})
+            <TabsTrigger value="my-orders">
+              My Orders ({myOrdersData?.total || 0})
             </TabsTrigger>
             <TabsTrigger value="in-progress">
               In Progress ({inProgressData?.total || 0})
@@ -294,14 +309,14 @@ export default function AgentOrdersPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="scheduled" className="mt-6">
+          <TabsContent value="my-orders" className="mt-6">
             {renderStaffTabContent(
-              scheduledData,
-              scheduledLoading,
-              scheduledError,
-              scheduledPage,
-              setScheduledPage,
-              "No scheduled orders"
+              myOrdersData,
+              myOrdersLoading,
+              myOrdersError,
+              myOrdersPage,
+              setMyOrdersPage,
+              "No orders assigned to you yet"
             )}
           </TabsContent>
 

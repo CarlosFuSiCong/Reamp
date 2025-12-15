@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Accounts.Studios.Dtos;
 using Reamp.Application.Accounts.Studios.Services;
@@ -34,6 +34,14 @@ namespace Reamp.Api.Controllers.Accounts
         [AllowAnonymous]
         public async Task<IActionResult> GetBySlug([FromRoute] string slug, CancellationToken ct)
         {
+            // Handle empty GUID case (sometimes passed by UI)
+            if (string.IsNullOrWhiteSpace(slug) || 
+                slug == "00000000-0000-0000-0000-000000000000" ||
+                slug == Guid.Empty.ToString())
+            {
+                return NotFound();
+            }
+
             var studio = await _svc.GetBySlugAsync(slug, ct);
             return studio is null ? NotFound() : Ok(studio);
         }

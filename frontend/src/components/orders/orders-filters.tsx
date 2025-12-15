@@ -34,7 +34,7 @@ export function OrdersFilters({
       <Select
         value={statusFilter === "all" ? "all" : statusFilter.toString()}
         onValueChange={(value) =>
-          onStatusChange(value === "all" ? "all" : (parseInt(value) as OrderStatus))
+          onStatusChange(value === "all" ? "all" : (Number(value) as OrderStatus))
         }
       >
         <SelectTrigger className="w-full sm:w-[180px]">

@@ -4,6 +4,7 @@ using Reamp.Application.Orders.Dtos;
 using Reamp.Application.Orders.Services;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Accounts.Repositories;
+using Reamp.Domain.Shoots.Enums;
 using Reamp.Shared;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -96,12 +97,21 @@ namespace Reamp.Api.Controllers
         public async Task<IActionResult> GetOrderList(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
+            [FromQuery] ShootOrderStatus? status = null,
+            [FromQuery] string? keyword = null,
             CancellationToken ct = default)
         {
             var currentUserId = GetCurrentUserId();
             var pageRequest = new PageRequest(page, pageSize);
 
-            var result = await _appService.GetListAsync(pageRequest, currentUserId, ct);
+            // Create filter from query parameters
+            var filter = new OrderFilterDto
+            {
+                Status = status
+                // keyword filtering is not yet implemented in the backend
+            };
+
+            var result = await _appService.GetFilteredListAsync(filter, pageRequest, currentUserId, ct);
 
             return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
         }

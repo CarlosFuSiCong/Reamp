@@ -9,6 +9,7 @@ namespace Reamp.Application.Orders.Dtos
         public Guid StudioId { get; set; }
         public Guid ListingId { get; set; }
         public Guid? AssignedPhotographerId { get; set; }
+        public string Title { get; set; } = string.Empty;
         public string Currency { get; set; } = "AUD";
         public decimal TotalAmount { get; set; }
         public ShootOrderStatus Status { get; set; }
