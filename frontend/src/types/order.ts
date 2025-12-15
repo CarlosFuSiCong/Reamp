@@ -10,7 +10,7 @@ export enum ShootTaskType {
 export interface ShootOrder {
   id: string;
   agencyId: string;
-  studioId: string;
+  studioId?: string;
   listingId: string;
   assignedPhotographerId?: string;
   

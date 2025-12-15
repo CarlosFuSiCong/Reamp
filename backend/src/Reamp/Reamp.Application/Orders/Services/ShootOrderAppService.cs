@@ -502,7 +502,7 @@ namespace Reamp.Application.Orders.Services
                 orders.Items.Count(o => o.StudioId == null));
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
-            return new PagedList<OrderListDto>(dtos, filteredOrders.Count, pageRequest.Page, pageRequest.PageSize);
+            return new PagedList<OrderListDto>(dtos, orders.TotalCount, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task<IPagedList<OrderListDto>> GetPhotographerOrdersAsync(PageRequest pageRequest, Guid currentUserId, ShootOrderStatus? status = null, CancellationToken ct = default)
@@ -543,7 +543,7 @@ namespace Reamp.Application.Orders.Services
             }
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
-            return new PagedList<OrderListDto>(dtos, dtos.Count, pageRequest.Page, pageRequest.PageSize);
+            return new PagedList<OrderListDto>(dtos, orders.TotalCount, pageRequest.Page, pageRequest.PageSize);
         }
 
         public async Task AcceptOrderAsPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
@@ -606,10 +606,9 @@ namespace Reamp.Application.Orders.Services
             if (!order.StudioId.HasValue)
             {
                 // This is a marketplace order, assign it to the photographer's studio
-                // Note: We need to add a method to assign studio to order
                 _logger.LogInformation("Marketplace order {OrderId} being claimed by photographer from studio {StudioId}", 
                     orderId, staff.StudioId);
-                // TODO: Add order.AssignStudio(staff.StudioId) method to ShootOrder entity
+                order.AssignStudio(staff.StudioId);
             }
             
             // Accept the order if it's still in Placed status

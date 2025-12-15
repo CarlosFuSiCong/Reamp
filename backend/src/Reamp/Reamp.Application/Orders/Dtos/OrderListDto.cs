@@ -6,7 +6,7 @@ namespace Reamp.Application.Orders.Dtos
     {
         public Guid Id { get; set; }
         public Guid AgencyId { get; set; }
-        public Guid StudioId { get; set; }
+        public Guid? StudioId { get; set; }
         public Guid ListingId { get; set; }
         public Guid? AssignedPhotographerId { get; set; }
         

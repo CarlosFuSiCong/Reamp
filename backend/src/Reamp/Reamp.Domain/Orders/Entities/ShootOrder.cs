@@ -140,6 +140,14 @@ namespace Reamp.Domain.Shoots.Entities
             Touch();
         }
 
+        public void AssignStudio(Guid studioId)
+        {
+            if (studioId == Guid.Empty) throw new ArgumentException("StudioId required", nameof(studioId));
+            EnsureNotFinal();
+            StudioId = studioId;
+            Touch();
+        }
+
         // Scheduling
         public void SetSchedule(DateTime scheduledStartUtc, DateTime? scheduledEndUtc = null, string? notes = null)
         {
