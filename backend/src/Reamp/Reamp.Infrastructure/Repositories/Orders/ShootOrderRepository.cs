@@ -157,33 +157,6 @@ namespace Reamp.Infrastructure.Repositories.Orders
             
             return Task.CompletedTask;
         }
-        
-        public Task ResetOrderStateAsync(ShootOrder order, ShootTask newTask, CancellationToken ct = default)
-        {
-            // Get the order entry
-            var orderEntry = _db.Entry(order);
-            
-            // We want to UPDATE TotalAmount but NOT UpdatedAtUtc
-            // So we reset UpdatedAtUtc back to original, keeping TotalAmount modified
-            var updatedAtProperty = orderEntry.Property(nameof(ShootOrder.UpdatedAtUtc));
-            if (updatedAtProperty.IsModified)
-            {
-                updatedAtProperty.CurrentValue = updatedAtProperty.OriginalValue;
-                updatedAtProperty.IsModified = false;
-            }
-            
-            // Keep order in Modified state so TotalAmount will be updated
-            // but only UpdatedAtUtc has been reset
-            
-            // Ensure the new task is marked as Added
-            var taskEntry = _db.Entry(newTask);
-            if (taskEntry.State != EntityState.Added)
-            {
-                taskEntry.State = EntityState.Added;
-            }
-            
-            return Task.CompletedTask;
-        }
     }
 }
 

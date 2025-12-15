@@ -32,9 +32,6 @@ namespace Reamp.Domain.Shoots.Repositories
 
         // Update order
         Task UpdateAsync(ShootOrder entity, CancellationToken ct = default);
-        
-        // Reset order state after AddTask to prevent UPDATE, only INSERT the new task
-        Task ResetOrderStateAsync(ShootOrder order, ShootTask newTask, CancellationToken ct = default);
     }
 }
 

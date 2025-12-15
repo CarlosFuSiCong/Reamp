@@ -208,13 +208,9 @@ namespace Reamp.Application.Orders.Services
             }
 
             // Add task - this will modify order properties (TotalAmount, UpdatedAtUtc) and add task to collection
-            var addedTask = order.AddTask(dto.Type, dto.Notes, dto.Price);
+            order.AddTask(dto.Type, dto.Notes, dto.Price);
 
-            // Reset the order's Modified state to prevent UPDATE
-            // We only want to INSERT the new task
-            await _repo.ResetOrderStateAsync(order, addedTask, ct);
-
-            // Save changes - only the task will be inserted
+            // Save changes - order will be updated (TotalAmount, UpdatedAtUtc) and task will be inserted
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Successfully added task to order {OrderId}", orderId);
@@ -502,8 +498,16 @@ namespace Reamp.Application.Orders.Services
                 orders.Items.Count(o => o.StudioId == null));
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
-            // Note: Using filteredOrders.Count as total because we filter in-memory after DB pagination
-            // This means pagination is approximate - actual implementation should filter at DB level
+            
+            // LIMITATION: In-memory filtering after DB pagination breaks true pagination
+            // Total count represents only filtered items on current page, not across all pages
+            // TODO: Move filtering to repository level for accurate pagination
+            if (filteredOrders.Count != orders.Items.Count)
+            {
+                _logger.LogWarning("Available orders pagination is approximate: DB returned {DbCount} items, filtered to {FilteredCount} items on page {Page}", 
+                    orders.Items.Count, filteredOrders.Count, pageRequest.Page);
+            }
+            
             return new PagedList<OrderListDto>(dtos, filteredOrders.Count, pageRequest.Page, pageRequest.PageSize);
         }
 
@@ -544,9 +548,17 @@ namespace Reamp.Application.Orders.Services
                     .Where(o => o.Status != ShootOrderStatus.Completed && 
                                o.Status != ShootOrderStatus.Cancelled)
                     .ToList();
-                // Note: Using filteredOrders.Count as total because we filter in-memory after DB pagination
-                // This means pagination is approximate - actual implementation should filter at DB level
+                
+                // LIMITATION: In-memory filtering after DB pagination breaks true pagination
+                // Total count represents only filtered items on current page, not across all pages
+                // TODO: Pass multiple status values to repository instead of filtering in-memory
                 totalCount = filteredOrders.Count;
+                
+                if (filteredOrders.Count != orders.Items.Count)
+                {
+                    _logger.LogWarning("Photographer orders pagination is approximate: DB returned {DbCount} items, filtered to {FilteredCount} items on page {Page}", 
+                        orders.Items.Count, filteredOrders.Count, pageRequest.Page);
+                }
             }
 
             var dtos = await EnrichOrderListDtosAsync(filteredOrders, ct);
