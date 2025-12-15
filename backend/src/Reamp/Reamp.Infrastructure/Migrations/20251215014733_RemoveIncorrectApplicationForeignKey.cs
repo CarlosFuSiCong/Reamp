@@ -10,10 +10,13 @@ namespace Reamp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Remove incorrect foreign key constraint
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrganizationApplications_UserProfiles_ApplicantUserId",
-                table: "OrganizationApplications");
+            // Check if constraint exists before dropping
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_OrganizationApplications_UserProfiles_ApplicantUserId')
+                BEGIN
+                    ALTER TABLE [OrganizationApplications] DROP CONSTRAINT [FK_OrganizationApplications_UserProfiles_ApplicantUserId];
+                END
+            ");
         }
 
         /// <inheritdoc />
