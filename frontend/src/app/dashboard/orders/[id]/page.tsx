@@ -43,7 +43,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const { data: order, isLoading, error } = useOrder(orderId);
   const { data: listing } = useListing(order?.listingId || null);
-  const { data: studio } = useStudio(order?.studioId || null);
+  // Filter out empty GUID for studio - marketplace orders have null or empty GUID
+  const validStudioId = order?.studioId && order.studioId !== "00000000-0000-0000-0000-000000000000" ? order.studioId : null;
+  const { data: studio } = useStudio(validStudioId);
   const { user: profile } = useProfile();
   const cancelMutation = useCancelOrder();
   const acceptMutation = useAcceptOrder();
@@ -101,9 +103,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const canCancelOrder =
+  // Only agents can cancel orders
+  const canCancelOrder = !isStaff && (
     order?.status === OrderStatus.Placed ||
-    order?.status === OrderStatus.Accepted;
+    order?.status === OrderStatus.Accepted
+  );
 
   const canAccept = isStaff && (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted) && !order?.assignedPhotographerId;
   const canStart = isStaff && order?.status === OrderStatus.Scheduled;
@@ -123,7 +127,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Order #${order.id.substring(0, 8)}`}
+        title={order.title || `Order #${order.id.substring(0, 8)}`}
         description={`Created ${format(new Date(order.createdAtUtc), "PPP")}`}
         action={
           <div className="flex gap-2">
@@ -148,10 +152,13 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <OrderStatusTimeline
-            currentStatus={order.status}
-            isCancelled={isCancelled}
-          />
+          {/* Only show timeline for agents, not staff */}
+          {!isStaff && (
+            <OrderStatusTimeline
+              currentStatus={order.status}
+              isCancelled={isCancelled}
+            />
+          )}
 
           {isCancelled && order.cancellationReason && (
             <OrderInfoCard title="Cancellation Reason" icon={<XCircle className="h-5 w-5" />}>

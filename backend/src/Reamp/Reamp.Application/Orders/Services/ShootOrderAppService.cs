@@ -67,7 +67,13 @@ namespace Reamp.Application.Orders.Services
             if (listing == null)
                 throw new ArgumentException($"Listing with ID {dto.ListingId} does not exist", nameof(dto.ListingId));
 
-            var order = ShootOrder.Place(dto.AgencyId, dto.StudioId, dto.ListingId, currentUserId, dto.Currency ?? "AUD");
+            var order = ShootOrder.Place(dto.AgencyId, dto.StudioId, dto.ListingId, currentUserId, dto.Title, dto.Currency ?? "AUD");
+
+            // Set schedule if provided
+            if (dto.ScheduledStartUtc.HasValue)
+            {
+                order.SetSchedule(dto.ScheduledStartUtc.Value, dto.ScheduledEndUtc);
+            }
 
             await _repo.AddAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
@@ -140,28 +146,44 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 return null;
 
-            // Check if user is the creator OR the assigned photographer
+            // Check if user is the creator
             var isCreator = order.CreatedBy == currentUserId;
-            var isAssignedPhotographer = false;
-
-            if (order.AssignedPhotographerId.HasValue)
+            
+            // Check if user is staff and can view this order
+            var canViewAsStaff = false;
+            var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+            if (userProfile != null)
             {
-                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
-                if (userProfile != null)
+                var staff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                if (staff != null)
                 {
-                    var staff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
-                    if (staff != null && staff.Id == order.AssignedPhotographerId.Value)
+                    // Staff can view if:
+                    // 1. They are assigned to the order
+                    if (order.AssignedPhotographerId.HasValue && staff.Id == order.AssignedPhotographerId.Value)
                     {
-                        isAssignedPhotographer = true;
+                        canViewAsStaff = true;
+                        _logger.LogDebug("Staff {StaffId} is assigned to order {OrderId}", staff.Id, id);
+                    }
+                    // 2. Order belongs to their studio
+                    else if (order.StudioId.HasValue && staff.StudioId == order.StudioId)
+                    {
+                        canViewAsStaff = true;
+                        _logger.LogDebug("Order {OrderId} belongs to staff's studio {StudioId}", id, staff.StudioId);
+                    }
+                    // 3. It's a marketplace order (StudioId is null) and they can claim it
+                    else if (!order.StudioId.HasValue && (order.Status == Domain.Shoots.Enums.ShootOrderStatus.Placed || order.Status == Domain.Shoots.Enums.ShootOrderStatus.Accepted))
+                    {
+                        canViewAsStaff = true;
+                        _logger.LogDebug("Order {OrderId} is a marketplace order available for staff {StaffId}", id, staff.Id);
                     }
                 }
             }
 
-            // Verify ownership - only creator or assigned photographer can view
-            if (!isCreator && !isAssignedPhotographer)
+            // Verify permission - creator or staff who can access
+            if (!isCreator && !canViewAsStaff)
             {
-                _logger.LogWarning("User {UserId} attempted to access order {OrderId} owned by {OwnerId}", 
-                    currentUserId, id, order.CreatedBy);
+                _logger.LogWarning("User {UserId} attempted to access order {OrderId} without permission. Creator: {CreatedBy}, StudioId: {StudioId}, AssignedPhotographer: {AssignedPhotographerId}", 
+                    currentUserId, id, order.CreatedBy, order.StudioId, order.AssignedPhotographerId);
                 throw new UnauthorizedAccessException("You do not have permission to view this order");
             }
 
