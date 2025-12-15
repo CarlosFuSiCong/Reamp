@@ -10,6 +10,7 @@ namespace Reamp.Application.Orders.Dtos
         public Guid ListingId { get; set; }
         public Guid? AssignedPhotographerId { get; set; }
         
+        public string Title { get; set; } = string.Empty;
         // Display-friendly fields
         public string ListingTitle { get; set; } = string.Empty;
         public string? ListingAddress { get; set; }
