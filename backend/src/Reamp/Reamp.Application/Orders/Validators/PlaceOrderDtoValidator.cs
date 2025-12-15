@@ -7,8 +7,8 @@ namespace Reamp.Application.Orders.Validators
     {
         public PlaceOrderDtoValidator()
         {
-            RuleFor(x => x.AgencyId)
-                .NotEmpty().WithMessage("AgencyId is required.");
+            // AgencyId is populated by the controller from the current user's agent record
+            // No validation needed here
 
             // StudioId is optional - order can be published for studios to claim
             // RuleFor(x => x.StudioId) - removed validation
