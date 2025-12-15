@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useListings, useStudios, useCreateOrder, useProfile } from "@/lib/hooks";
+import { useListings, useStudios, useCreateOrder } from "@/lib/hooks";
 import { ShootTaskType } from "@/types";
 import { taskTypeLabels } from "@/lib/utils/enum-labels";
 import { Plus, Trash2 } from "lucide-react";
@@ -52,7 +52,6 @@ export function OrderCreationForm() {
 
   const { data: listingsData, isLoading: isLoadingListings } = useListings({ pageSize: 100 });
   const { data: studiosData, isLoading: isLoadingStudios } = useStudios({ pageSize: 100 });
-  const { data: profile } = useProfile();
   const createMutation = useCreateOrder();
 
   const isLoadingData = isLoadingListings || isLoadingStudios;
@@ -85,24 +84,9 @@ export function OrderCreationForm() {
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
     try {
-      // Get agencyId - try from profile first, then from selected listing's owner
-      let agencyId = profile?.agencyId;
-      
-      if (!agencyId) {
-        // Fallback: get agencyId from the listing's owner
-        const selectedListing = listingsData?.items?.find(l => l.id === values.listingId);
-        if (selectedListing?.ownerAgencyId) {
-          agencyId = selectedListing.ownerAgencyId;
-        }
-      }
-      
-      if (!agencyId) {
-        throw new Error("Unable to create order: No agency ID found. Please ensure you are part of an agency.");
-      }
-
-      // Create the order (studioId is optional - if not provided, order will be available for claiming)
+      // Create the order (agencyId and studioId are both optional on frontend)
+      // Backend will auto-populate agencyId from the current user's agent record
       const orderData: any = {
-        agencyId,
         listingId: values.listingId,
         currency: values.currency,
       };
