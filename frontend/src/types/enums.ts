@@ -36,6 +36,14 @@ export enum StaffRole {
   Manager = 4,
 }
 
+// Staff Skills (Flags enum)
+export enum StaffSkills {
+  None = 0,
+  Photographer = 1, // 1 << 0
+  Videographer = 2, // 1 << 1
+  VRMaker = 4, // 1 << 2
+}
+
 export enum ListingType {
   ForSale = 1,
   ForRent = 2,

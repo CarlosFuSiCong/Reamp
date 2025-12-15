@@ -1,32 +1,45 @@
-import apiClient from "@/lib/api-client";
-import { Staff, PagedResponse } from "@/types";
+import apiClient from "../api-client";
+import { StaffSkills } from "@/types/enums";
+
+export interface StaffDetailDto {
+  id: string;
+  userProfileId: string;
+  studioId: string;
+  studioName?: string;
+  role: number; // StudioRole
+  skills: StaffSkills;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+}
+
+export interface UpdateStaffSkillsDto {
+  skills: StaffSkills;
+}
 
 export const staffApi = {
-  async list(params: {
-    studioId?: string;
-    status?: string;
-    page?: number;
-    pageSize?: number;
-  }): Promise<PagedResponse<Staff>> {
-    const response = await apiClient.get<PagedResponse<Staff>>("/api/staff", { params });
+  // Get staff by ID
+  async getById(id: string): Promise<StaffDetailDto> {
+    const response = await apiClient.get<StaffDetailDto>(`/api/staff/${id}`);
     return response.data;
   },
 
-  async getById(id: string): Promise<Staff> {
-    const response = await apiClient.get<Staff>(`/api/staff/${id}`);
+  // Get staff by user profile ID
+  async getByUserProfileId(userProfileId: string): Promise<StaffDetailDto | null> {
+    try {
+      const response = await apiClient.get<StaffDetailDto>(`/api/staff/profile/${userProfileId}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.status === 404) return null;
+      throw error;
+    }
+  },
+
+  // Update staff skills
+  async updateSkills(staffId: string, skills: StaffSkills): Promise<StaffDetailDto> {
+    const response = await apiClient.put<StaffDetailDto>(`/api/staff/${staffId}/skills`, { skills });
     return response.data;
-  },
-
-  async create(data: Partial<Staff>): Promise<{ id: string }> {
-    const response = await apiClient.post<{ id: string }>("/api/staff", data);
-    return response.data;
-  },
-
-  async update(id: string, data: Partial<Staff>): Promise<void> {
-    await apiClient.put(`/api/staff/${id}`, data);
-  },
-
-  async delete(id: string): Promise<void> {
-    await apiClient.delete(`/api/staff/${id}`);
   },
 };
