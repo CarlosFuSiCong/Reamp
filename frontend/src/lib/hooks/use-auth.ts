@@ -9,10 +9,12 @@ function getRedirectPath(role: UserRole): string {
   switch (role) {
     case UserRole.Admin:
       return "/admin";
-    case UserRole.User:
     case UserRole.Agent:
+      return "/dashboard/agency";
     case UserRole.Staff:
-      return "/dashboard/profile";
+      return "/dashboard/studio";
+    case UserRole.User:
+      return "/"; // User goes to homepage
     default:
       return "/";
   }
@@ -41,13 +43,15 @@ export function useAuth() {
         description: `Welcome back, ${userInfo.email}!`,
       });
       
-      const redirectPath = getRedirectPath(userInfo.role);
-      window.location.href = redirectPath;
+      // Delay redirect slightly to allow toast to be visible
+      setTimeout(() => {
+        const redirectPath = getRedirectPath(userInfo.role);
+        window.location.href = redirectPath;
+      }, 800);
     },
     onError: (error: any) => {
-      toast.error("Login failed", {
-        description: error?.message || "Please check your credentials and try again",
-      });
+      console.error("Login error:", error);
+      // Don't show toast for login errors - page will show ErrorAlert instead
     },
   });
 
@@ -68,13 +72,15 @@ export function useAuth() {
         description: `Welcome to Reamp, ${userInfo.email}!`,
       });
       
-      const redirectPath = getRedirectPath(userInfo.role);
-      window.location.href = redirectPath;
+      // Delay redirect slightly to allow toast to be visible
+      setTimeout(() => {
+        const redirectPath = getRedirectPath(userInfo.role);
+        window.location.href = redirectPath;
+      }, 800);
     },
     onError: (error: any) => {
-      toast.error("Registration failed", {
-        description: error?.message || "Please check your information and try again",
-      });
+      console.error("Registration error:", error);
+      // Don't show toast for registration errors - page will show ErrorAlert instead
     },
   });
 

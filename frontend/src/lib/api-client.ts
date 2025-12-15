@@ -92,6 +92,20 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - token expired
     if (error.response?.status === 401 && originalRequest) {
+      // Don't redirect for login/register endpoints - let them handle their own errors
+      const isAuthEndpoint = originalRequest.url?.includes('/api/auth/login') || 
+                             originalRequest.url?.includes('/api/auth/register');
+      
+      if (isAuthEndpoint) {
+        // Format error for auth endpoints before rejecting
+        const apiError: ApiError = {
+          message: error.response?.data?.message || "Authentication failed",
+          errors: error.response?.data?.errors,
+          statusCode: error.response?.status || 401,
+        };
+        return Promise.reject(apiError);
+      }
+      
       // Prevent infinite loop - don't retry if already retried or if it's the refresh endpoint
       if (originalRequest._retry || originalRequest.url?.includes('/api/auth/refresh')) {
         if (typeof window !== "undefined") {
