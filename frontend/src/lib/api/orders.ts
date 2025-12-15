@@ -47,7 +47,37 @@ export const ordersApi = {
     await apiClient.post(`/api/orders/${id}/accept`);
   },
 
+  async start(id: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/start`);
+  },
+
   async complete(id: string): Promise<void> {
     await apiClient.post(`/api/orders/${id}/complete`);
+  },
+
+  // Photographer-specific endpoints
+  async getAvailableOrders(params: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<PagedResponse<ShootOrder>> {
+    const response = await apiClient.get<PagedResponse<ShootOrder>>("/api/orders/available", {
+      params,
+    });
+    return response.data;
+  },
+
+  async getMyOrders(params: {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<PagedResponse<ShootOrder>> {
+    const response = await apiClient.get<PagedResponse<ShootOrder>>("/api/orders/my-orders", {
+      params,
+    });
+    return response.data;
+  },
+
+  async acceptAsPhotographer(id: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/accept-photographer`);
   },
 };

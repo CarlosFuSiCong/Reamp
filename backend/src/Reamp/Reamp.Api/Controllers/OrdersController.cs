@@ -239,5 +239,58 @@ namespace Reamp.Api.Controllers
 
             return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
         }
+
+        /// <summary>
+        /// Get available orders for photographers to accept (marketplace orders)
+        /// </summary>
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailableOrders(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var currentUserId = GetCurrentUserId();
+            var pageRequest = new PageRequest(page, pageSize);
+
+            var result = await _appService.GetAvailableOrdersAsync(pageRequest, currentUserId, ct);
+
+            return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
+        }
+
+        /// <summary>
+        /// Get orders assigned to the current photographer
+        /// </summary>
+        [HttpGet("my-orders")]
+        public async Task<IActionResult> GetPhotographerOrders(
+            [FromQuery] string? status = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken ct = default)
+        {
+            var currentUserId = GetCurrentUserId();
+            var pageRequest = new PageRequest(page, pageSize);
+
+            Reamp.Domain.Shoots.Enums.ShootOrderStatus? statusEnum = null;
+            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Reamp.Domain.Shoots.Enums.ShootOrderStatus>(status, true, out var parsedStatus))
+            {
+                statusEnum = parsedStatus;
+            }
+
+            var result = await _appService.GetPhotographerOrdersAsync(pageRequest, currentUserId, statusEnum, ct);
+
+            return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
+        }
+
+        /// <summary>
+        /// Accept an available order as a photographer (grab/claim order)
+        /// </summary>
+        [HttpPost("{id:guid}/accept-photographer")]
+        public async Task<IActionResult> AcceptAsPhotographer(Guid id, CancellationToken ct)
+        {
+            var currentUserId = GetCurrentUserId();
+            await _appService.AcceptOrderAsPhotographerAsync(id, currentUserId, ct);
+
+            return Ok(ApiResponse.Ok("Order accepted successfully"));
+        }
     }
 }

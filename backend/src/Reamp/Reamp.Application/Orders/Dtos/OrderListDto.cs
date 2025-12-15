@@ -8,10 +8,13 @@ namespace Reamp.Application.Orders.Dtos
         public Guid AgencyId { get; set; }
         public Guid StudioId { get; set; }
         public Guid ListingId { get; set; }
+        public Guid? AssignedPhotographerId { get; set; }
         public string Currency { get; set; } = "AUD";
         public decimal TotalAmount { get; set; }
         public ShootOrderStatus Status { get; set; }
         public DateTime CreatedAtUtc { get; set; }
+        public DateTime? ScheduledStartUtc { get; set; }
+        public DateTime? ScheduledEndUtc { get; set; }
         public int TaskCount { get; set; }
     }
 }

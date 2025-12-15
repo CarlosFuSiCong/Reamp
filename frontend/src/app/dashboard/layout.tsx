@@ -95,8 +95,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         studioItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
       }
 
-      // All studio members can view orders (studio side)
-      // Add more studio-specific items here as needed
+      // All studio members can view orders (staff orders for shoots)
+      studioItems.push({ title: "Orders", href: "/dashboard/orders", icon: ShoppingCart });
 
       return [...baseItems, ...studioItems];
     }

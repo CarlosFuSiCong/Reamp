@@ -12,11 +12,15 @@ export interface ShootOrder {
   agencyId: string;
   studioId: string;
   listingId: string;
+  assignedPhotographerId?: string;
   currency: string;
   totalAmount: number;
   status: OrderStatus;
   createdBy: string;
   createdAtUtc: string;
+  scheduledStartUtc?: string;
+  scheduledEndUtc?: string;
+  schedulingNotes?: string;
   cancellationReason?: string;
   tasks: ShootTask[];
 }

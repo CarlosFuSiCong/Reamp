@@ -59,3 +59,79 @@ export function useCancelOrder() {
     },
   });
 }
+
+export function useStartOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => ordersApi.start(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["photographer-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+      handleMutationSuccess("Order started successfully");
+    },
+    onError: (error: any) => {
+      handleMutationError(error, "Failed to start order");
+    },
+  });
+}
+
+export function useCompleteOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => ordersApi.complete(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["photographer-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+      handleMutationSuccess("Order completed successfully");
+    },
+    onError: (error: any) => {
+      handleMutationError(error, "Failed to complete order");
+    },
+  });
+}
+
+// Photographer-specific hooks
+export function useAvailableOrders(params?: {
+  page?: number;
+  pageSize?: number;
+}) {
+  return useQuery<PagedResponse<ShootOrder>>({
+    queryKey: ["available-orders", params],
+    queryFn: () => ordersApi.getAvailableOrders(params || {}),
+  });
+}
+
+export function usePhotographerOrders(params?: {
+  status?: OrderStatus;
+  page?: number;
+  pageSize?: number;
+}) {
+  return useQuery<PagedResponse<ShootOrder>>({
+    queryKey: ["photographer-orders", params],
+    queryFn: () => ordersApi.getMyOrders({
+      ...params,
+      status: params?.status?.toString(),
+    }),
+  });
+}
+
+export function useAcceptOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => ordersApi.acceptAsPhotographer(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["available-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["photographer-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+      handleMutationSuccess("Order accepted successfully");
+    },
+    onError: (error: any) => {
+      handleMutationError(error, "Failed to accept order");
+    },
+  });
+}

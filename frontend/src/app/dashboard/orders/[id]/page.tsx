@@ -15,9 +15,10 @@ import {
   OrderInfoCard,
 } from "@/components/orders";
 import { Button } from "@/components/ui/button";
-import { useOrder, useCancelOrder } from "@/lib/hooks/use-orders";
+import { useOrder, useCancelOrder, useAcceptOrder, useStartOrder, useCompleteOrder } from "@/lib/hooks/use-orders";
 import { useListing } from "@/lib/hooks/use-listings";
 import { useStudio } from "@/lib/hooks/use-studios";
+import { useProfile } from "@/lib/hooks";
 import { OrderStatus } from "@/types";
 import { ArrowLeft, XCircle, Building2, Camera, Home } from "lucide-react";
 import Link from "next/link";
@@ -28,20 +29,85 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
   const orderId = resolvedParams.id;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    open: boolean;
+    action: "accept" | "start" | "complete" | null;
+    title: string;
+    description: string;
+  }>({
+    open: false,
+    action: null,
+    title: "",
+    description: "",
+  });
 
   const { data: order, isLoading, error } = useOrder(orderId);
   const { data: listing } = useListing(order?.listingId || null);
   const { data: studio } = useStudio(order?.studioId || null);
+  const { user: profile } = useProfile();
   const cancelMutation = useCancelOrder();
+  const acceptMutation = useAcceptOrder();
+  const startMutation = useStartOrder();
+  const completeMutation = useCompleteOrder();
+
+  const isStaff = profile?.studioRole !== undefined && profile?.studioRole !== null;
 
   const handleCancel = () => {
     cancelMutation.mutate({ id: orderId });
     setCancelDialogOpen(false);
   };
 
+  const handleAction = (action: "accept" | "start" | "complete") => {
+    const configs = {
+      accept: {
+        title: "Accept Order",
+        description: "Are you sure you want to accept this order? This will assign the order to you.",
+      },
+      start: {
+        title: "Start Shoot",
+        description: "Are you sure you want to start this shoot? This will mark the order as in progress.",
+      },
+      complete: {
+        title: "Complete Order",
+        description: "Are you sure you want to mark this order as completed?",
+      },
+    };
+
+    setConfirmAction({
+      open: true,
+      action,
+      ...configs[action],
+    });
+  };
+
+  const confirmActionHandler = async () => {
+    if (!confirmAction.action) return;
+
+    try {
+      switch (confirmAction.action) {
+        case "accept":
+          await acceptMutation.mutateAsync(orderId);
+          break;
+        case "start":
+          await startMutation.mutateAsync(orderId);
+          break;
+        case "complete":
+          await completeMutation.mutateAsync(orderId);
+          break;
+      }
+      setConfirmAction({ open: false, action: null, title: "", description: "" });
+    } catch (error) {
+      // Error is handled by the mutation
+    }
+  };
+
   const canCancelOrder =
     order?.status === OrderStatus.Placed ||
     order?.status === OrderStatus.Accepted;
+
+  const canAccept = isStaff && (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted) && !order?.assignedPhotographerId;
+  const canStart = isStaff && order?.status === OrderStatus.Scheduled;
+  const canComplete = isStaff && order?.status === OrderStatus.InProgress;
 
   if (isLoading) {
     return <LoadingState />;
@@ -145,6 +211,40 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </Link>
             </Button>
           )}
+
+          {isStaff && (
+            <>
+              {canAccept && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleAction("accept")}
+                  disabled={acceptMutation.isPending}
+                >
+                  Accept Order
+                </Button>
+              )}
+              
+              {canStart && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleAction("start")}
+                  disabled={startMutation.isPending}
+                >
+                  Start Shoot
+                </Button>
+              )}
+              
+              {canComplete && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleAction("complete")}
+                  disabled={completeMutation.isPending}
+                >
+                  Complete Order
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -156,6 +256,15 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         onConfirm={handleCancel}
         confirmText="Cancel Order"
         variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={confirmAction.open}
+        onOpenChange={(open) => setConfirmAction({ ...confirmAction, open })}
+        title={confirmAction.title}
+        description={confirmAction.description}
+        onConfirm={confirmActionHandler}
+        confirmText="Confirm"
       />
     </div>
   );

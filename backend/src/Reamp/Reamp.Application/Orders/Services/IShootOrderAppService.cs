@@ -1,6 +1,7 @@
 using Reamp.Application.Orders.Dtos;
 using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Domain.Common.Abstractions;
+using Reamp.Domain.Shoots.Enums;
 
 namespace Reamp.Application.Orders.Services
 {
@@ -30,6 +31,11 @@ namespace Reamp.Application.Orders.Services
         
         // Advanced Query
         Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);
+        
+        // Photographer-specific operations
+        Task<IPagedList<OrderListDto>> GetAvailableOrdersAsync(PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);
+        Task<IPagedList<OrderListDto>> GetPhotographerOrdersAsync(PageRequest pageRequest, Guid currentUserId, ShootOrderStatus? status = null, CancellationToken ct = default);
+        Task AcceptOrderAsPhotographerAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
     }
 }
 
