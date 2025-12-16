@@ -9,7 +9,6 @@ import {
   Clock,
   Users,
   Mail,
-  MoreVertical,
   UserPlus,
   Shield,
 } from "lucide-react";
@@ -36,11 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { InviteStaffDialog } from "@/components/studios";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
@@ -175,34 +175,6 @@ export default function StudioDashboardPage() {
               description="Active staff"
             />
           </div>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Button variant="outline" className="h-24 flex flex-col gap-2" asChild>
-                <a href="/dashboard/orders/marketplace">
-                  <Camera className="h-6 w-6" />
-                  <span>Browse Orders</span>
-                </a>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" asChild>
-                <a href="/dashboard/orders">
-                  <Calendar className="h-6 w-6" />
-                  <span>My Orders</span>
-                </a>
-              </Button>
-              {canInvite && (
-                <Button
-                  variant="outline"
-                  className="h-24 flex flex-col gap-2"
-                  onClick={() => setInviteDialogOpen(true)}
-                >
-                  <UserPlus className="h-6 w-6" />
-                  <span>Invite Staff</span>
-                </Button>
-              )}
-            </div>
-          </Card>
         </TabsContent>
 
         {/* Team Tab */}
@@ -255,7 +227,29 @@ export default function StudioDashboardPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <StudioRoleBadge role={member.role} />
+                        {canManageStudioMember(profile?.studioRole, member.role) ? (
+                          <Select
+                            value={member.role.toString()}
+                            onValueChange={(value) => {
+                              updateRole.mutate({
+                                studioId,
+                                memberId: member.id,
+                                data: { newRole: parseInt(value) as StudioRole },
+                              });
+                            }}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={StudioRole.Owner.toString()}>Owner</SelectItem>
+                              <SelectItem value={StudioRole.Manager.toString()}>Manager</SelectItem>
+                              <SelectItem value={StudioRole.Staff.toString()}>Staff</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <StudioRoleBadge role={member.role} />
+                        )}
                       </TableCell>
                       <TableCell>
                         {member.skills && member.skills.length > 0 ? (
@@ -283,46 +277,17 @@ export default function StudioDashboardPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         {canManageStudioMember(profile?.studioRole, member.role) && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  updateRole.mutate({
-                                    studioId,
-                                    memberId: member.id,
-                                    data: { newRole: StudioRole.Manager },
-                                  });
-                                }}
-                              >
-                                Promote to Manager
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  updateRole.mutate({
-                                    studioId,
-                                    memberId: member.id,
-                                    data: { newRole: StudioRole.Staff },
-                                  });
-                                }}
-                              >
-                                Change to Staff
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedMember(member.id);
-                                  setConfirmRemoveOpen(true);
-                                }}
-                                className="text-red-600"
-                              >
-                                Remove Member
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedMember(member.id);
+                              setConfirmRemoveOpen(true);
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Remove
+                          </Button>
                         )}
                       </TableCell>
                     </TableRow>
