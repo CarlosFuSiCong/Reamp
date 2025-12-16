@@ -7,10 +7,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared";
 import { useCreateListing } from "@/lib/hooks/use-listings";
@@ -19,7 +32,11 @@ import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 const listingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().max(5000, "Description cannot exceed 5000 characters").optional().or(z.literal("")),
+  description: z
+    .string()
+    .max(5000, "Description cannot exceed 5000 characters")
+    .optional()
+    .or(z.literal("")),
   price: z.number().min(0, "Price must be positive"),
   currency: z.string().min(3, "Currency is required"),
   listingType: z.nativeEnum(ListingType),
@@ -74,8 +91,8 @@ export default function NewListingPage() {
   });
 
   const onSubmit = async (data: ListingFormValues) => {
-    console.log('📝 onSubmit called - Current step:', currentStep, 'Total steps:', STEPS.length);
-    console.log('📝 Stack trace:', new Error().stack);
+    console.log("📝 onSubmit called - Current step:", currentStep, "Total steps:", STEPS.length);
+    console.log("📝 Stack trace:", new Error().stack);
     // Only allow submission on the last step
     if (currentStep !== STEPS.length) {
       console.log("❌ Form submission blocked - not on final step");
@@ -88,8 +105,8 @@ export default function NewListingPage() {
       console.log("❌ Form validation failed - please check all fields");
       return;
     }
-    
-    console.log('✅ Proceeding with form submission');
+
+    console.log("✅ Proceeding with form submission");
 
     // Transform form data to API format
     const apiData = {
@@ -124,7 +141,7 @@ export default function NewListingPage() {
   const nextStep = async (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    console.log('➡️ nextStep called - Current step:', currentStep);
+    console.log("➡️ nextStep called - Current step:", currentStep);
     let fieldsToValidate: (keyof ListingFormValues)[] = [];
 
     if (currentStep === 1) {
@@ -134,9 +151,9 @@ export default function NewListingPage() {
     }
 
     const isValid = await form.trigger(fieldsToValidate);
-    console.log('Validation result:', isValid, 'for fields:', fieldsToValidate);
+    console.log("Validation result:", isValid, "for fields:", fieldsToValidate);
     if (isValid && currentStep < STEPS.length) {
-      console.log('✅ Moving to step:', currentStep + 1);
+      console.log("✅ Moving to step:", currentStep + 1);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -148,35 +165,30 @@ export default function NewListingPage() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    console.log('🔑 Key pressed:', e.key, 'Current step:', currentStep, 'Target:', e.target);
+    console.log("🔑 Key pressed:", e.key, "Current step:", currentStep, "Target:", e.target);
     // Prevent form submission on Enter key unless on the last step
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
-      console.log('✋ Prevented Enter key default behavior');
-      
+      console.log("✋ Prevented Enter key default behavior");
+
       if (currentStep !== STEPS.length) {
-        console.log('➡️ Triggering next step from Enter key');
+        console.log("➡️ Triggering next step from Enter key");
         nextStep();
       } else {
-        console.log('📝 On final step, will submit via button click');
+        console.log("📝 On final step, will submit via button click");
       }
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <PageHeader
-        title="Create New Listing"
-        description="Add a new property listing"
-      />
+      <PageHeader title="Create New Listing" description="Add a new property listing" />
 
       <div className="flex justify-between mb-8">
         {STEPS.map((step) => (
           <div
             key={step.id}
-            className={`flex-1 ${
-              step.id < STEPS.length ? "border-r" : ""
-            } border-gray-200 pb-4`}
+            className={`flex-1 ${step.id < STEPS.length ? "border-r" : ""} border-gray-200 pb-4`}
           >
             <div className="flex flex-col items-center">
               <div
@@ -201,7 +213,11 @@ export default function NewListingPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          onKeyDown={handleKeyDown}
+          className="space-y-6"
+        >
           {currentStep === 1 && (
             <Card>
               <CardHeader>
@@ -267,8 +283,12 @@ export default function NewListingPage() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value={PropertyType.House.toString()}>House</SelectItem>
-                            <SelectItem value={PropertyType.Apartment.toString()}>Apartment</SelectItem>
-                            <SelectItem value={PropertyType.Townhouse.toString()}>Townhouse</SelectItem>
+                            <SelectItem value={PropertyType.Apartment.toString()}>
+                              Apartment
+                            </SelectItem>
+                            <SelectItem value={PropertyType.Townhouse.toString()}>
+                              Townhouse
+                            </SelectItem>
                             <SelectItem value={PropertyType.Villa.toString()}>Villa</SelectItem>
                             <SelectItem value={PropertyType.Others.toString()}>Others</SelectItem>
                           </SelectContent>
@@ -464,7 +484,7 @@ export default function NewListingPage() {
                             {...field}
                             onChange={(e) => {
                               const value = e.target.value;
-                              field.onChange(value === '' ? 0 : parseInt(value));
+                              field.onChange(value === "" ? 0 : parseInt(value));
                             }}
                           />
                         </FormControl>
@@ -486,7 +506,7 @@ export default function NewListingPage() {
                             {...field}
                             onChange={(e) => {
                               const value = e.target.value;
-                              field.onChange(value === '' ? 0 : parseInt(value));
+                              field.onChange(value === "" ? 0 : parseInt(value));
                             }}
                           />
                         </FormControl>
@@ -532,7 +552,9 @@ export default function NewListingPage() {
                             {...field}
                             value={field.value || ""}
                             onChange={(e) =>
-                              field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)
+                              field.onChange(
+                                e.target.value ? parseFloat(e.target.value) : undefined
+                              )
                             }
                           />
                         </FormControl>
@@ -555,7 +577,9 @@ export default function NewListingPage() {
                             {...field}
                             value={field.value || ""}
                             onChange={(e) =>
-                              field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)
+                              field.onChange(
+                                e.target.value ? parseFloat(e.target.value) : undefined
+                              )
                             }
                           />
                         </FormControl>
@@ -569,12 +593,7 @@ export default function NewListingPage() {
           )}
 
           <div className="flex justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={prevStep}
-              disabled={currentStep === 1}
-            >
+            <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
               <ChevronLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>

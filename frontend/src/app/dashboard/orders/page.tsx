@@ -2,13 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PageHeader, LoadingState, ErrorState, ConfirmDialog, Pagination } from "@/components/shared";
+import {
+  PageHeader,
+  LoadingState,
+  ErrorState,
+  ConfirmDialog,
+  Pagination,
+} from "@/components/shared";
 import { OrdersTable, OrdersFilters } from "@/components/orders";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useOrders, useCancelOrder, useAvailableOrders, usePhotographerOrders, useAcceptOrder, useStartOrder, useCompleteOrder } from "@/lib/hooks/use-orders";
+import {
+  useOrders,
+  useCancelOrder,
+  useAvailableOrders,
+  usePhotographerOrders,
+  useAcceptOrder,
+  useStartOrder,
+  useCompleteOrder,
+} from "@/lib/hooks/use-orders";
 import { useProfile } from "@/lib/hooks";
 import { OrderStatus, ShootOrder, ShootTaskType } from "@/types";
 import { Plus, Calendar, Package, DollarSign, Clock } from "lucide-react";
@@ -23,7 +37,7 @@ export default function AgentOrdersPage() {
   const [page, setPage] = useState(1);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  
+
   // Staff-specific states
   const [staffTab, setStaffTab] = useState<StaffTabValue>("available");
   const [availablePage, setAvailablePage] = useState(1);
@@ -36,7 +50,11 @@ export default function AgentOrdersPage() {
   const isAgent = profile?.agencyRole !== undefined && profile?.agencyRole !== null;
 
   // Agent queries
-  const { data: agentOrders, isLoading: agentLoading, error: agentError } = useOrders({
+  const {
+    data: agentOrders,
+    isLoading: agentLoading,
+    error: agentError,
+  } = useOrders({
     status: statusFilter === "all" ? undefined : statusFilter,
     keyword: searchKeyword || undefined,
     page,
@@ -44,25 +62,41 @@ export default function AgentOrdersPage() {
   });
 
   // Staff queries
-  const { data: availableData, isLoading: availableLoading, error: availableError } = useAvailableOrders({
+  const {
+    data: availableData,
+    isLoading: availableLoading,
+    error: availableError,
+  } = useAvailableOrders({
     page: availablePage,
     pageSize: 20,
   });
 
   // My Orders: Accepted + Scheduled (orders assigned to this photographer but not started yet)
-  const { data: myOrdersData, isLoading: myOrdersLoading, error: myOrdersError } = usePhotographerOrders({
+  const {
+    data: myOrdersData,
+    isLoading: myOrdersLoading,
+    error: myOrdersError,
+  } = usePhotographerOrders({
     status: undefined, // Get all statuses, will filter on backend
     page: myOrdersPage,
     pageSize: 20,
   });
 
-  const { data: inProgressData, isLoading: inProgressLoading, error: inProgressError } = usePhotographerOrders({
+  const {
+    data: inProgressData,
+    isLoading: inProgressLoading,
+    error: inProgressError,
+  } = usePhotographerOrders({
     status: OrderStatus.InProgress,
     page: inProgressPage,
     pageSize: 20,
   });
 
-  const { data: completedData, isLoading: completedLoading, error: completedError } = usePhotographerOrders({
+  const {
+    data: completedData,
+    isLoading: completedLoading,
+    error: completedError,
+  } = usePhotographerOrders({
     status: OrderStatus.Completed,
     page: completedPage,
     pageSize: 20,
@@ -109,7 +143,10 @@ export default function AgentOrdersPage() {
   };
 
   const getStatusBadge = (status: OrderStatus) => {
-    const variants: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    const variants: Record<
+      OrderStatus,
+      { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+    > = {
       [OrderStatus.Placed]: { label: "Placed", variant: "secondary" },
       [OrderStatus.Accepted]: { label: "Accepted", variant: "default" },
       [OrderStatus.Scheduled]: { label: "Scheduled", variant: "default" },
@@ -137,9 +174,7 @@ export default function AgentOrdersPage() {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-lg">
-              Order #{order.id.substring(0, 8)}
-            </CardTitle>
+            <CardTitle className="text-lg">Order #{order.id.substring(0, 8)}</CardTitle>
             <CardDescription className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               {format(new Date(order.createdAtUtc), "PPP")}
@@ -155,12 +190,14 @@ export default function AgentOrdersPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
               <span>
                 {order.taskCount ?? order.tasks?.length ?? 0} task
-                {(order.taskCount ?? order.tasks?.length ?? 0) !== 1 ? 's' : ''}
+                {(order.taskCount ?? order.tasks?.length ?? 0) !== 1 ? "s" : ""}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold">{order.currency} {order.totalAmount.toFixed(2)}</span>
+              <span className="font-semibold">
+                {order.currency} {order.totalAmount.toFixed(2)}
+              </span>
             </div>
           </div>
 
@@ -174,14 +211,12 @@ export default function AgentOrdersPage() {
           {showActions && (
             <div className="flex gap-2 pt-2">
               <Button variant="outline" size="sm" asChild className="flex-1">
-                <Link href={`/dashboard/orders/${order.id}`}>
-                  View Details
-                </Link>
+                <Link href={`/dashboard/orders/${order.id}`}>View Details</Link>
               </Button>
-              
+
               {staffTab === "available" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="flex-1"
                   onClick={() => handleAccept(order.id)}
                   disabled={acceptMutation.isPending}
@@ -189,10 +224,10 @@ export default function AgentOrdersPage() {
                   Accept Order
                 </Button>
               )}
-              
+
               {staffTab === "my-orders" && order.status === OrderStatus.Accepted && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="flex-1"
                   onClick={() => handleStart(order.id)}
                   disabled={startMutation.isPending}
@@ -200,10 +235,10 @@ export default function AgentOrdersPage() {
                   Start Shoot
                 </Button>
               )}
-              
+
               {staffTab === "my-orders" && order.status === OrderStatus.Scheduled && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="flex-1"
                   onClick={() => handleStart(order.id)}
                   disabled={startMutation.isPending}
@@ -211,10 +246,10 @@ export default function AgentOrdersPage() {
                   Start Shoot
                 </Button>
               )}
-              
+
               {staffTab === "in-progress" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="flex-1"
                   onClick={() => handleComplete(order.id)}
                   disabled={completeMutation.isPending}
@@ -256,9 +291,9 @@ export default function AgentOrdersPage() {
     return (
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
-          {data.items.map(order => renderOrderCard(order))}
+          {data.items.map((order) => renderOrderCard(order))}
         </div>
-        
+
         <Pagination
           currentPage={data.page}
           totalItems={data.total}
@@ -277,25 +312,16 @@ export default function AgentOrdersPage() {
   if (isStaff) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="My Orders"
-          description="Manage your photography assignments"
-        />
+        <PageHeader title="My Orders" description="Manage your photography assignments" />
 
         <Tabs value={staffTab} onValueChange={(v) => setStaffTab(v as StaffTabValue)}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="available">
-              Available ({availableData?.total || 0})
-            </TabsTrigger>
-            <TabsTrigger value="my-orders">
-              My Orders ({myOrdersData?.total || 0})
-            </TabsTrigger>
+            <TabsTrigger value="available">Available ({availableData?.total || 0})</TabsTrigger>
+            <TabsTrigger value="my-orders">My Orders ({myOrdersData?.total || 0})</TabsTrigger>
             <TabsTrigger value="in-progress">
               In Progress ({inProgressData?.total || 0})
             </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({completedData?.total || 0})
-            </TabsTrigger>
+            <TabsTrigger value="completed">Completed ({completedData?.total || 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="available" className="mt-6">
@@ -377,10 +403,7 @@ export default function AgentOrdersPage() {
         onStatusChange={handleStatusChange}
       />
 
-      <OrdersTable
-        orders={agentOrders?.items || []}
-        onCancel={openCancelDialog}
-      />
+      <OrdersTable orders={agentOrders?.items || []} onCancel={openCancelDialog} />
 
       {agentOrders && (
         <Pagination

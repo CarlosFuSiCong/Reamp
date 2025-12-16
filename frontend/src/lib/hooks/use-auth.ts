@@ -35,14 +35,14 @@ export function useAuth() {
         createdAt: userInfo.createdAtUtc,
         updatedAt: userInfo.updatedAtUtc,
       };
-      
+
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      
+
       toast.success("Login successful", {
         description: `Welcome back, ${userInfo.email}!`,
       });
-      
+
       // Delay redirect slightly to allow toast to be visible
       setTimeout(() => {
         const redirectPath = getRedirectPath(userInfo.role);
@@ -67,11 +67,11 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      
+
       toast.success("Registration successful", {
         description: `Welcome to Reamp, ${userInfo.email}!`,
       });
-      
+
       // Delay redirect slightly to allow toast to be visible
       setTimeout(() => {
         const redirectPath = getRedirectPath(userInfo.role);

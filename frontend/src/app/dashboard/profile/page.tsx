@@ -7,7 +7,13 @@ import { User, Lock, FileText, Mail, Briefcase } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
-import { AvatarUpload, ProfileInfoForm, ChangePasswordForm, MyInvitations, StaffSkillsManager } from "@/components/profile";
+import {
+  AvatarUpload,
+  ProfileInfoForm,
+  ChangePasswordForm,
+  MyInvitations,
+  StaffSkillsManager,
+} from "@/components/profile";
 import { MyApplications } from "@/components/applications";
 import { useUpdateProfile, useUpdateAvatar, useChangePassword } from "@/lib/hooks/use-profile";
 import { useStaffByUserProfileId } from "@/lib/hooks/use-staff";
@@ -18,7 +24,11 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
   const resolvedSearchParams = use(searchParams);
   const defaultTab = resolvedSearchParams?.tab || "profile";
 
-  const { data: profile, isLoading, error } = useQuery({
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["profile"],
     queryFn: profilesApi.getMe,
   });
@@ -57,10 +67,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
   return (
     <div className="max-w-4xl mx-auto">
-      <PageHeader 
-        title="Profile Settings" 
-        description="Manage your profile and account settings" 
-      />
+      <PageHeader title="Profile Settings" description="Manage your profile and account settings" />
 
       <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList>
@@ -100,13 +107,15 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
             initialData={profileFormData}
             email={user?.email || ""}
             role={profile.role}
-            onSubmit={(data) => updateProfileMutation.mutate({ 
-              profileId: profile.id, 
-              data: {
-                firstName: data.firstName,
-                lastName: data.lastName
-              }
-            })}
+            onSubmit={(data) =>
+              updateProfileMutation.mutate({
+                profileId: profile.id,
+                data: {
+                  firstName: data.firstName,
+                  lastName: data.lastName,
+                },
+              })
+            }
             isSubmitting={updateProfileMutation.isPending}
             isSuccess={updateProfileMutation.isSuccess}
           />
@@ -122,10 +131,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
         {isStaffUser && staffData && (
           <TabsContent value="skills">
-            <StaffSkillsManager 
-              staffId={staffData.id} 
-              currentSkills={staffData.skills} 
-            />
+            <StaffSkillsManager staffId={staffData.id} currentSkills={staffData.skills} />
           </TabsContent>
         )}
 
@@ -140,4 +146,3 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
     </div>
   );
 }
-

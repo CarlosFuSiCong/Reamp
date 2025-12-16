@@ -12,9 +12,9 @@ export function handleMutationError(
 ): void {
   const errorResponse = error as ErrorResponse;
   const errorMessage = errorResponse?.message || fallbackMessage;
-  
+
   toast.error(errorMessage, { duration });
-  
+
   if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
     errorResponse.errors.forEach((err: string) => {
       toast.error(err, { duration });
@@ -22,11 +22,6 @@ export function handleMutationError(
   }
 }
 
-export function handleMutationSuccess(
-  message: string,
-  description?: string
-): void {
+export function handleMutationSuccess(message: string, description?: string): void {
   toast.success(message, description ? { description } : undefined);
 }
-
-

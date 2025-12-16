@@ -50,14 +50,18 @@ export const mediaApi = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await apiClient.post<ApiResponse<MediaUploadResponse>>("/api/media/upload", formData, {
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(progress);
-        }
-      },
-    });
+    const response = await apiClient.post<ApiResponse<MediaUploadResponse>>(
+      "/api/media/upload",
+      formData,
+      {
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(progress);
+          }
+        },
+      }
+    );
 
     // Unwrap ApiResponse to get the actual data
     return response.data.data;

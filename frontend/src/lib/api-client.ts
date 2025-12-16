@@ -17,7 +17,6 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-
     if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
       console.log("API Request:", {
         method: config.method,
@@ -93,9 +92,10 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized - token expired
     if (error.response?.status === 401 && originalRequest) {
       // Don't redirect for login/register endpoints - let them handle their own errors
-      const isAuthEndpoint = originalRequest.url?.includes('/api/auth/login') || 
-                             originalRequest.url?.includes('/api/auth/register');
-      
+      const isAuthEndpoint =
+        originalRequest.url?.includes("/api/auth/login") ||
+        originalRequest.url?.includes("/api/auth/register");
+
       if (isAuthEndpoint) {
         // Format error for auth endpoints before rejecting
         const apiError: ApiError = {
@@ -105,9 +105,9 @@ apiClient.interceptors.response.use(
         };
         return Promise.reject(apiError);
       }
-      
+
       // Prevent infinite loop - don't retry if already retried or if it's the refresh endpoint
-      if (originalRequest._retry || originalRequest.url?.includes('/api/auth/refresh')) {
+      if (originalRequest._retry || originalRequest.url?.includes("/api/auth/refresh")) {
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
@@ -133,11 +133,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(
-          `${API_URL}/api/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
 
         isRefreshing = false;
         onRefreshed();
@@ -145,7 +141,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
         onRefreshed(refreshError as Error);
-        
+
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

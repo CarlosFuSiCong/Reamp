@@ -1,7 +1,14 @@
 "use client";
 
 import { useUsers } from "@/lib/hooks/use-admin-stats";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { RoleBadge } from "@/components/shared/role-badge";

@@ -5,10 +5,7 @@ interface ErrorStateProps {
   message?: string;
 }
 
-export function ErrorState({ 
-  title = "Error", 
-  message = "Something went wrong" 
-}: ErrorStateProps) {
+export function ErrorState({ title = "Error", message = "Something went wrong" }: ErrorStateProps) {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
@@ -20,11 +17,3 @@ export function ErrorState({
     </div>
   );
 }
-
-
-
-
-
-
-
-

@@ -2,11 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { studiosApi } from "@/lib/api";
 import { Studio, PagedResponse } from "@/types";
 
-export function useStudios(params?: {
-  status?: string;
-  page?: number;
-  pageSize?: number;
-}) {
+export function useStudios(params?: { status?: string; page?: number; pageSize?: number }) {
   return useQuery<PagedResponse<Studio>>({
     queryKey: ["studios", params],
     queryFn: async () => {

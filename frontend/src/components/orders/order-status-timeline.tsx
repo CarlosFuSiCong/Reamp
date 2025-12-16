@@ -16,12 +16,9 @@ const orderSteps = [
   { status: OrderStatus.Completed, label: "Completed" },
 ];
 
-export function OrderStatusTimeline({
-  currentStatus,
-  isCancelled,
-}: OrderStatusTimelineProps) {
+export function OrderStatusTimeline({ currentStatus, isCancelled }: OrderStatusTimelineProps) {
   let currentIndex = orderSteps.findIndex((step) => step.status === currentStatus);
-  
+
   if (currentIndex === -1 && isCancelled) {
     currentIndex = 0;
   }
@@ -44,12 +41,11 @@ export function OrderStatusTimeline({
                   <div
                     className={cn(
                       "flex items-center justify-center w-8 h-8 rounded-full border-2",
-                      isCompleted &&
-                        "border-chart-4 bg-chart-4 text-white",
-                      isCurrent && !isCancelled &&
+                      isCompleted && "border-chart-4 bg-chart-4 text-white",
+                      isCurrent &&
+                        !isCancelled &&
                         "border-primary bg-primary text-primary-foreground",
-                      isCurrent && isCancelled &&
-                        "border-destructive bg-destructive text-white",
+                      isCurrent && isCancelled && "border-destructive bg-destructive text-white",
                       isPending && "border-border bg-background"
                     )}
                   >
@@ -60,10 +56,7 @@ export function OrderStatusTimeline({
                   </div>
                   {index < orderSteps.length - 1 && (
                     <div
-                      className={cn(
-                        "w-0.5 h-8 mt-1",
-                        isCompleted ? "bg-chart-4" : "bg-border"
-                      )}
+                      className={cn("w-0.5 h-8 mt-1", isCompleted ? "bg-chart-4" : "bg-border")}
                     />
                   )}
                 </div>
@@ -78,9 +71,7 @@ export function OrderStatusTimeline({
                     {step.label}
                   </p>
                   {isCurrent && isCancelled && (
-                    <p className="text-sm text-destructive mt-1">
-                      Order Cancelled
-                    </p>
+                    <p className="text-sm text-destructive mt-1">Order Cancelled</p>
                   )}
                 </div>
               </div>

@@ -37,9 +37,9 @@ export default function LoginPage() {
       await login(data);
     } catch (error: any) {
       console.error("Login failed:", error);
-      
+
       let message = "Login failed. Please try again.";
-      
+
       if (error?.statusCode === 401) {
         // 401 means account doesn't exist or wrong password
         message = "Account does not exist or password is incorrect.";
@@ -52,7 +52,7 @@ export default function LoginPage() {
       } else if (error?.errors && Array.isArray(error.errors)) {
         message = error.errors.join("; ");
       }
-      
+
       setErrorMessage(message);
     }
   };
@@ -107,10 +107,7 @@ export default function LoginPage() {
           </div>
 
           <div className="text-sm">
-            <Link
-              href="/forgot-password"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
+            <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
               Forgot password?
             </Link>
           </div>

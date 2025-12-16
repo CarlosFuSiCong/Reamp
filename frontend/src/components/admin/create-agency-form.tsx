@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface CreateAgencyFormProps {
@@ -16,7 +22,13 @@ interface CreateAgencyFormProps {
 
 export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
   const queryClient = useQueryClient();
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<CreateAgencyDto>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<CreateAgencyDto>();
 
   // Register ownerUserId with validation
   register("ownerUserId", { required: "Owner user is required" });
@@ -73,7 +85,9 @@ export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
           {...register("contactEmail", { required: "Contact email is required" })}
           placeholder="contact@agency.com"
         />
-        {errors.contactEmail && <p className="text-sm text-red-600">{errors.contactEmail.message}</p>}
+        {errors.contactEmail && (
+          <p className="text-sm text-red-600">{errors.contactEmail.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -83,14 +97,14 @@ export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
           {...register("contactPhone", { required: "Contact phone is required" })}
           placeholder="+1234567890"
         />
-        {errors.contactPhone && <p className="text-sm text-red-600">{errors.contactPhone.message}</p>}
+        {errors.contactPhone && (
+          <p className="text-sm text-red-600">{errors.contactPhone.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="ownerUserId">Owner User *</Label>
-        <Select
-          onValueChange={(value) => setValue("ownerUserId", value, { shouldValidate: true })}
-        >
+        <Select onValueChange={(value) => setValue("ownerUserId", value, { shouldValidate: true })}>
           <SelectTrigger>
             <SelectValue placeholder="Select owner user" />
           </SelectTrigger>

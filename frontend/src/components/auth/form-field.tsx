@@ -34,13 +34,8 @@ export function FormField({
         placeholder={placeholder}
         aria-invalid={!!error}
       />
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
-      {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {helperText && !error && <p className="text-xs text-muted-foreground">{helperText}</p>}
     </div>
   );
 }
-

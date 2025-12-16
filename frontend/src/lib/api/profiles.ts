@@ -3,7 +3,7 @@ import { UserProfile } from "@/types";
 
 export interface UpdateProfileDto {
   firstName: string;
-  lastName?: string;  // Optional to match backend domain model
+  lastName?: string; // Optional to match backend domain model
 }
 
 export interface ChangePasswordDto {

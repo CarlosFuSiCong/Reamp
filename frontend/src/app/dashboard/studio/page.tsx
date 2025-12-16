@@ -10,7 +10,11 @@ import { StatsCard } from "@/components/dashboard";
 import { OrderStatus } from "@/types";
 
 export default function StudioDashboardPage() {
-  const { data: ordersData, isLoading, error } = useQuery({
+  const {
+    data: ordersData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["orders", { page: 1, pageSize: 100 }],
     queryFn: () => ordersApi.list({ page: 1, pageSize: 100 }),
   });
@@ -24,10 +28,10 @@ export default function StudioDashboardPage() {
   }
 
   const orders = ordersData?.items || [];
-  
-  const pendingOrders = orders.filter(o => o.status === OrderStatus.Placed).length;
-  const acceptedOrders = orders.filter(o => o.status === OrderStatus.Accepted).length;
-  const completedOrders = orders.filter(o => o.status === OrderStatus.Completed).length;
+
+  const pendingOrders = orders.filter((o) => o.status === OrderStatus.Placed).length;
+  const acceptedOrders = orders.filter((o) => o.status === OrderStatus.Accepted).length;
+  const completedOrders = orders.filter((o) => o.status === OrderStatus.Completed).length;
 
   return (
     <div>
@@ -55,12 +59,7 @@ export default function StudioDashboardPage() {
           icon={CheckCircle}
           description="This month"
         />
-        <StatsCard
-          title="Schedule"
-          value={0}
-          icon={Calendar}
-          description="Upcoming shoots"
-        />
+        <StatsCard title="Schedule" value={0} icon={Calendar} description="Upcoming shoots" />
       </div>
 
       <div className="flex items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg">
@@ -69,4 +68,3 @@ export default function StudioDashboardPage() {
     </div>
   );
 }
-

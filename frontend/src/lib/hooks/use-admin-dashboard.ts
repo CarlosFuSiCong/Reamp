@@ -32,7 +32,7 @@ const DEFAULT_STATS = {
   totalOrders: 0,
   totalStudios: 0,
   chartData: [],
-  alerts: []
+  alerts: [],
 };
 
 export function useAdminDashboard(): AdminDashboardState {
@@ -42,6 +42,6 @@ export function useAdminDashboard(): AdminDashboardState {
     stats: error ? DEFAULT_STATS : stats,
     activities: error ? [] : activities,
     isLoading,
-    error
+    error,
   };
 }

@@ -71,10 +71,10 @@ export function ApplicationForm({ type, userEmail, onSuccess }: ApplicationFormP
     onError: (error: any) => {
       const errorMessage = error?.message || "Failed to submit application";
       const errors = error?.errors;
-      
+
       // Show main error message
       toast.error(errorMessage);
-      
+
       // Show additional error details if available
       if (errors && Array.isArray(errors) && errors.length > 0) {
         errors.forEach((err: string) => {

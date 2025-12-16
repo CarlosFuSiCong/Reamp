@@ -8,13 +8,8 @@ interface SubmitButtonProps {
 
 export function SubmitButton({ isLoading, loadingText, children }: SubmitButtonProps) {
   return (
-    <Button
-      type="submit"
-      disabled={isLoading}
-      className="w-full"
-    >
+    <Button type="submit" disabled={isLoading} className="w-full">
       {isLoading ? loadingText : children}
     </Button>
   );
 }
-

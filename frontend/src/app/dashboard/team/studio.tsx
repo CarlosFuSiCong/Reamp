@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
-import { 
-  PageHeader, 
-  LoadingState, 
-  ErrorState, 
-  StudioRoleBadge, 
-  InvitationStatusBadge 
+import {
+  PageHeader,
+  LoadingState,
+  ErrorState,
+  StudioRoleBadge,
+  InvitationStatusBadge,
 } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,19 +41,21 @@ import { canInviteStudioMembers, canManageStudioMember } from "@/lib/utils";
 
 export default function StudioTeamPage() {
   const { user: profile } = useProfile();
-  
+
   const studioId = profile?.studioId || "";
-  
+
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(null);
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
-  const { data: members, isLoading: membersLoading, error: membersError } =
-    useStudioMembers(studioId);
-  const { data: invitations, isLoading: invitationsLoading } =
-    useStudioInvitations(studioId);
+  const {
+    data: members,
+    isLoading: membersLoading,
+    error: membersError,
+  } = useStudioMembers(studioId);
+  const { data: invitations, isLoading: invitationsLoading } = useStudioInvitations(studioId);
 
   const updateRole = useUpdateStudioMemberRole();
   const removeMember = useRemoveStudioMember();
@@ -114,11 +116,10 @@ export default function StudioTeamPage() {
       <Card className="p-6">
         <Tabs defaultValue="members">
           <TabsList>
-            <TabsTrigger value="members">
-              Members ({members?.length || 0})
-            </TabsTrigger>
+            <TabsTrigger value="members">Members ({members?.length || 0})</TabsTrigger>
             <TabsTrigger value="invitations">
-              Invitations ({invitations?.filter(i => i.status === InvitationStatus.Pending).length || 0})
+              Invitations (
+              {invitations?.filter((i) => i.status === InvitationStatus.Pending).length || 0})
             </TabsTrigger>
           </TabsList>
 
@@ -233,9 +234,7 @@ export default function StudioTeamPage() {
               <div className="text-center py-12 text-gray-500">
                 <Users className="mx-auto h-12 w-12 mb-4 text-gray-400" />
                 <p className="text-lg font-medium">No team members yet</p>
-                <p className="text-sm mt-1">
-                  Invite your first team member to get started
-                </p>
+                <p className="text-sm mt-1">Invite your first team member to get started</p>
               </div>
             )}
           </TabsContent>
@@ -272,9 +271,7 @@ export default function StudioTeamPage() {
                         {new Date(invitation.createdAtUtc).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={invitation.isExpired ? "text-red-600" : ""}
-                        >
+                        <span className={invitation.isExpired ? "text-red-600" : ""}>
                           {new Date(invitation.expiresAtUtc).toLocaleDateString()}
                         </span>
                       </TableCell>
@@ -300,9 +297,7 @@ export default function StudioTeamPage() {
               <div className="text-center py-12 text-gray-500">
                 <Mail className="mx-auto h-12 w-12 mb-4 text-gray-400" />
                 <p className="text-lg font-medium">No invitations</p>
-                <p className="text-sm mt-1">
-                  Pending invitations will appear here
-                </p>
+                <p className="text-sm mt-1">Pending invitations will appear here</p>
               </div>
             )}
           </TabsContent>

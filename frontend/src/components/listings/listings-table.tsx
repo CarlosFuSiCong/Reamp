@@ -27,18 +27,11 @@ interface ListingsTableProps {
   onDelete: (id: string) => void;
 }
 
-export function ListingsTable({
-  listings,
-  onPublish,
-  onArchive,
-  onDelete,
-}: ListingsTableProps) {
+export function ListingsTable({ listings, onPublish, onArchive, onDelete }: ListingsTableProps) {
   if (listings.length === 0) {
     return (
       <div className="rounded-md border">
-        <div className="text-center py-12 text-muted-foreground">
-          No listings found
-        </div>
+        <div className="text-center py-12 text-muted-foreground">No listings found</div>
       </div>
     );
   }
@@ -66,9 +59,7 @@ export function ListingsTable({
               <TableCell>
                 {listing.currency} {listing.price.toLocaleString()}
               </TableCell>
-              <TableCell>
-                {getListingTypeLabel(listing.listingType)}
-              </TableCell>
+              <TableCell>{getListingTypeLabel(listing.listingType)}</TableCell>
               <TableCell>
                 <StatusBadge status={listing.status} type="listing" />
               </TableCell>

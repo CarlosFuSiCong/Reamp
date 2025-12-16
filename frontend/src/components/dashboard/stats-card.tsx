@@ -14,20 +14,18 @@ interface StatsCardProps {
   className?: string;
 }
 
-export function StatsCard({ 
-  title, 
-  value, 
-  icon: Icon, 
-  description, 
+export function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  description,
   trend,
-  className 
+  className,
 }: StatsCardProps) {
   return (
     <Card className={cn("bg-card border-border", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
@@ -35,16 +33,17 @@ export function StatsCard({
         {(description || trend) && (
           <div className="mt-1 flex items-center gap-2">
             {trend && (
-              <span className={cn(
-                "text-xs font-medium",
-                trend.isPositive ? "text-chart-4" : "text-destructive"
-              )}>
-                {trend.isPositive ? "+" : ""}{trend.value}%
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  trend.isPositive ? "text-chart-4" : "text-destructive"
+                )}
+              >
+                {trend.isPositive ? "+" : ""}
+                {trend.value}%
               </span>
             )}
-            {description && (
-              <p className="text-xs text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
           </div>
         )}
       </CardContent>

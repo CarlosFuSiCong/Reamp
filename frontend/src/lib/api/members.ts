@@ -9,9 +9,7 @@ import {
 export const membersApi = {
   // Agency member endpoints
   async getAgencyMembers(agencyId: string): Promise<AgencyMemberDto[]> {
-    const response = await apiClient.get<AgencyMemberDto[]>(
-      `/api/agencies/${agencyId}/members`
-    );
+    const response = await apiClient.get<AgencyMemberDto[]>(`/api/agencies/${agencyId}/members`);
     return response.data;
   },
 
@@ -33,9 +31,7 @@ export const membersApi = {
 
   // Studio member endpoints
   async getStudioMembers(studioId: string): Promise<StudioMemberDto[]> {
-    const response = await apiClient.get<StudioMemberDto[]>(
-      `/api/studios/${studioId}/members`
-    );
+    const response = await apiClient.get<StudioMemberDto[]>(`/api/studios/${studioId}/members`);
     return response.data;
   },
 

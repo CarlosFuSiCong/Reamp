@@ -70,9 +70,7 @@ export function StaffSkillsManager({ staffId, currentSkills }: StaffSkillsManage
     <Card>
       <CardHeader>
         <CardTitle>Professional Skills</CardTitle>
-        <CardDescription>
-          Select the skills that you can offer as a staff member
-        </CardDescription>
+        <CardDescription>Select the skills that you can offer as a staff member</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Current Skills Display */}
@@ -104,7 +102,7 @@ export function StaffSkillsManager({ staffId, currentSkills }: StaffSkillsManage
             {SKILL_DEFINITIONS.map((skill) => {
               const Icon = skill.icon;
               const checked = hasSkill(skill.value);
-              
+
               return (
                 <div
                   key={skill.value}
@@ -123,9 +121,7 @@ export function StaffSkillsManager({ staffId, currentSkills }: StaffSkillsManage
                       <Icon className="h-4 w-4" />
                       {skill.label}
                     </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {skill.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{skill.description}</p>
                   </div>
                 </div>
               );
@@ -154,10 +150,7 @@ export function StaffSkillsManager({ staffId, currentSkills }: StaffSkillsManage
               Reset
             </Button>
           )}
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || updateSkillsMutation.isPending}
-          >
+          <Button onClick={handleSave} disabled={!hasChanges || updateSkillsMutation.isPending}>
             <Save className="h-4 w-4 mr-2" />
             {updateSkillsMutation.isPending ? "Saving..." : "Save Changes"}
           </Button>

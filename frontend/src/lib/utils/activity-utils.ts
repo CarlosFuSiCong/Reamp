@@ -9,9 +9,9 @@ export function generateRecentActivities(
   maxItems: number = 5
 ): Activity[] {
   const now = Date.now();
-  
+
   const activities: ActivityWithSortKey[] = [
-    ...orders.slice(0, 3).map(order => ({
+    ...orders.slice(0, 3).map((order) => ({
       id: order.id,
       type: "order" as const,
       title: "New Order Created",
@@ -19,7 +19,7 @@ export function generateRecentActivities(
       timestamp: new Date(order.createdAtUtc).toLocaleString(),
       sortKey: new Date(order.createdAtUtc).getTime(),
     })),
-    ...listings.slice(0, 2).map(listing => ({
+    ...listings.slice(0, 2).map((listing) => ({
       id: listing.id,
       type: "listing" as const,
       title: "Listing Updated",

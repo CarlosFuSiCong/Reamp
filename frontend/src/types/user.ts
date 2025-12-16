@@ -30,11 +30,11 @@ export interface UserProfile {
   status: UserStatus;
   createdAtUtc: string;
   updatedAtUtc: string;
-  
+
   // Agency information (if user is an agent)
   agencyId?: string;
   agencyRole?: AgencyRole;
-  
+
   // Studio information (if user is a studio staff)
   studioId?: string;
   studioRole?: StudioRole;

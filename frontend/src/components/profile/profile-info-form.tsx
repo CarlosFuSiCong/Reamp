@@ -24,13 +24,13 @@ interface ProfileInfoFormProps {
   isSuccess?: boolean;
 }
 
-export function ProfileInfoForm({ 
-  initialData, 
-  email, 
-  role, 
-  onSubmit, 
+export function ProfileInfoForm({
+  initialData,
+  email,
+  role,
+  onSubmit,
   isSubmitting,
-  isSuccess
+  isSuccess,
 }: ProfileInfoFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(initialData);
@@ -54,15 +54,15 @@ export function ProfileInfoForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // FirstName is required per backend validation
     const trimmedFirstName = formData.firstName?.trim() || "";
-    
+
     if (!trimmedFirstName) {
       // Don't submit if firstName is empty (required field)
       return;
     }
-    
+
     onSubmit(formData);
   };
 
@@ -104,12 +104,7 @@ export function ProfileInfoForm({
 
           <div className="space-y-2">
             <Label htmlFor="displayName">Display Name</Label>
-            <Input
-              id="displayName"
-              value={formData.displayName}
-              disabled
-              className="bg-muted"
-            />
+            <Input id="displayName" value={formData.displayName} disabled className="bg-muted" />
           </div>
 
           <div className="space-y-2">
@@ -151,4 +146,3 @@ export function ProfileInfoForm({
     </Card>
   );
 }
-

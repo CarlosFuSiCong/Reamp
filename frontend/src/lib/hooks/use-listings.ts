@@ -11,10 +11,11 @@ export function useListings(params?: {
 }) {
   return useQuery<PagedResponse<Listing>>({
     queryKey: ["listings", params],
-    queryFn: () => listingsApi.list({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      listingsApi.list({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 

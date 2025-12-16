@@ -14,10 +14,11 @@ export function useOrders(params?: {
 }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["orders", params],
-    queryFn: () => ordersApi.list({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      ordersApi.list({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 
@@ -95,10 +96,7 @@ export function useCompleteOrder() {
 }
 
 // Photographer-specific hooks
-export function useAvailableOrders(params?: {
-  page?: number;
-  pageSize?: number;
-}) {
+export function useAvailableOrders(params?: { page?: number; pageSize?: number }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["available-orders", params],
     queryFn: () => ordersApi.getAvailableOrders(params || {}),
@@ -112,10 +110,11 @@ export function usePhotographerOrders(params?: {
 }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["photographer-orders", params],
-    queryFn: () => ordersApi.getMyOrders({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      ordersApi.getMyOrders({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 

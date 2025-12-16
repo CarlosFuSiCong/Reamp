@@ -130,9 +130,7 @@ export function ApplicationsList() {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value={ApplicationStatus.Pending.toString()}>Pending</SelectItem>
-              <SelectItem value={ApplicationStatus.UnderReview.toString()}>
-                Under Review
-              </SelectItem>
+              <SelectItem value={ApplicationStatus.UnderReview.toString()}>Under Review</SelectItem>
               <SelectItem value={ApplicationStatus.Approved.toString()}>Approved</SelectItem>
               <SelectItem value={ApplicationStatus.Rejected.toString()}>Rejected</SelectItem>
             </SelectContent>
@@ -188,11 +186,7 @@ export function ApplicationsList() {
                 <TableCell>{new Date(app.createdAtUtc).toLocaleDateString()}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewDetails(app)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(app)}>
                       <Eye className="h-4 w-4" />
                     </Button>
                     {canReview(app.status) && (
@@ -293,8 +287,8 @@ export function ApplicationsList() {
               {reviewMutation.isPending
                 ? "Processing..."
                 : reviewAction === "approve"
-                ? "Approve"
-                : "Reject"}
+                  ? "Approve"
+                  : "Reject"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

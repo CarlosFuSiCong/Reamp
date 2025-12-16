@@ -15,17 +15,11 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Admin Dashboard"
-        description="System overview and management"
-      />
+      <PageHeader title="Admin Dashboard" description="System overview and management" />
 
       <StatsGrid stats={stats} />
 
-      <ActivitySection 
-        chartData={stats.chartData} 
-        activities={activities} 
-      />
+      <ActivitySection chartData={stats.chartData} activities={activities} />
 
       <ManagementTabs alerts={stats.alerts} />
     </div>

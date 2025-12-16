@@ -5,14 +5,7 @@ import { useAuth, useProfile } from "@/lib/hooks";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Navbar } from "@/components/layout";
 import { Sidebar, SidebarNavItem } from "@/components/layout/sidebar";
-import { 
-  User, 
-  Users, 
-  ShoppingCart,
-  Settings,
-  ClipboardList,
-  Building2
-} from "lucide-react";
+import { User, Users, ShoppingCart, Settings, ClipboardList, Building2 } from "lucide-react";
 import { UserRole, AgencyRole, StudioRole } from "@/types/enums";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -32,27 +25,29 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       const adminItems: SidebarNavItem[] = [
         { title: "Admin Panel", href: "/admin", icon: Settings },
       ];
-      
+
       // Admins might also have organization roles, so include those too
       const orgItems: SidebarNavItem[] = [];
-      
+
       // Add agency navigation if admin is also an agency member
       if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
         orgItems.push({ title: "Agency", href: "/dashboard/agency", icon: Building2 });
       }
-      
+
       // Add studio navigation if admin is also a studio member
       if (profile.studioRole !== undefined && profile.studioRole !== null) {
         orgItems.push({ title: "Studio", href: "/dashboard/studio", icon: Building2 });
       }
-      
+
       return [...baseItems, ...adminItems, ...orgItems];
     }
 
     // For regular Staff (no organization)
-    if (user.role === UserRole.Staff && 
-        (profile.agencyRole === undefined || profile.agencyRole === null) && 
-        (profile.studioRole === undefined || profile.studioRole === null)) {
+    if (
+      user.role === UserRole.Staff &&
+      (profile.agencyRole === undefined || profile.agencyRole === null) &&
+      (profile.studioRole === undefined || profile.studioRole === null)
+    ) {
       return baseItems;
     }
 
@@ -62,9 +57,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Agency", href: "/dashboard/agency", icon: Building2 },
       ];
 
-      const roleValue = typeof profile.agencyRole === 'string' 
-        ? parseInt(profile.agencyRole, 10) 
-        : Number(profile.agencyRole);
+      const roleValue =
+        typeof profile.agencyRole === "string"
+          ? parseInt(profile.agencyRole, 10)
+          : Number(profile.agencyRole);
 
       // Owner & Manager can manage team
       if (roleValue === AgencyRole.Owner || roleValue === AgencyRole.Manager) {
@@ -86,9 +82,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
       ];
 
-      const roleValue = typeof profile.studioRole === 'string' 
-        ? parseInt(profile.studioRole, 10) 
-        : Number(profile.studioRole);
+      const roleValue =
+        typeof profile.studioRole === "string"
+          ? parseInt(profile.studioRole, 10)
+          : Number(profile.studioRole);
 
       // Owner & Manager can manage team
       if (roleValue === StudioRole.Owner || roleValue === StudioRole.Manager) {
@@ -130,9 +127,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </aside>
 
             {/* Main Content */}
-            <main className="col-span-12 md:col-span-9 lg:col-span-10">
-              {children}
-            </main>
+            <main className="col-span-12 md:col-span-9 lg:col-span-10">{children}</main>
           </div>
         </div>
       </div>

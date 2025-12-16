@@ -36,31 +36,20 @@ export function ActivityTimeline({ activities, className }: ActivityTimelineProp
       <CardContent>
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No recent activities
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">No recent activities</p>
           ) : (
             activities.map((activity, index) => (
               <div key={activity.id} className="flex gap-4">
                 <div className="relative flex flex-col items-center">
-                  <div className={cn(
-                    "h-2 w-2 rounded-full",
-                    getActivityColor(activity.type)
-                  )} />
-                  {index !== activities.length - 1 && (
-                    <div className="h-full w-px bg-border" />
-                  )}
+                  <div className={cn("h-2 w-2 rounded-full", getActivityColor(activity.type))} />
+                  {index !== activities.length - 1 && <div className="h-full w-px bg-border" />}
                 </div>
                 <div className="flex-1 pb-4">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-medium">{activity.title}</h4>
-                    <span className="text-xs text-muted-foreground">
-                      {activity.timestamp}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{activity.timestamp}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {activity.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
                 </div>
               </div>
             ))
@@ -70,4 +59,3 @@ export function ActivityTimeline({ activities, className }: ActivityTimelineProp
     </Card>
   );
 }
-

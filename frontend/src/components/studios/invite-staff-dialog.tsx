@@ -37,11 +37,7 @@ interface InviteStaffDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function InviteStaffDialog({
-  studioId,
-  open,
-  onOpenChange,
-}: InviteStaffDialogProps) {
+export function InviteStaffDialog({ studioId, open, onOpenChange }: InviteStaffDialogProps) {
   const {
     register,
     handleSubmit,
@@ -80,9 +76,7 @@ export function InviteStaffDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Invite Staff Member</DialogTitle>
-          <DialogDescription>
-            Send an invitation to join your studio team
-          </DialogDescription>
+          <DialogDescription>Send an invitation to join your studio team</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -135,11 +129,7 @@ export function InviteStaffDialog({
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={sendInvitation.isPending}>

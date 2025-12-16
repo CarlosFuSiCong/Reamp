@@ -1,5 +1,12 @@
 import apiClient from "@/lib/api-client";
-import { LoginDto, RegisterDto, TokenResponse, UserInfoDto, UserProfile, PasswordPolicy } from "@/types";
+import {
+  LoginDto,
+  RegisterDto,
+  TokenResponse,
+  UserInfoDto,
+  UserProfile,
+  PasswordPolicy,
+} from "@/types";
 
 export const authApi = {
   async getPasswordPolicy(): Promise<PasswordPolicy> {

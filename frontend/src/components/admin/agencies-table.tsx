@@ -3,10 +3,23 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi, AgencySummary } from "@/lib/api/admin";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { CreateAgencyForm } from "./create-agency-form";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -16,7 +29,11 @@ export function AgenciesTable() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: agencies, isLoading, error } = useQuery({
+  const {
+    data: agencies,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["admin-agencies"],
     queryFn: () => adminApi.getAgencies(),
   });

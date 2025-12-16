@@ -6,7 +6,7 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ profileId, data }: { profileId: string; data: UpdateProfileDto }) => 
+    mutationFn: ({ profileId, data }: { profileId: string; data: UpdateProfileDto }) =>
       profilesApi.update(profileId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -22,7 +22,7 @@ export function useUpdateAvatar() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ profileId, assetId }: { profileId: string; assetId: string }) => 
+    mutationFn: ({ profileId, assetId }: { profileId: string; assetId: string }) =>
       profilesApi.updateAvatar(profileId, assetId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -45,4 +45,3 @@ export function useChangePassword() {
     },
   });
 }
-

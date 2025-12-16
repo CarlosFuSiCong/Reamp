@@ -22,11 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,13 +42,15 @@ const orderFormSchema = z.object({
   currency: z.string().min(1),
   scheduledDate: z.date().optional(),
   scheduledTime: z.string().optional(),
-  tasks: z.array(
-    z.object({
-      taskType: z.nativeEnum(ShootTaskType),
-      description: z.string().optional(),
-      unitPrice: z.number().min(0, "Price must be positive"),
-    })
-  ).min(1, "At least one task is required"),
+  tasks: z
+    .array(
+      z.object({
+        taskType: z.nativeEnum(ShootTaskType),
+        description: z.string().optional(),
+        unitPrice: z.number().min(0, "Price must be positive"),
+      })
+    )
+    .min(1, "At least one task is required"),
 });
 
 type OrderFormValues = z.infer<typeof orderFormSchema>;
@@ -88,10 +86,7 @@ export function OrderCreationForm() {
   });
 
   const watchTasks = form.watch("tasks");
-  const totalAmount = watchTasks?.reduce(
-    (sum, task) => sum + (task.unitPrice || 0),
-    0
-  ) || 0;
+  const totalAmount = watchTasks?.reduce((sum, task) => sum + (task.unitPrice || 0), 0) || 0;
 
   const onSubmit = async (values: OrderFormValues) => {
     setIsSubmitting(true);
@@ -103,7 +98,7 @@ export function OrderCreationForm() {
         listingId: values.listingId,
         currency: values.currency,
       };
-      
+
       // Only include studioId if a studio was selected (not "none")
       if (values.studioId && values.studioId !== "none") {
         orderData.studioId = values.studioId;
@@ -114,7 +109,7 @@ export function OrderCreationForm() {
         orderData.scheduledStartUtc = values.scheduledDate.toISOString();
       }
 
-      console.log('📤 Submitting order data:', orderData);
+      console.log("📤 Submitting order data:", orderData);
       const result = await createMutation.mutateAsync(orderData);
 
       // Add tasks to the order
@@ -162,9 +157,7 @@ export function OrderCreationForm() {
                   <FormControl>
                     <Input placeholder="e.g., Property Photography - 123 Main St" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Give this order a descriptive title
-                  </FormDescription>
+                  <FormDescription>Give this order a descriptive title</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -190,7 +183,8 @@ export function OrderCreationForm() {
                       )}
                       {listingsData?.items.map((listing) => (
                         <SelectItem key={listing.id} value={listing.id}>
-                          {listing.title}{listing.city ? ` - ${listing.city}` : ''}
+                          {listing.title}
+                          {listing.city ? ` - ${listing.city}` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -217,7 +211,7 @@ export function OrderCreationForm() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No studio (publish to marketplace)</SelectItem>
-                      {(!studiosData?.items || studiosData.items.length === 0) ? (
+                      {!studiosData?.items || studiosData.items.length === 0 ? (
                         <SelectItem value="no-studios" disabled>
                           No studios available
                         </SelectItem>
@@ -254,11 +248,7 @@ export function OrderCreationForm() {
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
+                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -268,9 +258,7 @@ export function OrderCreationForm() {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0, 0, 0, 0))
-                        }
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         initialFocus
                       />
                     </PopoverContent>
@@ -281,7 +269,7 @@ export function OrderCreationForm() {
                       className="flex-1"
                       onChange={(e) => {
                         if (field.value && e.target.value) {
-                          const [hours, minutes] = e.target.value.split(':');
+                          const [hours, minutes] = e.target.value.split(":");
                           const newDate = new Date(field.value);
                           newDate.setHours(parseInt(hours), parseInt(minutes));
                           field.onChange(newDate);
@@ -290,9 +278,7 @@ export function OrderCreationForm() {
                       value={field.value ? format(field.value, "HH:mm") : ""}
                     />
                   </div>
-                  <FormDescription>
-                    When should the photoshoot take place?
-                  </FormDescription>
+                  <FormDescription>When should the photoshoot take place?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -359,9 +345,7 @@ export function OrderCreationForm() {
                             <FormItem>
                               <FormLabel>Task Type</FormLabel>
                               <Select
-                                onValueChange={(value) =>
-                                  field.onChange(parseInt(value))
-                                }
+                                onValueChange={(value) => field.onChange(parseInt(value))}
                                 defaultValue={field.value?.toString()}
                               >
                                 <FormControl>

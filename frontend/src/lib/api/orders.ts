@@ -35,11 +35,14 @@ export const ordersApi = {
     return response.data;
   },
 
-  async addTask(orderId: string, task: {
-    type: number;
-    notes?: string;
-    price?: number;
-  }): Promise<void> {
+  async addTask(
+    orderId: string,
+    task: {
+      type: number;
+      notes?: string;
+      price?: number;
+    }
+  ): Promise<void> {
     await apiClient.post(`/api/orders/${orderId}/tasks`, task);
   },
 

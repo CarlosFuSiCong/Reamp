@@ -29,7 +29,7 @@ export function useUpdateStaffSkills() {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["staff", data.id] });
       queryClient.invalidateQueries({ queryKey: ["staff", "profile", data.userProfileId] });
-      
+
       toast.success("Skills updated successfully");
     },
     onError: (error: any) => {

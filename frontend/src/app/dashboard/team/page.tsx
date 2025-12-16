@@ -12,9 +12,12 @@ export default function TeamPage() {
   const { user: profile, isLoading } = useProfile();
 
   useEffect(() => {
-    if (!isLoading && profile && 
-        (profile.agencyRole === undefined || profile.agencyRole === null) &&
-        (profile.studioRole === undefined || profile.studioRole === null)) {
+    if (
+      !isLoading &&
+      profile &&
+      (profile.agencyRole === undefined || profile.agencyRole === null) &&
+      (profile.studioRole === undefined || profile.studioRole === null)
+    ) {
       router.replace("/dashboard/profile");
     }
   }, [isLoading, profile, router]);
@@ -24,8 +27,10 @@ export default function TeamPage() {
   }
 
   // Prioritize agency over studio for dual-role users
-  const hasAgencyRole = profile?.agencyId && (profile?.agencyRole !== undefined && profile?.agencyRole !== null);
-  const hasStudioRole = profile?.studioId && (profile?.studioRole !== undefined && profile?.studioRole !== null);
+  const hasAgencyRole =
+    profile?.agencyId && profile?.agencyRole !== undefined && profile?.agencyRole !== null;
+  const hasStudioRole =
+    profile?.studioId && profile?.studioRole !== undefined && profile?.studioRole !== null;
 
   if (hasAgencyRole) {
     return <AgencyTeamPage />;

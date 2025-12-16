@@ -109,4 +109,3 @@ export function ChangePasswordForm({ onSubmit, isSubmitting, isSuccess }: Change
     </Card>
   );
 }
-

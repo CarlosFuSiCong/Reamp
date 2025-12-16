@@ -51,9 +51,9 @@ export default function RegisterPage() {
       await registerUser(data);
     } catch (error: any) {
       console.error("Registration failed:", error);
-      
+
       let message = "Registration failed. Please try again.";
-      
+
       if (error?.statusCode === 409) {
         message = "This email is already registered. Please use a different email or sign in.";
       } else if (error?.statusCode === 400) {
@@ -65,7 +65,7 @@ export default function RegisterPage() {
       } else if (error?.errors && Array.isArray(error.errors)) {
         message = error.errors.join("; ");
       }
-      
+
       setErrorMessage(message);
     }
   };
