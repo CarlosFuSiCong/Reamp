@@ -6,7 +6,7 @@ interface ErrorResponse {
 }
 
 export function handleMutationError(
-  error: any,
+  error: unknown,
   fallbackMessage: string,
   duration: number = 5000
 ): void {

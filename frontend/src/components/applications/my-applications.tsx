@@ -5,7 +5,7 @@ import { ApplicationStatus, ApplicationType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Camera, Calendar, Mail, Phone, XCircle } from "lucide-react";
+import { Building2, Camera, Calendar, Mail, XCircle } from "lucide-react";
 import { LoadingState, ErrorState } from "@/components/shared";
 import Link from "next/link";
 import {

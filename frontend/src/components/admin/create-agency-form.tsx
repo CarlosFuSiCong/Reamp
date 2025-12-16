@@ -27,7 +27,6 @@ export function CreateAgencyForm({ onSuccess }: CreateAgencyFormProps) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<CreateAgencyDto>();
 
   // Register ownerUserId with validation

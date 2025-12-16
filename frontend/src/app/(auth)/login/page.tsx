@@ -35,7 +35,7 @@ export default function LoginPage() {
     try {
       setErrorMessage("");
       await login(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
 
       let message = "Login failed. Please try again.";

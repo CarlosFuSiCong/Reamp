@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader, LoadingState, ErrorState, ConfirmDialog } from "@/components/shared";
 import {
   OrderStatusTimeline,
@@ -103,7 +102,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           break;
       }
       setConfirmAction({ open: false, action: null, title: "", description: "" });
-    } catch (error) {
+    } catch {
       // Error is handled by the mutation
     }
   };

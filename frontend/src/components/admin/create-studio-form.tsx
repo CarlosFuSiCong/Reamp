@@ -27,7 +27,6 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<CreateStudioDto>();
 
   // Register ownerUserId with validation

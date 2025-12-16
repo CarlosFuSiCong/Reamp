@@ -75,7 +75,7 @@ export function InviteMemberDialog({
       });
       reset();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error handled by hook
     }
   };

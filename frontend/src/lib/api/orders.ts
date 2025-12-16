@@ -75,9 +75,12 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders/available", {
-      params,
-    });
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>(
+      "/api/orders/available",
+      {
+        params,
+      }
+    );
     // Map totalCount to total for frontend compatibility
     return {
       ...response.data,
@@ -90,9 +93,12 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders/my-orders", {
-      params,
-    });
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>(
+      "/api/orders/my-orders",
+      {
+        params,
+      }
+    );
     // Map totalCount to total for frontend compatibility
     return {
       ...response.data,

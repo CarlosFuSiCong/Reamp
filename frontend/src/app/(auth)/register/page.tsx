@@ -49,7 +49,7 @@ export default function RegisterPage() {
     try {
       setErrorMessage("");
       await registerUser(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration failed:", error);
 
       let message = "Registration failed. Please try again.";

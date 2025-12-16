@@ -158,16 +158,6 @@ export default function AgentOrdersPage() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const getTaskTypeName = (type: ShootTaskType): string => {
-    const names: Record<ShootTaskType, string> = {
-      [ShootTaskType.None]: "None",
-      [ShootTaskType.Photography]: "Photography",
-      [ShootTaskType.Video]: "Video",
-      [ShootTaskType.Floorplan]: "Floor Plan",
-    };
-    return names[type] || "Unknown";
-  };
-
   const renderOrderCard = (order: ShootOrder, showActions = true) => (
     <Card key={order.id} className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -266,7 +256,7 @@ export default function AgentOrdersPage() {
   const renderStaffTabContent = (
     data: typeof availableData,
     isLoading: boolean,
-    error: any,
+    error: unknown,
     page: number,
     setPage: (page: number) => void,
     emptyMessage: string
