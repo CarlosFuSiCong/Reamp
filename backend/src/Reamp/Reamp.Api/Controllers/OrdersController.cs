@@ -73,7 +73,11 @@ namespace Reamp.Api.Controllers
                 // keyword filtering is not yet implemented in the backend
             };
 
-            var result = await _appService.GetFilteredListAsync(filter, pageRequest, currentUserId, ct);
+            // If studioId is provided, don't filter by createdBy (Studio members view orders accepted by their studio)
+            // If agencyId is provided, filter by createdBy (Agency members view orders they created)
+            var createdByFilter = studioId.HasValue ? Guid.Empty : currentUserId;
+            
+            var result = await _appService.GetFilteredListAsync(filter, pageRequest, createdByFilter, ct);
 
             return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
         }
