@@ -65,6 +65,14 @@ export const deliveriesApi = {
   },
 
   /**
+   * Add multiple items to delivery package in batch (single transaction)
+   */
+  addItemsBatch: async (id: string, items: AddDeliveryItemDto[]): Promise<DeliveryPackageDetailDto> => {
+    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/delivery/${id}/items/batch`, items);
+    return response.data;
+  },
+
+  /**
    * Remove item from delivery package
    */
   removeItem: async (id: string, itemId: string): Promise<DeliveryPackageDetailDto> => {

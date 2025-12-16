@@ -154,12 +154,14 @@ export default function NewDeliveryPage() {
         watermarkEnabled: data.watermarkEnabled,
       });
 
-      // Step 2: Add media items
-      for (const media of uploadedMedia) {
-        await deliveriesApi.addItem(delivery.id, {
+      // Step 2: Add all media items in batch (single transaction)
+      if (uploadedMedia.length > 0) {
+        const itemsToAdd = uploadedMedia.map((media) => ({
           mediaAssetId: media.id,
           variantName: "original",
-        });
+          sortOrder: 0,
+        }));
+        await deliveriesApi.addItemsBatch(delivery.id, itemsToAdd);
       }
 
       // Step 3: Publish or save as draft

@@ -89,18 +89,48 @@ namespace Reamp.Application.Delivery.Services
 
         public async Task<DeliveryPackageDetailDto> AddItemAsync(Guid packageId, AddDeliveryItemDto dto, CancellationToken ct = default)
         {
-            // Get package with AsNoTracking disabled (default is tracking enabled)
+            // Get package with fresh tracking
             var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
+            _logger.LogInformation("Loaded package {PackageId}, Items count: {ItemsCount}, RowVersion: {RowVersion}",
+                packageId, package.Items.Count, package.RowVersion != null ? BitConverter.ToString(package.RowVersion) : "NULL");
+
             // Add item to the package
-            package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
+            var newItem = package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
+            
+            _logger.LogInformation("Added item {ItemId} to package {PackageId}, Total items: {TotalItems}",
+                newItem.Id, packageId, package.Items.Count);
             
             // Save changes
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item added to delivery package {PackageId}", packageId);
+            
+            // Return updated package
+            return package.Adapt<DeliveryPackageDetailDto>();
+        }
+
+        public async Task<DeliveryPackageDetailDto> AddItemsBatchAsync(Guid packageId, List<AddDeliveryItemDto> items, CancellationToken ct = default)
+        {
+            // Get package with fresh tracking
+            var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
+            if (package == null)
+                throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
+
+            _logger.LogInformation("Batch adding {Count} items to package {PackageId}", items.Count, packageId);
+
+            // Add all items in one go
+            foreach (var dto in items)
+            {
+                package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
+            }
+            
+            // Save once after all items are added
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("{Count} items added to delivery package {PackageId}", items.Count, packageId);
             
             // Return updated package
             return package.Adapt<DeliveryPackageDetailDto>();
