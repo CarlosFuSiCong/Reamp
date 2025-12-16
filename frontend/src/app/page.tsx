@@ -101,7 +101,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">For Agencies</h3>
               <p className="text-gray-600">
-                Connect with professional photographers and manage all your property listings in one place.
+                Connect with professional photographers and manage all your property listings in one
+                place.
               </p>
             </div>
             <div className="text-center p-6">

@@ -14,10 +14,11 @@ export function useOrders(params?: {
 }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["orders", params],
-    queryFn: () => ordersApi.list({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      ordersApi.list({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 
@@ -38,7 +39,7 @@ export function useCreateOrder() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       handleMutationSuccess("Order created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to create order");
     },
   });
@@ -54,7 +55,7 @@ export function useCancelOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", variables.id] });
       handleMutationSuccess("Order cancelled successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to cancel order");
     },
   });
@@ -71,7 +72,7 @@ export function useStartOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order started successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to start order");
     },
   });
@@ -88,17 +89,14 @@ export function useCompleteOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order completed successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to complete order");
     },
   });
 }
 
 // Photographer-specific hooks
-export function useAvailableOrders(params?: {
-  page?: number;
-  pageSize?: number;
-}) {
+export function useAvailableOrders(params?: { page?: number; pageSize?: number }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["available-orders", params],
     queryFn: () => ordersApi.getAvailableOrders(params || {}),
@@ -112,10 +110,11 @@ export function usePhotographerOrders(params?: {
 }) {
   return useQuery<PagedResponse<ShootOrder>>({
     queryKey: ["photographer-orders", params],
-    queryFn: () => ordersApi.getMyOrders({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      ordersApi.getMyOrders({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 
@@ -130,7 +129,7 @@ export function useAcceptOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order accepted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to accept order");
     },
   });

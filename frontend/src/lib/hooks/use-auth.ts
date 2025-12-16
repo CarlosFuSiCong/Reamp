@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authApi, profilesApi } from "@/lib/api";
+import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useRouter } from "next/navigation";
 import { UserRole } from "@/types";
@@ -35,21 +35,21 @@ export function useAuth() {
         createdAt: userInfo.createdAtUtc,
         updatedAt: userInfo.updatedAtUtc,
       };
-      
+
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      
+
       toast.success("Login successful", {
         description: `Welcome back, ${userInfo.email}!`,
       });
-      
+
       // Delay redirect slightly to allow toast to be visible
       setTimeout(() => {
         const redirectPath = getRedirectPath(userInfo.role);
         window.location.href = redirectPath;
       }, 800);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Login error:", error);
       // Don't show toast for login errors - page will show ErrorAlert instead
     },
@@ -67,18 +67,18 @@ export function useAuth() {
       };
       setUser(userData);
       queryClient.invalidateQueries({ queryKey: ["user"] });
-      
+
       toast.success("Registration successful", {
         description: `Welcome to Reamp, ${userInfo.email}!`,
       });
-      
+
       // Delay redirect slightly to allow toast to be visible
       setTimeout(() => {
         const redirectPath = getRedirectPath(userInfo.role);
         window.location.href = redirectPath;
       }, 800);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Registration error:", error);
       // Don't show toast for registration errors - page will show ErrorAlert instead
     },

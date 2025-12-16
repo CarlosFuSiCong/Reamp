@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShootTask, ShootTaskType } from "@/types";
+import { ShootTask } from "@/types";
 import { getTaskTypeLabel } from "@/lib/utils/enum-labels";
 import { Calendar, DollarSign, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
@@ -18,29 +18,21 @@ export function OrderTasksCard({ tasks, currency }: OrderTasksCardProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {tasks.map((task, index) => (
+          {tasks.map((task) => (
             <div
               key={task.id}
               className="flex items-start justify-between gap-4 p-4 rounded-lg border"
             >
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">
-                    {getTaskTypeLabel(task.type)}
-                  </span>
-                  <Badge variant="outline">
-                    {task.status === 4 ? "Done" : "Pending"}
-                  </Badge>
+                  <span className="font-medium">{getTaskTypeLabel(task.type)}</span>
+                  <Badge variant="outline">{task.status === 4 ? "Done" : "Pending"}</Badge>
                 </div>
-                {task.notes && (
-                  <p className="text-sm text-muted-foreground">{task.notes}</p>
-                )}
+                {task.notes && <p className="text-sm text-muted-foreground">{task.notes}</p>}
                 {task.scheduledStartUtc && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>
-                      {format(new Date(task.scheduledStartUtc), "PPp")}
-                    </span>
+                    <span>{format(new Date(task.scheduledStartUtc), "PPp")}</span>
                   </div>
                 )}
               </div>

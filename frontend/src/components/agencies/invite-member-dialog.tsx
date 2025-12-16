@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -61,6 +60,7 @@ export function InviteMemberDialog({
   });
 
   const sendInvitation = useSendAgencyInvitation();
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRole = watch("targetRole");
 
   const onSubmit = async (data: FormData) => {
@@ -75,7 +75,7 @@ export function InviteMemberDialog({
       });
       reset();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error handled by hook
     }
   };
@@ -85,9 +85,7 @@ export function InviteMemberDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Invite Team Member</DialogTitle>
-          <DialogDescription>
-            Send an invitation to join your agency team
-          </DialogDescription>
+          <DialogDescription>Send an invitation to join your agency team</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -155,18 +153,12 @@ export function InviteMemberDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">
-                Assign the member to a specific branch
-              </p>
+              <p className="text-xs text-gray-500">Assign the member to a specific branch</p>
             </div>
           )}
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={sendInvitation.isPending}>

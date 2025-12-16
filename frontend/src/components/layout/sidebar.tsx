@@ -45,4 +45,3 @@ export function Sidebar({ items, className }: SidebarProps) {
     </nav>
   );
 }
-

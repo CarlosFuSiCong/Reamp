@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, User, FileText, Bell } from "lucide-react";
+import { Building2, LogOut, FileText, Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
 
   const getDashboardLink = () => {
     if (!isAuthenticated || !user) return "/";
-    
+
     switch (user.role) {
       case UserRole.Admin:
         return "/admin";
@@ -66,7 +66,11 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span className={index === breadcrumbs.length - 1 ? "text-foreground font-medium" : ""}>
+                    <span
+                      className={
+                        index === breadcrumbs.length - 1 ? "text-foreground font-medium" : ""
+                      }
+                    >
                       {crumb.label}
                     </span>
                   )}
@@ -81,7 +85,9 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
             ) : isAuthenticated && user ? (
               <>
                 {/* Notification Bell */}
-                {(user.role === UserRole.Admin || user.role === UserRole.Agent || user.role === UserRole.Staff) && (
+                {(user.role === UserRole.Admin ||
+                  user.role === UserRole.Agent ||
+                  user.role === UserRole.Staff) && (
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs">
@@ -115,7 +121,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    
+
                     {/* Dashboard Link - for all authenticated users */}
                     <DropdownMenuItem asChild>
                       <Link href={getDashboardLink()} className="cursor-pointer">
@@ -123,7 +129,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
-                    
+
                     {/* Apply Link for User role only */}
                     {user.role === UserRole.User && (
                       <DropdownMenuItem asChild>
@@ -133,7 +139,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
                         </Link>
                       </DropdownMenuItem>
                     )}
-                    
+
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />

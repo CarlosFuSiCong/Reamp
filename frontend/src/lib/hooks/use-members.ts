@@ -33,9 +33,12 @@ export function useUpdateAgencyMemberRole() {
       queryClient.invalidateQueries({
         queryKey: ["agencies", variables.agencyId, "members"],
       });
-      handleMutationSuccess("Member role updated", "The member's role has been updated successfully");
+      handleMutationSuccess(
+        "Member role updated",
+        "The member's role has been updated successfully"
+      );
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to update member role");
     },
   });
@@ -45,20 +48,15 @@ export function useRemoveAgencyMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      agencyId,
-      memberId,
-    }: {
-      agencyId: string;
-      memberId: string;
-    }) => membersApi.removeAgencyMember(agencyId, memberId),
+    mutationFn: ({ agencyId, memberId }: { agencyId: string; memberId: string }) =>
+      membersApi.removeAgencyMember(agencyId, memberId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["agencies", variables.agencyId, "members"],
       });
       handleMutationSuccess("Member removed", "The member has been removed from the agency");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to remove member");
     },
   });
@@ -89,9 +87,12 @@ export function useUpdateStudioMemberRole() {
       queryClient.invalidateQueries({
         queryKey: ["studios", variables.studioId, "members"],
       });
-      handleMutationSuccess("Member role updated", "The member's role has been updated successfully");
+      handleMutationSuccess(
+        "Member role updated",
+        "The member's role has been updated successfully"
+      );
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to update member role");
     },
   });
@@ -101,20 +102,15 @@ export function useRemoveStudioMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      studioId,
-      memberId,
-    }: {
-      studioId: string;
-      memberId: string;
-    }) => membersApi.removeStudioMember(studioId, memberId),
+    mutationFn: ({ studioId, memberId }: { studioId: string; memberId: string }) =>
+      membersApi.removeStudioMember(studioId, memberId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["studios", variables.studioId, "members"],
       });
       handleMutationSuccess("Member removed", "The member has been removed from the studio");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to remove member");
     },
   });

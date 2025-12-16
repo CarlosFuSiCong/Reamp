@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { UseFormRegisterReturn } from "react-hook-form";
 
 interface FormFieldProps {
   label: string;
@@ -10,7 +10,7 @@ interface FormFieldProps {
   autoComplete?: string;
   error?: string;
   helperText?: string;
-  register: any;
+  register: UseFormRegisterReturn;
 }
 
 export function FormField({
@@ -34,13 +34,8 @@ export function FormField({
         placeholder={placeholder}
         aria-invalid={!!error}
       />
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
-      {helperText && !error && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {helperText && !error && <p className="text-xs text-muted-foreground">{helperText}</p>}
     </div>
   );
 }
-

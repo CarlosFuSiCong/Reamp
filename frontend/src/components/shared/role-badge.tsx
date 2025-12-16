@@ -24,15 +24,5 @@ interface RoleBadgeProps {
 }
 
 export function RoleBadge({ role, className }: RoleBadgeProps) {
-  return (
-    <Badge className={cn(ROLE_COLORS[role], className)}>
-      {ROLE_NAMES[role]}
-    </Badge>
-  );
+  return <Badge className={cn(ROLE_COLORS[role], className)}>{ROLE_NAMES[role]}</Badge>;
 }
-
-
-
-
-
-

@@ -22,7 +22,7 @@ export default function ApplyPage() {
     if (!isAuthenticated && !isLoading) {
       router.push("/login?redirect=/apply");
     }
-    
+
     // Redirect Staff and Agent to their dashboard
     if (isAuthenticated && user && (user.role === UserRole.Staff || user.role === UserRole.Agent)) {
       router.push("/dashboard/profile");
@@ -123,10 +123,10 @@ export default function ApplyPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ApplicationForm 
-                type={ApplicationType.Agency} 
-                userEmail={user.email} 
-                onSuccess={handleSuccess} 
+              <ApplicationForm
+                type={ApplicationType.Agency}
+                userEmail={user.email}
+                onSuccess={handleSuccess}
               />
             </CardContent>
           </Card>
@@ -142,10 +142,10 @@ export default function ApplyPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ApplicationForm 
-                type={ApplicationType.Studio} 
-                userEmail={user.email} 
-                onSuccess={handleSuccess} 
+              <ApplicationForm
+                type={ApplicationType.Studio}
+                userEmail={user.email}
+                onSuccess={handleSuccess}
               />
             </CardContent>
           </Card>

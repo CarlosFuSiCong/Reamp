@@ -15,11 +15,7 @@ import {
 } from "@/components/ui/table";
 import { LoadingState, ErrorState } from "@/components/shared";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import {
-  useMyInvitations,
-  useAcceptInvitation,
-  useRejectInvitation,
-} from "@/lib/hooks";
+import { useMyInvitations, useAcceptInvitation, useRejectInvitation } from "@/lib/hooks";
 import { InvitationType, InvitationStatus } from "@/types";
 
 export function MyInvitations() {
@@ -110,15 +106,14 @@ export function MyInvitations() {
                     {getTypeIcon(invitation.type)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-gray-900">
-                          {invitation.targetEntityName}
-                        </h4>
+                        <h4 className="font-medium text-gray-900">{invitation.targetEntityName}</h4>
                         <Badge variant="outline" className="text-xs">
                           {getTypeLabel(invitation.type)}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        You've been invited as <span className="font-medium">{invitation.targetRoleName}</span>
+                        You&apos;ve been invited as{" "}
+                        <span className="font-medium">{invitation.targetRoleName}</span>
                       </p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
@@ -187,9 +182,7 @@ export function MyInvitations() {
                     <Badge variant="outline">{getTypeLabel(invitation.type)}</Badge>
                   </TableCell>
                   <TableCell>{invitation.targetRoleName}</TableCell>
-                  <TableCell>
-                    {getStatusBadge(invitation.status, invitation.isExpired)}
-                  </TableCell>
+                  <TableCell>{getStatusBadge(invitation.status, invitation.isExpired)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4" />
@@ -210,7 +203,7 @@ export function MyInvitations() {
             <Mail className="mx-auto h-12 w-12 mb-4 text-gray-400" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No Invitations</h3>
             <p className="text-sm text-gray-500">
-              You don't have any invitations at the moment
+              You don&apos;t have any invitations at the moment
             </p>
           </div>
         </Card>

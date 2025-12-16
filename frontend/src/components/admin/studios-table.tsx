@@ -1,12 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminApi, StudioSummary } from "@/lib/api/admin";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/api/admin";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { CreateStudioForm } from "./create-studio-form";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -14,9 +27,12 @@ import { formatDistanceToNow } from "date-fns";
 
 export function StudiosTable() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const queryClient = useQueryClient();
 
-  const { data: studios, isLoading, error } = useQuery({
+  const {
+    data: studios,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["admin-studios"],
     queryFn: () => adminApi.getStudios(),
   });

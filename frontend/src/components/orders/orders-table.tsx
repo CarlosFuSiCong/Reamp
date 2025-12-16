@@ -29,9 +29,7 @@ export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
   if (orders.length === 0) {
     return (
       <div className="rounded-md border">
-        <div className="text-center py-12 text-muted-foreground">
-          No orders found
-        </div>
+        <div className="text-center py-12 text-muted-foreground">No orders found</div>
       </div>
     );
   }
@@ -58,12 +56,10 @@ export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className="font-mono text-sm">
-                #{order.id.substring(0, 8)}
-              </TableCell>
+              <TableCell className="font-mono text-sm">#{order.id.substring(0, 8)}</TableCell>
               <TableCell className="max-w-[200px]">
                 <div className="font-medium truncate">
-                  {order.title || order.listingTitle || 'Untitled Order'}
+                  {order.title || order.listingTitle || "Untitled Order"}
                 </div>
                 {order.listingAddress && (
                   <div className="text-xs text-muted-foreground truncate">
@@ -71,13 +67,11 @@ export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
                   </div>
                 )}
               </TableCell>
-              <TableCell>{order.studioName || 'Not assigned'}</TableCell>
+              <TableCell>{order.studioName || "Not assigned"}</TableCell>
               <TableCell className="font-semibold">
                 {order.currency} {order.totalAmount.toLocaleString()}
               </TableCell>
-              <TableCell>
-                {order.taskCount ?? order.tasks?.length ?? 0} tasks
-              </TableCell>
+              <TableCell>{order.taskCount ?? order.tasks?.length ?? 0} tasks</TableCell>
               <TableCell>
                 <StatusBadge status={order.status} type="order" />
               </TableCell>

@@ -4,12 +4,20 @@ import { ordersApi } from "@/lib/api/orders";
 import { ListingStatus, OrderStatus } from "@/types";
 
 export function useDashboardStats() {
-  const { data: listingsData, isLoading: loadingListings, error: listingsError } = useQuery({
+  const {
+    data: listingsData,
+    isLoading: loadingListings,
+    error: listingsError,
+  } = useQuery({
     queryKey: ["listings", { page: 1, pageSize: 100 }],
     queryFn: () => listingsApi.list({ page: 1, pageSize: 100 }),
   });
 
-  const { data: ordersData, isLoading: loadingOrders, error: ordersError } = useQuery({
+  const {
+    data: ordersData,
+    isLoading: loadingOrders,
+    error: ordersError,
+  } = useQuery({
     queryKey: ["orders", { page: 1, pageSize: 100 }],
     queryFn: () => ordersApi.list({ page: 1, pageSize: 100 }),
   });
@@ -18,11 +26,11 @@ export function useDashboardStats() {
   const orders = ordersData?.items || [];
 
   const stats = {
-    totalListings: listings.filter(l => l.status === ListingStatus.Active).length,
-    activeOrders: orders.filter(o => 
-      o.status === OrderStatus.Placed || o.status === OrderStatus.Accepted
+    totalListings: listings.filter((l) => l.status === ListingStatus.Active).length,
+    activeOrders: orders.filter(
+      (o) => o.status === OrderStatus.Placed || o.status === OrderStatus.Accepted
     ).length,
-    pendingListings: listings.filter(l => l.status === ListingStatus.Pending).length,
+    pendingListings: listings.filter((l) => l.status === ListingStatus.Pending).length,
     totalClients: 0,
   };
 
@@ -34,4 +42,3 @@ export function useDashboardStats() {
     error: listingsError || ordersError,
   };
 }
-

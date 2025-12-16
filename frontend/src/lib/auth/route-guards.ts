@@ -9,10 +9,10 @@ export function isAuthenticated(): boolean {
 
 export function getUserRole(): UserRole | null {
   if (typeof window === "undefined") return null;
-  
+
   const authStorage = getCookie("reamp-auth-storage");
   if (!authStorage) return null;
-  
+
   try {
     const parsed = JSON.parse(decodeURIComponent(authStorage));
     return parsed.state?.user?.role || null;
@@ -78,7 +78,7 @@ export function getRoleDashboard(role: UserRole): string {
   }
 }
 
-export function canAccessRoute(pathname: string, role: UserRole): boolean {
+export function canAccessRoute(): boolean {
   return true;
 }
 
@@ -108,4 +108,3 @@ export function clearAuth(): void {
   if (typeof window === "undefined") return;
   deleteCookie("reamp-auth-storage");
 }
-

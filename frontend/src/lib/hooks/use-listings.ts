@@ -11,10 +11,11 @@ export function useListings(params?: {
 }) {
   return useQuery<PagedResponse<Listing>>({
     queryKey: ["listings", params],
-    queryFn: () => listingsApi.list({
-      ...params,
-      status: params?.status?.toString(),
-    }),
+    queryFn: () =>
+      listingsApi.list({
+        ...params,
+        status: params?.status?.toString(),
+      }),
   });
 }
 
@@ -35,7 +36,7 @@ export function useCreateListing() {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
       handleMutationSuccess("Listing created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to create listing");
     },
   });
@@ -52,7 +53,7 @@ export function useUpdateListing() {
       queryClient.invalidateQueries({ queryKey: ["listing", variables.id] });
       handleMutationSuccess("Listing updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to update listing");
     },
   });
@@ -67,7 +68,7 @@ export function useDeleteListing() {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
       handleMutationSuccess("Listing deleted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to delete listing");
     },
   });
@@ -83,7 +84,7 @@ export function usePublishListing() {
       queryClient.invalidateQueries({ queryKey: ["listing", id] });
       handleMutationSuccess("Listing published successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to publish listing");
     },
   });
@@ -99,7 +100,7 @@ export function useArchiveListing() {
       queryClient.invalidateQueries({ queryKey: ["listing", id] });
       handleMutationSuccess("Listing archived successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to archive listing");
     },
   });

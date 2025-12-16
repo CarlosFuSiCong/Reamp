@@ -31,7 +31,7 @@ export const staffApi = {
     try {
       const response = await apiClient.get<StaffDetailDto>(`/api/staff/profile/${userProfileId}`);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.status === 404) return null;
       throw error;
     }
@@ -39,7 +39,9 @@ export const staffApi = {
 
   // Update staff skills
   async updateSkills(staffId: string, skills: StaffSkills): Promise<StaffDetailDto> {
-    const response = await apiClient.put<StaffDetailDto>(`/api/staff/${staffId}/skills`, { skills });
+    const response = await apiClient.put<StaffDetailDto>(`/api/staff/${staffId}/skills`, {
+      skills,
+    });
     return response.data;
   },
 };

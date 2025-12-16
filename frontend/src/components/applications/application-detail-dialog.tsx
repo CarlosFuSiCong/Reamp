@@ -55,7 +55,7 @@ export function ApplicationDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         {isLoading && <LoadingState message="Loading application details..." />}
-        
+
         {error && <ErrorState message="Failed to load application details" />}
 
         {application && (
@@ -91,7 +91,9 @@ export function ApplicationDetailDialog({
 
               {/* Organization Information */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Organization Information</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Organization Information
+                </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Mail className="h-4 w-4" />

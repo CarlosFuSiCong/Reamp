@@ -9,11 +9,7 @@ interface SystemAlertsProps {
 
 export function SystemAlerts({ alerts }: SystemAlertsProps) {
   if (!alerts || alerts.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        No system alerts
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground text-center py-4">No system alerts</p>;
   }
 
   return (
@@ -26,9 +22,7 @@ export function SystemAlerts({ alerts }: SystemAlertsProps) {
           <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
           <div className="flex-1">
             <p className="text-sm font-medium text-card-foreground">{alert.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {alert.message}
-            </p>
+            <p className="text-xs text-muted-foreground">{alert.message}</p>
           </div>
         </div>
       ))}

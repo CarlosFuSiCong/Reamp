@@ -1,6 +1,14 @@
 import apiClient from "@/lib/api-client";
 import { PagedResponse, ShootOrder } from "@/types";
 
+interface BackendPagedResponse<T> {
+  items: T[];
+  totalCount?: number;
+  total?: number;
+  page: number;
+  pageSize: number;
+}
+
 export const ordersApi = {
   async list(params: {
     agencyId?: string;
@@ -10,7 +18,7 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders", {
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders", {
       params,
     });
     // Map totalCount to total for frontend compatibility
@@ -35,11 +43,14 @@ export const ordersApi = {
     return response.data;
   },
 
-  async addTask(orderId: string, task: {
-    type: number;
-    notes?: string;
-    price?: number;
-  }): Promise<void> {
+  async addTask(
+    orderId: string,
+    task: {
+      type: number;
+      notes?: string;
+      price?: number;
+    }
+  ): Promise<void> {
     await apiClient.post(`/api/orders/${orderId}/tasks`, task);
   },
 
@@ -64,9 +75,12 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders/available", {
-      params,
-    });
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>(
+      "/api/orders/available",
+      {
+        params,
+      }
+    );
     // Map totalCount to total for frontend compatibility
     return {
       ...response.data,
@@ -79,9 +93,12 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders/my-orders", {
-      params,
-    });
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>(
+      "/api/orders/my-orders",
+      {
+        params,
+      }
+    );
     // Map totalCount to total for frontend compatibility
     return {
       ...response.data,

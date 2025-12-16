@@ -1,13 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  PageHeader,
-  LoadingState,
-  ErrorState,
-  ConfirmDialog,
-} from "@/components/shared";
+import { PageHeader, LoadingState, ErrorState, ConfirmDialog } from "@/components/shared";
 import {
   OrderStatusTimeline,
   OrderTasksCard,
@@ -15,18 +9,23 @@ import {
   OrderInfoCard,
 } from "@/components/orders";
 import { Button } from "@/components/ui/button";
-import { useOrder, useCancelOrder, useAcceptOrder, useStartOrder, useCompleteOrder } from "@/lib/hooks/use-orders";
+import {
+  useOrder,
+  useCancelOrder,
+  useAcceptOrder,
+  useStartOrder,
+  useCompleteOrder,
+} from "@/lib/hooks/use-orders";
 import { useListing } from "@/lib/hooks/use-listings";
 import { useStudio } from "@/lib/hooks/use-studios";
 import { useProfile } from "@/lib/hooks";
 import { OrderStatus } from "@/types";
-import { ArrowLeft, XCircle, Building2, Camera, Home } from "lucide-react";
+import { ArrowLeft, XCircle, Camera, Home } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const router = useRouter();
   const orderId = resolvedParams.id;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -44,7 +43,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const { data: order, isLoading, error } = useOrder(orderId);
   const { data: listing } = useListing(order?.listingId || null);
   // Filter out empty GUID for studio - marketplace orders have null or empty GUID
-  const validStudioId = order?.studioId && order.studioId !== "00000000-0000-0000-0000-000000000000" ? order.studioId : null;
+  const validStudioId =
+    order?.studioId && order.studioId !== "00000000-0000-0000-0000-000000000000"
+      ? order.studioId
+      : null;
   const { data: studio } = useStudio(validStudioId);
   const { user: profile } = useProfile();
   const cancelMutation = useCancelOrder();
@@ -63,11 +65,13 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     const configs = {
       accept: {
         title: "Accept Order",
-        description: "Are you sure you want to accept this order? This will assign the order to you.",
+        description:
+          "Are you sure you want to accept this order? This will assign the order to you.",
       },
       start: {
         title: "Start Shoot",
-        description: "Are you sure you want to start this shoot? This will mark the order as in progress.",
+        description:
+          "Are you sure you want to start this shoot? This will mark the order as in progress.",
       },
       complete: {
         title: "Complete Order",
@@ -98,18 +102,19 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           break;
       }
       setConfirmAction({ open: false, action: null, title: "", description: "" });
-    } catch (error) {
+    } catch {
       // Error is handled by the mutation
     }
   };
 
   // Only agents can cancel orders
-  const canCancelOrder = !isStaff && (
-    order?.status === OrderStatus.Placed ||
-    order?.status === OrderStatus.Accepted
-  );
+  const canCancelOrder =
+    !isStaff && (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted);
 
-  const canAccept = isStaff && (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted) && !order?.assignedPhotographerId;
+  const canAccept =
+    isStaff &&
+    (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted) &&
+    !order?.assignedPhotographerId;
   const canStart = isStaff && order?.status === OrderStatus.Scheduled;
   const canComplete = isStaff && order?.status === OrderStatus.InProgress;
 
@@ -138,10 +143,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </Link>
             </Button>
             {canCancelOrder && (
-              <Button
-                variant="destructive"
-                onClick={() => setCancelDialogOpen(true)}
-              >
+              <Button variant="destructive" onClick={() => setCancelDialogOpen(true)}>
                 <XCircle className="mr-2 h-4 w-4" />
                 Cancel Order
               </Button>
@@ -154,17 +156,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <div className="lg:col-span-2 space-y-6">
           {/* Only show timeline for agents, not staff */}
           {!isStaff && (
-            <OrderStatusTimeline
-              currentStatus={order.status}
-              isCancelled={isCancelled}
-            />
+            <OrderStatusTimeline currentStatus={order.status} isCancelled={isCancelled} />
           )}
 
           {isCancelled && order.cancellationReason && (
             <OrderInfoCard title="Cancellation Reason" icon={<XCircle className="h-5 w-5" />}>
-              <p className="text-sm text-muted-foreground">
-                {order.cancellationReason}
-              </p>
+              <p className="text-sm text-muted-foreground">{order.cancellationReason}</p>
             </OrderInfoCard>
           )}
 
@@ -191,9 +188,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   {listing.city}, {listing.state} {listing.postcode}
                 </p>
                 <Button variant="outline" size="sm" asChild className="mt-2">
-                  <Link href={`/dashboard/listings/${listing.id}`}>
-                    View Listing
-                  </Link>
+                  <Link href={`/dashboard/listings/${listing.id}`}>View Listing</Link>
                 </Button>
               </div>
             </OrderInfoCard>
@@ -204,46 +199,42 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <div className="space-y-2">
                 <p className="font-medium">{studio.name}</p>
                 <p className="text-sm text-muted-foreground">{studio.email}</p>
-                {studio.phone && (
-                  <p className="text-sm text-muted-foreground">{studio.phone}</p>
-                )}
+                {studio.phone && <p className="text-sm text-muted-foreground">{studio.phone}</p>}
               </div>
             </OrderInfoCard>
           )}
 
           {order.status === OrderStatus.Completed && (
             <Button className="w-full" asChild>
-              <Link href={`/dashboard/orders/${order.id}/delivery`}>
-                View Delivery
-              </Link>
+              <Link href={`/dashboard/orders/${order.id}/delivery`}>View Delivery</Link>
             </Button>
           )}
 
           {isStaff && (
             <>
               {canAccept && (
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={() => handleAction("accept")}
                   disabled={acceptMutation.isPending}
                 >
                   Accept Order
                 </Button>
               )}
-              
+
               {canStart && (
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={() => handleAction("start")}
                   disabled={startMutation.isPending}
                 >
                   Start Shoot
                 </Button>
               )}
-              
+
               {canComplete && (
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={() => handleAction("complete")}
                   disabled={completeMutation.isPending}
                 >

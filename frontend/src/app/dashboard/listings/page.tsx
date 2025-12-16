@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PageHeader, LoadingState, ErrorState, ConfirmDialog, Pagination } from "@/components/shared";
+import {
+  PageHeader,
+  LoadingState,
+  ErrorState,
+  ConfirmDialog,
+  Pagination,
+} from "@/components/shared";
 import { ListingsTable, ListingsFilters } from "@/components/listings";
 import { Button } from "@/components/ui/button";
 import {

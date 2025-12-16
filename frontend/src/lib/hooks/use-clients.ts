@@ -13,7 +13,7 @@ export function useClients(params?: {
     queryFn: async () => {
       try {
         return await clientsApi.list(params || {});
-      } catch (error) {
+      } catch {
         return { items: [], total: 0, page: 1, pageSize: 20 };
       }
     },

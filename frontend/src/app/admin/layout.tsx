@@ -7,14 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Sidebar, Navbar, SidebarNavItem } from "@/components/layout";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2,
-  Settings,
-  FileText,
-  ShieldCheck
-} from "lucide-react";
+import { LayoutDashboard, Users, Building2, Settings } from "lucide-react";
 
 const sidebarItems: SidebarNavItem[] = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -25,7 +18,7 @@ const sidebarItems: SidebarNavItem[] = [
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -46,7 +39,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen flex-col">
         <Navbar breadcrumbs={[{ label: "Admin" }]} />
-        
+
         <div className="flex flex-1 overflow-hidden">
           <aside className="hidden w-64 border-r bg-background lg:block overflow-y-auto">
             <div className="p-4">
@@ -55,9 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </aside>
 
           <main className="flex-1 overflow-y-auto">
-            <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8">
-              {children}
-            </div>
+            <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8">{children}</div>
           </main>
         </div>
       </div>

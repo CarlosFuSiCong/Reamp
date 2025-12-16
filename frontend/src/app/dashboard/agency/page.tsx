@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, ShoppingCart, Users, Clock, Plus } from "lucide-react";
+import { Home, ShoppingCart, Clock, Plus } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { StatsCard, ActivityTimeline, QuickActions } from "@/components/dashboard";
 import { useDashboardStats } from "@/lib/hooks/use-dashboard-stats";
@@ -60,4 +60,3 @@ export default function AgentDashboardPage() {
     </div>
   );
 }
-

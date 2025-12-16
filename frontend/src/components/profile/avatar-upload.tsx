@@ -16,11 +16,11 @@ interface AvatarUploadProps {
   isUploading?: boolean;
 }
 
-export function AvatarUpload({ 
-  avatarAssetId, 
-  displayName, 
-  onUpload, 
-  isUploading 
+export function AvatarUpload({
+  avatarAssetId,
+  displayName,
+  onUpload,
+  isUploading,
 }: AvatarUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -31,13 +31,15 @@ export function AvatarUpload({
 
   useEffect(() => {
     if (avatarAssetId) {
-      mediaApi.getUrl(avatarAssetId)
-        .then(url => setAvatarUrl(url))
-        .catch(err => {
+      mediaApi
+        .getUrl(avatarAssetId)
+        .then((url) => setAvatarUrl(url))
+        .catch((err) => {
           console.error("Failed to load avatar:", err);
           setAvatarUrl("");
         });
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarUrl("");
     }
   }, [avatarAssetId]);
@@ -54,15 +56,15 @@ export function AvatarUpload({
 
   const handleUpload = async () => {
     if (!file) return;
-    
+
     setUploading(true);
     setUploadProgress(0);
-    
+
     try {
       const response = await mediaApi.upload(file, setUploadProgress);
       setUploading(false);
       onUpload(response.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error?.message || "Failed to upload avatar");
       setFile(null);
       setPreview(null);
@@ -74,6 +76,7 @@ export function AvatarUpload({
   // Clear UI state when profile update completes (isUploading: true -> false)
   useEffect(() => {
     if (prevIsUploadingRef.current && !isUploading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
@@ -93,9 +96,7 @@ export function AvatarUpload({
         <div className="flex items-center gap-4">
           <Avatar className="h-24 w-24">
             <AvatarImage src={preview || avatarUrl || ""} />
-            <AvatarFallback>
-              {displayName?.charAt(0).toUpperCase() || "U"}
-            </AvatarFallback>
+            <AvatarFallback>{displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
             <Input
@@ -116,9 +117,7 @@ export function AvatarUpload({
                   Upload
                 </Button>
                 {uploading && uploadProgress > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    Uploading: {uploadProgress}%
-                  </div>
+                  <div className="text-xs text-muted-foreground">Uploading: {uploadProgress}%</div>
                 )}
               </div>
             )}
@@ -128,4 +127,3 @@ export function AvatarUpload({
     </Card>
   );
 }
-

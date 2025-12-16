@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Users, Mail, Calendar, MoreVertical, UserPlus, Shield } from "lucide-react";
-import { 
-  PageHeader, 
-  LoadingState, 
-  ErrorState, 
-  AgencyRoleBadge, 
-  InvitationStatusBadge 
+import {
+  PageHeader,
+  LoadingState,
+  ErrorState,
+  AgencyRoleBadge,
+  InvitationStatusBadge,
 } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -40,19 +40,21 @@ import { canInviteAgencyMembers, canManageAgencyMember } from "@/lib/utils";
 
 export default function AgencyTeamPage() {
   const { user: profile } = useProfile();
-  
+
   const agencyId = profile?.agencyId || "";
-  
+
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState<string | null>(null);
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
-  const { data: members, isLoading: membersLoading, error: membersError } =
-    useAgencyMembers(agencyId);
-  const { data: invitations, isLoading: invitationsLoading } =
-    useAgencyInvitations(agencyId);
+  const {
+    data: members,
+    isLoading: membersLoading,
+    error: membersError,
+  } = useAgencyMembers(agencyId);
+  const { data: invitations } = useAgencyInvitations(agencyId);
 
   const updateRole = useUpdateAgencyMemberRole();
   const removeMember = useRemoveAgencyMember();
@@ -113,11 +115,10 @@ export default function AgencyTeamPage() {
       <Card className="p-6">
         <Tabs defaultValue="members">
           <TabsList>
-            <TabsTrigger value="members">
-              Members ({members?.length || 0})
-            </TabsTrigger>
+            <TabsTrigger value="members">Members ({members?.length || 0})</TabsTrigger>
             <TabsTrigger value="invitations">
-              Invitations ({invitations?.filter(i => i.status === InvitationStatus.Pending).length || 0})
+              Invitations (
+              {invitations?.filter((i) => i.status === InvitationStatus.Pending).length || 0})
             </TabsTrigger>
           </TabsList>
 
@@ -219,9 +220,7 @@ export default function AgencyTeamPage() {
               <div className="text-center py-12 text-gray-500">
                 <Users className="mx-auto h-12 w-12 mb-4 text-gray-400" />
                 <p className="text-lg font-medium">No team members yet</p>
-                <p className="text-sm mt-1">
-                  Invite your first team member to get started
-                </p>
+                <p className="text-sm mt-1">Invite your first team member to get started</p>
               </div>
             )}
           </TabsContent>
@@ -258,9 +257,7 @@ export default function AgencyTeamPage() {
                         {new Date(invitation.createdAtUtc).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <span
-                          className={invitation.isExpired ? "text-red-600" : ""}
-                        >
+                        <span className={invitation.isExpired ? "text-red-600" : ""}>
                           {new Date(invitation.expiresAtUtc).toLocaleDateString()}
                         </span>
                       </TableCell>
@@ -286,9 +283,7 @@ export default function AgencyTeamPage() {
               <div className="text-center py-12 text-gray-500">
                 <Mail className="mx-auto h-12 w-12 mb-4 text-gray-400" />
                 <p className="text-lg font-medium">No invitations</p>
-                <p className="text-sm mt-1">
-                  Pending invitations will appear here
-                </p>
+                <p className="text-sm mt-1">Pending invitations will appear here</p>
               </div>
             )}
           </TabsContent>

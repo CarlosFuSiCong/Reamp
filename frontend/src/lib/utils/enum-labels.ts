@@ -1,4 +1,11 @@
-import { ListingStatus, ListingType, PropertyType, OrderStatus, DeliveryStatus, ShootTaskType } from "@/types";
+import {
+  ListingStatus,
+  ListingType,
+  PropertyType,
+  OrderStatus,
+  DeliveryStatus,
+  ShootTaskType,
+} from "@/types";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 

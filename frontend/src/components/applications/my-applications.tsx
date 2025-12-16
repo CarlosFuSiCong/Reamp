@@ -5,7 +5,7 @@ import { ApplicationStatus, ApplicationType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Camera, Calendar, Mail, Phone, XCircle } from "lucide-react";
+import { Building2, Camera, Calendar, Mail, XCircle } from "lucide-react";
 import { LoadingState, ErrorState } from "@/components/shared";
 import Link from "next/link";
 import {
@@ -27,15 +27,35 @@ export function MyApplications() {
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case ApplicationStatus.Pending:
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            Pending
+          </Badge>
+        );
       case ApplicationStatus.UnderReview:
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Under Review</Badge>;
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            Under Review
+          </Badge>
+        );
       case ApplicationStatus.Approved:
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Approved</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Approved
+          </Badge>
+        );
       case ApplicationStatus.Rejected:
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>;
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Rejected
+          </Badge>
+        );
       case ApplicationStatus.Cancelled:
-        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Cancelled</Badge>;
+        return (
+          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+            Cancelled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{ApplicationStatus[status]}</Badge>;
     }
@@ -76,7 +96,7 @@ export function MyApplications() {
             <div>
               <h3 className="text-lg font-semibold">No Applications</h3>
               <p className="text-sm text-gray-600 mt-1">
-                You haven't submitted any organization applications yet.
+                You haven&apos;t submitted any organization applications yet.
               </p>
             </div>
             <Link href="/profile/apply">
@@ -139,7 +159,11 @@ export function MyApplications() {
                 <div className="mt-4 pt-4 border-t">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                      >
                         <XCircle className="h-4 w-4 mr-2" />
                         Cancel Application
                       </Button>
@@ -148,7 +172,8 @@ export function MyApplications() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Cancel Application</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to cancel this application? This action cannot be undone.
+                          Are you sure you want to cancel this application? This action cannot be
+                          undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
