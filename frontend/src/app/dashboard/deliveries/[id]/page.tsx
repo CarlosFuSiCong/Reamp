@@ -164,9 +164,9 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
                       className="relative aspect-square rounded-lg overflow-hidden border group"
                     >
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        {item.thumbnailUrl ? (
+                        {item.thumbnailUrl || item.mediaUrl ? (
                           <img
-                            src={item.thumbnailUrl}
+                            src={item.thumbnailUrl || item.mediaUrl || ""}
                             alt="Media"
                             className="w-full h-full object-cover"
                           />
