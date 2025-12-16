@@ -112,7 +112,7 @@ export function MyInvitations() {
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        You've been invited as{" "}
+                        You&apos;ve been invited as{" "}
                         <span className="font-medium">{invitation.targetRoleName}</span>
                       </p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -202,7 +202,7 @@ export function MyInvitations() {
           <div className="text-center">
             <Mail className="mx-auto h-12 w-12 mb-4 text-gray-400" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No Invitations</h3>
-            <p className="text-sm text-gray-500">You don't have any invitations at the moment</p>
+            <p className="text-sm text-gray-500">You don&apos;t have any invitations at the moment</p>
           </div>
         </Card>
       )}

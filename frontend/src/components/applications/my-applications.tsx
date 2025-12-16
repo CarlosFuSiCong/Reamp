@@ -96,7 +96,7 @@ export function MyApplications() {
             <div>
               <h3 className="text-lg font-semibold">No Applications</h3>
               <p className="text-sm text-gray-600 mt-1">
-                You haven't submitted any organization applications yet.
+                You haven&apos;t submitted any organization applications yet.
               </p>
             </div>
             <Link href="/profile/apply">
