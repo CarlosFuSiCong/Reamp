@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (profile.studioRole !== undefined && profile.studioRole !== null) {
       const studioItems: SidebarNavItem[] = [
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
-        { title: "Marketplace", href: "/dashboard/orders/marketplace", icon: ShoppingCart },
+        { title: "Marketplace", href: "/dashboard/marketplace", icon: ShoppingCart },
         { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
         { title: "Deliveries", href: "/dashboard/deliveries", icon: Package },
       ];
