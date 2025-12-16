@@ -28,6 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { ListingMediaManager } from "@/components/listings";
 import { useListing, useUpdateListing } from "@/lib/hooks/use-listings";
 import { ListingType, PropertyType } from "@/types";
 import { ChevronLeft, ChevronRight, Save } from "lucide-react";
@@ -62,6 +63,7 @@ const STEPS = [
   { id: 1, name: "Basic Info" },
   { id: 2, name: "Address" },
   { id: 3, name: "Details" },
+  { id: 4, name: "Media" },
 ];
 
 export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -631,6 +633,10 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {currentStep === 4 && listing && (
+            <ListingMediaManager listingId={listing.id} />
           )}
 
           <div className="flex justify-between">

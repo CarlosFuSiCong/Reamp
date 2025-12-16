@@ -104,3 +104,11 @@ export enum MediaProcessStatus {
   Ready = 3,
   Failed = 4,
 }
+
+export enum ListingMediaRole {
+  Cover = 0,
+  Gallery = 1,
+  FloorPlan = 2,
+  Video = 3,
+  VrPreview = 4,
+}

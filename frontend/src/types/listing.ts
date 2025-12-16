@@ -1,4 +1,4 @@
-import { ListingStatus, ListingType, PropertyType } from "./enums";
+import { ListingStatus, ListingType, PropertyType, ListingMediaRole } from "./enums";
 
 export interface Listing {
   id: string;
@@ -26,10 +26,13 @@ export interface Listing {
 }
 
 export interface ListingMedia {
+  id?: string;
   mediaAssetId: string;
-  role: string;
+  role: string | ListingMediaRole;
   sortOrder: number;
   isCover: boolean;
+  isVisible?: boolean;
+  thumbnailUrl?: string;
 }
 
 export interface ListingAgent {
@@ -39,4 +42,19 @@ export interface ListingAgent {
   phone?: string;
   isPrimary: boolean;
   sortOrder: number;
+}
+
+// DTOs for media management
+export interface AddMediaDto {
+  mediaAssetId: string;
+  role?: ListingMediaRole;
+}
+
+export interface ReorderMediaDto {
+  mediaOrders: Record<string, number>;
+}
+
+export interface SetMediaVisibilityDto {
+  mediaId: string;
+  isVisible: boolean;
 }

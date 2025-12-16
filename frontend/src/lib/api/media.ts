@@ -1,83 +1,106 @@
-import apiClient from "@/lib/api-client";
-
-// Backend ApiResponse wrapper structure
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  errors?: string[];
-}
-
-export interface MediaAssetDetailDto {
-  id: string;
-  ownerStudioId: string;
-  studioName?: string;
-  uploaderUserId: string;
-  uploaderName?: string;
-  mediaProvider: number;
-  providerAssetId: string;
-  resourceType: number;
-  processStatus: number;
-  contentType: string;
-  sizeBytes: number;
-  widthPx?: number;
-  heightPx?: number;
-  durationSeconds?: number;
-  originalFileName: string;
-  publicUrl: string;
-  checksumSha256?: string;
-  description?: string;
-  tags?: string[];
-  variants: Array<{
-    variantName: string;
-    transformedUrl: string;
-    widthPx?: number;
-    heightPx?: number;
-    sizeBytes?: number;
-  }>;
-  createdAtUtc: string;
-  updatedAtUtc: string;
-}
-
-// Simplified interface for upload response (only includes essential fields)
-export interface MediaUploadResponse {
-  id: string;
-  publicUrl: string;
-}
+import apiClient from "../api-client";
+import type {
+  InitiateChunkedUploadDto,
+  UploadSessionDto,
+  MediaAssetDetailDto,
+  MediaAssetListDto,
+  PagedResponse,
+} from "@/types";
 
 export const mediaApi = {
-  async upload(file: File, onProgress?: (progress: number) => void): Promise<MediaUploadResponse> {
-    const formData = new FormData();
-    formData.append("file", file);
+  // ===== Chunked Upload =====
+  
+  /**
+   * Initiate a chunked upload session
+   */
+  initiateChunkedUpload: async (
+    dto: InitiateChunkedUploadDto
+  ): Promise<UploadSessionDto> => {
+    const response = await apiClient.post<UploadSessionDto>(
+      "/media/chunked/initiate",
+      dto
+    );
+    return response.data;
+  },
 
-    const response = await apiClient.post<ApiResponse<MediaUploadResponse>>(
-      "/api/media/upload",
+  /**
+   * Upload a single chunk
+   */
+  uploadChunk: async (
+    sessionId: string,
+    chunkIndex: number,
+    chunkData: Blob
+  ): Promise<UploadSessionDto> => {
+    const formData = new FormData();
+    formData.append("sessionId", sessionId);
+    formData.append("chunkIndex", chunkIndex.toString());
+    formData.append("chunk", chunkData);
+
+    const response = await apiClient.post<UploadSessionDto>(
+      "/media/chunked/upload",
       formData,
       {
-        onUploadProgress: (progressEvent) => {
-          if (onProgress && progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(progress);
-          }
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
       }
     );
-
-    // Unwrap ApiResponse to get the actual data
-    return response.data.data;
+    return response.data;
   },
 
-  async delete(id: string): Promise<void> {
-    await apiClient.delete(`/api/media/${id}`);
+  /**
+   * Complete chunked upload
+   */
+  completeChunkedUpload: async (
+    sessionId: string
+  ): Promise<MediaAssetDetailDto> => {
+    const response = await apiClient.post<MediaAssetDetailDto>(
+      `/media/chunked/complete/${sessionId}`
+    );
+    return response.data;
   },
 
-  async getById(id: string): Promise<MediaAssetDetailDto> {
-    const response = await apiClient.get<ApiResponse<MediaAssetDetailDto>>(`/api/media/${id}`);
-    return response.data.data;
+  /**
+   * Get upload session status
+   */
+  getUploadSessionStatus: async (
+    sessionId: string
+  ): Promise<UploadSessionDto> => {
+    const response = await apiClient.get<UploadSessionDto>(
+      `/media/chunked/status/${sessionId}`
+    );
+    return response.data;
   },
 
-  async getUrl(id: string): Promise<string> {
-    const response = await apiClient.get<ApiResponse<MediaAssetDetailDto>>(`/api/media/${id}`);
-    return response.data.data.publicUrl;
+  /**
+   * Cancel upload session
+   */
+  cancelUploadSession: async (sessionId: string): Promise<void> => {
+    await apiClient.delete(`/media/chunked/cancel/${sessionId}`);
+  },
+
+  // ===== Media Asset Management =====
+
+  /**
+   * Get media asset by ID
+   */
+  getById: async (id: string): Promise<MediaAssetDetailDto> => {
+    const response = await apiClient.get<MediaAssetDetailDto>(`/media/${id}`);
+    return response.data;
+  },
+
+  /**
+   * List media assets by studio
+   */
+  listByStudio: async (params: {
+    studioId: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<PagedResponse<MediaAssetListDto>> => {
+    const response = await apiClient.get<PagedResponse<MediaAssetListDto>>(
+      `/media/studio/${params.studioId}`,
+      { params }
+    );
+    return response.data;
   },
 };

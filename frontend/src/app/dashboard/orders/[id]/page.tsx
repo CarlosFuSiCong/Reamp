@@ -126,7 +126,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     return <ErrorState message="Failed to load order details" />;
   }
 
-  const tasksCompleted = order.tasks.filter((t) => t.status === 4).length;
+  const tasksCompleted = order.tasks?.filter((t) => t.status === 4).length || 0;
   const isCancelled = order.status === OrderStatus.Cancelled;
 
   return (
@@ -165,7 +165,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             </OrderInfoCard>
           )}
 
-          <OrderTasksCard tasks={order.tasks} currency={order.currency} />
+          <OrderTasksCard tasks={order.tasks || []} currency={order.currency} />
         </div>
 
         <div className="space-y-6">
@@ -173,7 +173,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             totalAmount={order.totalAmount}
             currency={order.currency}
             tasksCompleted={tasksCompleted}
-            totalTasks={order.tasks.length}
+            totalTasks={order.tasks?.length || 0}
           />
 
           {listing && (

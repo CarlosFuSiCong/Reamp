@@ -53,17 +53,18 @@ export default function RegisterPage() {
       console.error("Registration failed:", error);
 
       let message = "Registration failed. Please try again.";
+      const err = error as { statusCode?: number; message?: string; errors?: string[] };
 
-      if (error?.statusCode === 409) {
+      if (err.statusCode === 409) {
         message = "This email is already registered. Please use a different email or sign in.";
-      } else if (error?.statusCode === 400) {
+      } else if (err.statusCode === 400) {
         message = "Invalid input. Please check all fields.";
-      } else if (error?.statusCode === 500) {
+      } else if (err.statusCode === 500) {
         message = "Server error. Please try again later.";
-      } else if (error?.message) {
-        message = error.message;
-      } else if (error?.errors && Array.isArray(error.errors)) {
-        message = error.errors.join("; ");
+      } else if (err.message) {
+        message = err.message;
+      } else if (err.errors && Array.isArray(err.errors)) {
+        message = err.errors.join("; ");
       }
 
       setErrorMessage(message);
@@ -83,7 +84,7 @@ export default function RegisterPage() {
       }
     >
       <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <ErrorAlert message={errorMessage || registerError?.message} />
+        <ErrorAlert message={errorMessage || (registerError as { message?: string })?.message} />
 
         <div className="space-y-4">
           <FormField
