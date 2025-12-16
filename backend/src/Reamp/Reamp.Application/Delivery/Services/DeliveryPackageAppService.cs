@@ -89,14 +89,20 @@ namespace Reamp.Application.Delivery.Services
 
         public async Task<DeliveryPackageDetailDto> AddItemAsync(Guid packageId, AddDeliveryItemDto dto, CancellationToken ct = default)
         {
+            // Get package with AsNoTracking disabled (default is tracking enabled)
             var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
+            // Add item to the package
             package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
+            
+            // Save changes
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item added to delivery package {PackageId}", packageId);
+            
+            // Return updated package
             return package.Adapt<DeliveryPackageDetailDto>();
         }
 

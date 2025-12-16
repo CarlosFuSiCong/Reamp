@@ -16,10 +16,20 @@ namespace Reamp.Infrastructure.Repositories.Delivery
 
         public async Task<DeliveryPackage?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
         {
-            return await _set
+            // Use AsNoTracking to avoid RowVersion conflicts, then attach for updates
+            var package = await _set
+                .AsNoTracking()
                 .Include(d => d.Items)
                 .Include(d => d.Accesses)
                 .FirstOrDefaultAsync(d => d.Id == id, ct);
+
+            if (package != null)
+            {
+                // Attach the package and its collections to the context for tracking
+                _db.Attach(package);
+            }
+
+            return package;
         }
 
         public async Task<List<DeliveryPackage>> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
