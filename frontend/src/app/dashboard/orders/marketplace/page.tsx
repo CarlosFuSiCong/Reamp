@@ -3,18 +3,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/shared";
-import { OrdersTable } from "@/components/orders/orders-table";
-import { OrdersFilters } from "@/components/orders/orders-filters";
+import { OrdersTable, OrdersFilters } from "@/components/orders";
+import { useProfile } from "@/lib/hooks";
 import { ordersApi } from "@/lib/api";
 import { OrderStatus } from "@/types";
-import { useProfile } from "@/lib/hooks";
 
 export default function OrdersMarketplacePage() {
   const { user } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(OrderStatus.Placed.toString());
 
-  // Fetch Placed orders (market orders)
   const { data, isLoading } = useQuery({
     queryKey: ["orders", "marketplace", statusFilter, searchQuery],
     queryFn: () =>

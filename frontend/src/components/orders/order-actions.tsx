@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  CheckCircle,
+  XCircle,
+  UserPlus,
+  Play,
+  Package,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared";
 import { ordersApi } from "@/lib/api";
 import { OrderStatus } from "@/types";
-import { toast } from "sonner";
-import { 
-  CheckCircle, 
-  XCircle, 
-  UserPlus, 
-  Play, 
-  Package,
-  Loader2 
-} from "lucide-react";
-import { ConfirmDialog } from "@/components/shared";
 
 interface OrderActionsProps {
   orderId: string;
@@ -105,9 +105,9 @@ export function OrderActions({
     },
   });
 
-  const handleAction = (action: typeof confirmDialog.action) => {
+  const handleConfirm = (action: typeof confirmDialog.action) => {
     setConfirmDialog({ open: false });
-    
+
     switch (action) {
       case "accept":
         acceptMutation.mutate();
@@ -127,30 +127,23 @@ export function OrderActions({
     }
   };
 
-  const isLoading = 
-    acceptMutation.isPending || 
-    cancelMutation.isPending || 
-    scheduleMutation.isPending || 
-    startShootingMutation.isPending || 
+  const isLoading =
+    acceptMutation.isPending ||
+    cancelMutation.isPending ||
+    scheduleMutation.isPending ||
+    startShootingMutation.isPending ||
     confirmDeliveryMutation.isPending;
 
-  // Agent can cancel order before shooting starts (Placed/Accepted/Scheduled)
-  const canAgentCancel = 
-    isAgent && 
-    (currentStatus === OrderStatus.Placed || 
-     currentStatus === OrderStatus.Accepted || 
-     currentStatus === OrderStatus.Scheduled);
+  // Determine available actions based on status and role
+  const canAgentCancel =
+    isAgent &&
+    (currentStatus === OrderStatus.Placed ||
+      currentStatus === OrderStatus.Accepted ||
+      currentStatus === OrderStatus.Scheduled);
 
-  // Studio can accept marketplace order (Placed)
   const canStudioAccept = isStudio && currentStatus === OrderStatus.Placed;
-
-  // Studio can schedule order after accepting (Accepted)
   const canStudioSchedule = isStudio && currentStatus === OrderStatus.Accepted;
-
-  // Studio can start shooting after scheduling (Scheduled)
   const canStudioStart = isStudio && currentStatus === OrderStatus.Scheduled;
-
-  // Agent can confirm delivery (AwaitingConfirmation)
   const canAgentConfirm = isAgent && currentStatus === OrderStatus.AwaitingConfirmation;
 
   return (
@@ -224,7 +217,7 @@ export function OrderActions({
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         title="Accept Order"
         description="Are you sure you want to accept this order? You will be responsible for completing the shoot."
-        onConfirm={() => handleAction("accept")}
+        onConfirm={() => handleConfirm("accept")}
         confirmText="Accept Order"
       />
 
@@ -233,7 +226,7 @@ export function OrderActions({
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         title="Cancel Order"
         description="Are you sure you want to cancel this order? This action cannot be undone."
-        onConfirm={() => handleAction("cancel")}
+        onConfirm={() => handleConfirm("cancel")}
         confirmText="Cancel Order"
         variant="destructive"
       />
@@ -243,7 +236,7 @@ export function OrderActions({
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         title="Schedule Order"
         description="Assign staff and confirm the shooting schedule. The agent can still cancel before shooting starts."
-        onConfirm={() => handleAction("schedule")}
+        onConfirm={() => handleConfirm("schedule")}
         confirmText="Schedule Order"
       />
 
@@ -252,7 +245,7 @@ export function OrderActions({
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         title="Start Shooting"
         description="Starting the shoot will lock the order. The agent will no longer be able to cancel."
-        onConfirm={() => handleAction("start")}
+        onConfirm={() => handleConfirm("start")}
         confirmText="Start Shooting"
       />
 
@@ -261,7 +254,7 @@ export function OrderActions({
         onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
         title="Confirm Delivery"
         description="Confirm that you have received the delivery. This will complete the order."
-        onConfirm={() => handleAction("confirm")}
+        onConfirm={() => handleConfirm("confirm")}
         confirmText="Confirm Delivery"
       />
     </>
