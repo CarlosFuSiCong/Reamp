@@ -90,6 +90,7 @@ export const deliveriesApi = {
 
   /**
    * Publish delivery package
+   * NOTE: Publishing a delivery will automatically update the order status to AwaitingConfirmation
    */
   publish: async (id: string): Promise<DeliveryPackageDetailDto> => {
     const response = await apiClient.post<DeliveryPackageDetailDto>(`/delivery/${id}/publish`);

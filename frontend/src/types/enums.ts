@@ -68,12 +68,13 @@ export enum ListingStatus {
 }
 
 export enum OrderStatus {
-  Placed = 1,
-  Accepted = 2,
-  Scheduled = 3,
-  InProgress = 4,
-  Completed = 5,
-  Cancelled = 6,
+  Placed = 1,              // Marketplace order, waiting for Studio to accept
+  Accepted = 2,            // Studio accepted, can still be cancelled by Agent
+  Scheduled = 3,           // Staff assigned, can still be cancelled by Agent
+  InProgress = 4,          // Shooting started, order locked (cannot cancel)
+  AwaitingConfirmation = 5, // Delivery submitted, waiting for Agent confirmation
+  Completed = 6,           // Agent confirmed delivery, order completed
+  Cancelled = 7,           // Order cancelled
 }
 
 export enum TaskStatus {

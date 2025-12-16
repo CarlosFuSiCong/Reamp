@@ -93,9 +93,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         studioItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
       }
 
-      // All studio members can view orders and deliveries
+      // All studio members can view marketplace, orders, and deliveries
       studioItems.push(
-        { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
+        { title: "Marketplace", href: "/dashboard/orders/marketplace", icon: ShoppingCart },
+        { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
         { title: "Deliveries", href: "/dashboard/deliveries", icon: Package }
       );
 

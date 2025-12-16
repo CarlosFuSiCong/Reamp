@@ -7,6 +7,7 @@ import {
   OrderTasksCard,
   OrderSummaryCard,
   OrderInfoCard,
+  OrderActions,
 } from "@/components/orders";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,67 +57,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const isStaff = profile?.studioRole !== undefined && profile?.studioRole !== null;
 
-  const handleCancel = () => {
-    cancelMutation.mutate({ id: orderId });
-    setCancelDialogOpen(false);
-  };
-
-  const handleAction = (action: "accept" | "start" | "complete") => {
-    const configs = {
-      accept: {
-        title: "Accept Order",
-        description:
-          "Are you sure you want to accept this order? This will assign the order to you.",
-      },
-      start: {
-        title: "Start Shoot",
-        description:
-          "Are you sure you want to start this shoot? This will mark the order as in progress.",
-      },
-      complete: {
-        title: "Complete Order",
-        description: "Are you sure you want to mark this order as completed?",
-      },
-    };
-
-    setConfirmAction({
-      open: true,
-      action,
-      ...configs[action],
-    });
-  };
-
-  const confirmActionHandler = async () => {
-    if (!confirmAction.action) return;
-
-    try {
-      switch (confirmAction.action) {
-        case "accept":
-          await acceptMutation.mutateAsync(orderId);
-          break;
-        case "start":
-          await startMutation.mutateAsync(orderId);
-          break;
-        case "complete":
-          await completeMutation.mutateAsync(orderId);
-          break;
-      }
-      setConfirmAction({ open: false, action: null, title: "", description: "" });
-    } catch {
-      // Error is handled by the mutation
-    }
-  };
-
-  // Only agents can cancel orders
-  const canCancelOrder =
-    !isStaff && (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted);
-
-  const canAccept =
-    isStaff &&
-    (order?.status === OrderStatus.Placed || order?.status === OrderStatus.Accepted) &&
-    !order?.assignedPhotographerId;
-  const canStart = isStaff && order?.status === OrderStatus.Scheduled;
-  const canComplete = isStaff && order?.status === OrderStatus.InProgress;
+  // Legacy unused mutations - can be removed
+  // const cancelMutation = useCancelOrder();
+  // const acceptMutation = useAcceptOrder();
+  // const startMutation = useStartOrder();
+  // const completeMutation = useCompleteOrder();
 
   if (isLoading) {
     return <LoadingState />;
@@ -142,22 +87,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 Back to Orders
               </Link>
             </Button>
-            {canCancelOrder && (
-              <Button variant="destructive" onClick={() => setCancelDialogOpen(true)}>
-                <XCircle className="mr-2 h-4 w-4" />
-                Cancel Order
-              </Button>
-            )}
           </div>
         }
       />
 
+      {/* Order Actions */}
+      <OrderActions
+        orderId={order.id}
+        currentStatus={order.status}
+        isAgent={isAgent}
+        isStudio={isStudio}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Only show timeline for agents, not staff */}
-          {!isStaff && (
-            <OrderStatusTimeline currentStatus={order.status} isCancelled={isCancelled} />
-          )}
+          {/* Timeline for all users */}
+          <OrderStatusTimeline currentStatus={order.status} isCancelled={isCancelled} />
 
           {isCancelled && order.cancellationReason && (
             <OrderInfoCard title="Cancellation Reason" icon={<XCircle className="h-5 w-5" />}>
@@ -204,18 +149,19 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             </OrderInfoCard>
           )}
 
-          {order.status === OrderStatus.Completed && (
+          {(order.status === OrderStatus.Completed || order.status === OrderStatus.AwaitingConfirmation) && (
             <Button className="w-full" asChild>
-              <Link href={`/dashboard/orders/${order.id}/delivery`}>View Delivery</Link>
+              <Link href={`/dashboard/deliveries?orderId=${order.id}`}>View Deliveries</Link>
             </Button>
           )}
 
-          {isStaff && (
+          {/* Removed old action buttons - now using OrderActions component */}
+          {false && isStudio && (
             <>
-              {canAccept && (
+              {false && (
                 <Button
                   className="w-full"
-                  onClick={() => handleAction("accept")}
+                  onClick={() => {}}
                   disabled={acceptMutation.isPending}
                 >
                   Accept Order

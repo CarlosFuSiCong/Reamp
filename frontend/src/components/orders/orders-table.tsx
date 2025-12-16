@@ -22,20 +22,39 @@ import { formatDistanceToNow } from "date-fns";
 
 interface OrdersTableProps {
   orders: ShootOrder[];
-  onCancel: (id: string) => void;
+  onCancel?: (id: string) => void;
+  isMarketplace?: boolean;
+  isLoading?: boolean;
+  searchQuery?: string;
+  statusFilter?: string;
 }
 
-export function OrdersTable({ orders, onCancel }: OrdersTableProps) {
+export function OrdersTable({ 
+  orders, 
+  onCancel, 
+  isMarketplace = false,
+  isLoading = false,
+}: OrdersTableProps) {
+  if (isLoading) {
+    return (
+      <div className="rounded-md border">
+        <div className="text-center py-12 text-muted-foreground">Loading orders...</div>
+      </div>
+    );
+  }
+
   if (orders.length === 0) {
     return (
       <div className="rounded-md border">
-        <div className="text-center py-12 text-muted-foreground">No orders found</div>
+        <div className="text-center py-12 text-muted-foreground">
+          {isMarketplace ? "No available orders in marketplace" : "No orders found"}
+        </div>
       </div>
     );
   }
 
   const canCancelOrder = (status: OrderStatus) => {
-    return status === OrderStatus.Placed || status === OrderStatus.Accepted;
+    return status === OrderStatus.Placed || status === OrderStatus.Accepted || status === OrderStatus.Scheduled;
   };
 
   return (
