@@ -53,13 +53,33 @@ namespace Reamp.Application.Delivery.Services
         public async Task<List<DeliveryPackageListDto>> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByOrderIdAsync(orderId, ct);
-            return packages.Adapt<List<DeliveryPackageListDto>>();
+            return packages.Select(p => new DeliveryPackageListDto
+            {
+                Id = p.Id,
+                OrderId = p.OrderId,
+                ListingId = p.ListingId,
+                Title = p.Title,
+                Status = p.Status,
+                ItemCount = p.Items.Count,
+                ExpiresAtUtc = p.ExpiresAtUtc,
+                CreatedAtUtc = p.CreatedAtUtc
+            }).ToList();
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByListingIdAsync(Guid listingId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByListingIdAsync(listingId, ct);
-            return packages.Adapt<List<DeliveryPackageListDto>>();
+            return packages.Select(p => new DeliveryPackageListDto
+            {
+                Id = p.Id,
+                OrderId = p.OrderId,
+                ListingId = p.ListingId,
+                Title = p.Title,
+                Status = p.Status,
+                ItemCount = p.Items.Count,
+                ExpiresAtUtc = p.ExpiresAtUtc,
+                CreatedAtUtc = p.CreatedAtUtc
+            }).ToList();
         }
 
         public async Task<DeliveryPackageDetailDto> UpdateAsync(Guid id, UpdateDeliveryPackageDto dto, CancellationToken ct = default)
