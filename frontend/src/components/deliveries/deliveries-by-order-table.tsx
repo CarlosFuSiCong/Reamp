@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Eye, Package, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DeliveryPackageListDto, DeliveryStatus, OrderDto } from "@/types";
+import { DeliveryPackageListDto, OrderDto } from "@/types";
 import { LoadingState } from "@/components/shared";
+import { DeliveryStatusBadge } from "./delivery-status-badge";
 import { useState } from "react";
 import { getOrderStatusConfig } from "@/lib/utils/enum-labels";
 
@@ -148,7 +149,7 @@ export function DeliveriesByOrderTable({
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <p className="font-medium">{delivery.title}</p>
-                          <DeliveryStatusBadge status={delivery.status} />
+                          <DeliveryStatusBadge status={delivery.status} className="text-xs" />
                         </div>
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                           <span>{delivery.itemCount} files</span>
@@ -173,22 +174,5 @@ export function DeliveriesByOrderTable({
         );
       })}
     </div>
-  );
-}
-
-function DeliveryStatusBadge({ status }: { status: DeliveryStatus }) {
-  const variants: Record<DeliveryStatus, { label: string; variant: any }> = {
-    [DeliveryStatus.Draft]: { label: "Draft", variant: "secondary" },
-    [DeliveryStatus.Published]: { label: "Published", variant: "default" },
-    [DeliveryStatus.Revoked]: { label: "Revoked", variant: "destructive" },
-    [DeliveryStatus.Expired]: { label: "Expired", variant: "outline" },
-  };
-
-  const config = variants[status];
-
-  return (
-    <Badge variant={config.variant} className="text-xs">
-      {config.label}
-    </Badge>
   );
 }

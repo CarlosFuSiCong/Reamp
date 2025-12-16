@@ -4,11 +4,11 @@ import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, Download, Image as ImageIcon, Send, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Image as ImageIcon, Send, Loader2 } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { DeliveryStatusBadge } from "@/components/deliveries/delivery-status-badge";
 import { deliveriesApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { DeliveryStatus } from "@/types";
@@ -247,16 +247,4 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
       </div>
     </div>
   );
-}
-
-function DeliveryStatusBadge({ status }: { status: DeliveryStatus }) {
-  const variants: Record<DeliveryStatus, { label: string; variant: any }> = {
-    [DeliveryStatus.Draft]: { label: "Draft", variant: "secondary" },
-    [DeliveryStatus.Published]: { label: "Published", variant: "default" },
-    [DeliveryStatus.Revoked]: { label: "Revoked", variant: "destructive" },
-    [DeliveryStatus.Expired]: { label: "Expired", variant: "outline" },
-  };
-
-  const config = variants[status];
-  return <Badge variant={config.variant}>{config.label}</Badge>;
 }

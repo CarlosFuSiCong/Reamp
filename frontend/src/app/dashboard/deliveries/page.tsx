@@ -20,6 +20,7 @@ export default function DeliveriesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Fetch orders with their deliveries grouped together
+  // TODO: Optimize with dedicated backend API to avoid N+1 queries
   const { data: ordersWithDeliveries, isLoading } = useQuery({
     queryKey: ["orders-with-deliveries", user?.studioId, user?.agencyId],
     queryFn: async () => {
