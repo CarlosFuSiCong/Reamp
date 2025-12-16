@@ -38,16 +38,17 @@ export default function DeliveriesPage() {
             ? "Manage delivery packages for completed orders"
             : "View media deliveries from photography studios"
         }
-      >
-        {isStudio && (
-          <Link href="/dashboard/deliveries/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Delivery
-            </Button>
-          </Link>
-        )}
-      </PageHeader>
+        action={
+          isStudio ? (
+            <Link href="/dashboard/deliveries/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Delivery
+              </Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
       <DeliveriesFilters
         searchQuery={searchQuery}

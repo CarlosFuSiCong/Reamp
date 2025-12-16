@@ -13,7 +13,8 @@ export function useUpdateProfile() {
       toast.success("Profile updated successfully");
     },
     onError: (error: unknown) => {
-      toast.error(error?.message || "Failed to update profile");
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to update profile");
     },
   });
 }
@@ -29,7 +30,8 @@ export function useUpdateAvatar() {
       toast.success("Avatar updated successfully");
     },
     onError: (error: unknown) => {
-      toast.error(error?.message || "Failed to update avatar");
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to update avatar");
     },
   });
 }
@@ -41,7 +43,8 @@ export function useChangePassword() {
       toast.success("Password changed successfully");
     },
     onError: (error: unknown) => {
-      toast.error(error?.message || "Failed to change password");
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to change password");
     },
   });
 }

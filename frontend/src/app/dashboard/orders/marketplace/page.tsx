@@ -11,14 +11,13 @@ import { OrderStatus } from "@/types";
 export default function OrdersMarketplacePage() {
   const { user } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>(OrderStatus.Placed.toString());
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">(OrderStatus.Placed);
 
   const { data, isLoading } = useQuery({
     queryKey: ["orders", "marketplace", statusFilter, searchQuery],
     queryFn: () =>
       ordersApi.list({
-        status: statusFilter === "all" ? undefined : statusFilter,
-        keyword: searchQuery || undefined,
+        status: statusFilter === "all" ? undefined : statusFilter.toString(),
         page: 1,
         pageSize: 50,
       }),
@@ -47,18 +46,17 @@ export default function OrdersMarketplacePage() {
       />
 
       <OrdersFilters
-        searchQuery={searchQuery}
+        searchKeyword={searchQuery}
         onSearchChange={setSearchQuery}
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
-        showOnlyPlaced
       />
 
       <OrdersTable
         orders={data?.items || []}
         isLoading={isLoading}
         searchQuery={searchQuery}
-        statusFilter={statusFilter}
+        statusFilter={statusFilter === "all" ? undefined : statusFilter.toString()}
         isMarketplace
       />
     </div>

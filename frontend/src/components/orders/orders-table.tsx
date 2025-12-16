@@ -113,7 +113,7 @@ export function OrdersTable({
                         View Details
                       </Link>
                     </DropdownMenuItem>
-                    {canCancelOrder(order.status) && (
+                    {canCancelOrder(order.status) && onCancel && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem

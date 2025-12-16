@@ -150,6 +150,7 @@ export default function AgentOrdersPage() {
       [OrderStatus.Accepted]: { label: "Accepted", variant: "default" },
       [OrderStatus.Scheduled]: { label: "Scheduled", variant: "default" },
       [OrderStatus.InProgress]: { label: "In Progress", variant: "default" },
+      [OrderStatus.AwaitingConfirmation]: { label: "Awaiting Confirmation", variant: "default" },
       [OrderStatus.Completed]: { label: "Completed", variant: "outline" },
       [OrderStatus.Cancelled]: { label: "Cancelled", variant: "destructive" },
     };

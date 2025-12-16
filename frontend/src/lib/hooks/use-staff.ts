@@ -33,7 +33,8 @@ export function useUpdateStaffSkills() {
       toast.success("Skills updated successfully");
     },
     onError: (error: unknown) => {
-      toast.error(error.message || "Failed to update skills");
+      const err = error as { message?: string };
+      toast.error(err.message || "Failed to update skills");
     },
   });
 }

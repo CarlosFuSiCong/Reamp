@@ -17,7 +17,7 @@ import { Loader2 } from "lucide-react";
 
 const deliverySchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
-  watermarkEnabled: z.boolean().default(false),
+  watermarkEnabled: z.boolean(),
 });
 
 type DeliveryFormValues = z.infer<typeof deliverySchema>;

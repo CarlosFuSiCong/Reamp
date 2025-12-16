@@ -69,8 +69,9 @@ export function ApplicationForm({ type, userEmail, onSuccess }: ApplicationFormP
       onSuccess?.();
     },
     onError: (error: unknown) => {
-      const errorMessage = error?.message || "Failed to submit application";
-      const errors = error?.errors;
+      const err = error as { message?: string; errors?: string[] };
+      const errorMessage = err?.message || "Failed to submit application";
+      const errors = err?.errors;
 
       // Show main error message
       toast.error(errorMessage);

@@ -1,5 +1,6 @@
-// Media types
+import { MediaProcessStatus, ListingMediaRole } from "./enums";
 
+// Media provider and resource types
 export enum MediaProvider {
   Cloudinary = 0,
   LocalStorage = 1,
@@ -11,21 +12,6 @@ export enum MediaResourceType {
   Audio = 2,
   Document = 3,
   Other = 4,
-}
-
-export enum MediaProcessStatus {
-  Uploaded = 0,
-  Processing = 1,
-  Ready = 2,
-  Failed = 3,
-}
-
-export enum ListingMediaRole {
-  Cover = 0,
-  Gallery = 1,
-  FloorPlan = 2,
-  Video = 3,
-  VrPreview = 4,
 }
 
 // DTOs
@@ -85,21 +71,6 @@ export interface UploadSessionDto {
   progress: number;
   createdAtUtc: string;
   completedAtUtc?: string;
-}
-
-// Listing Media DTOs
-export interface AddMediaDto {
-  mediaAssetId: string;
-  role?: ListingMediaRole;
-}
-
-export interface ReorderMediaDto {
-  mediaOrders: Record<string, number>;
-}
-
-export interface SetMediaVisibilityDto {
-  mediaId: string;
-  isVisible: boolean;
 }
 
 // Upload Progress Event

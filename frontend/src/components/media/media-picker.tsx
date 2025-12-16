@@ -150,7 +150,7 @@ export function MediaPicker({
             </ScrollArea>
 
             {/* Pagination */}
-            {data && data.totalPages > 1 && (
+            {data && Math.ceil((data.total || 0) / (data.pageSize || 20)) > 1 && (
               <div className="flex items-center justify-between">
                 <Button
                   variant="outline"
@@ -161,12 +161,12 @@ export function MediaPicker({
                   Previous
                 </Button>
                 <span className="text-sm text-muted-foreground">
-                  Page {page} of {data.totalPages}
+                  Page {page} of {Math.ceil((data.total || 0) / (data.pageSize || 20))}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page === data.totalPages}
+                  disabled={page >= Math.ceil((data.total || 0) / (data.pageSize || 20))}
                   onClick={() => setPage((p) => p + 1)}
                 >
                   Next

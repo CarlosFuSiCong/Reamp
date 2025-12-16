@@ -30,7 +30,7 @@ import Link from "next/link";
 const deliverySchema = z.object({
   orderId: z.string().min(1, "Please select an order"),
   title: z.string().min(3, "Title must be at least 3 characters"),
-  watermarkEnabled: z.boolean().default(false),
+  watermarkEnabled: z.boolean(),
 });
 
 type DeliveryFormValues = z.infer<typeof deliverySchema>;
@@ -128,14 +128,18 @@ export default function NewDeliveryPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Create Delivery" description="Upload and deliver media to clients">
-        <Link href="/dashboard/deliveries">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-      </PageHeader>
+      <PageHeader
+        title="Create Delivery"
+        description="Upload and deliver media to clients"
+        action={
+          <Link href="/dashboard/deliveries">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </Link>
+        }
+      />
 
       <form onSubmit={handleSubmit((data) => handleSave(data, false))} className="space-y-6">
         {/* Basic Info */}

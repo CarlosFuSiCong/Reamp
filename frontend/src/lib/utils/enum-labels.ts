@@ -28,6 +28,7 @@ export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
   [OrderStatus.Accepted]: { label: "Accepted", variant: "secondary" },
   [OrderStatus.Scheduled]: { label: "Scheduled", variant: "default" },
   [OrderStatus.InProgress]: { label: "In Progress", variant: "default" },
+  [OrderStatus.AwaitingConfirmation]: { label: "Awaiting Confirmation", variant: "default" },
   [OrderStatus.Completed]: { label: "Completed", variant: "default" },
   [OrderStatus.Cancelled]: { label: "Cancelled", variant: "destructive" },
 };

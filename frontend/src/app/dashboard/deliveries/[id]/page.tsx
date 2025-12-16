@@ -4,7 +4,7 @@ import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, Download, Image as ImageIcon, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Image as ImageIcon, Send, Trash2, Loader2 } from "lucide-react";
 import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,36 +74,40 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-6">
-      <PageHeader title={delivery.title} description={`Delivery Package • Order #${delivery.orderId.slice(0, 8)}`}>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/deliveries">
-            <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-          </Link>
-
-          {isStudio && isDraft && (
-            <>
-              <Link href={`/dashboard/deliveries/${delivery.id}/edit`}>
-                <Button variant="outline">Edit</Button>
-              </Link>
-              <Button onClick={handlePublish} disabled={isPublishing}>
-                {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Send className="mr-2 h-4 w-4" />
-                Publish
+      <PageHeader
+        title={delivery.title}
+        description={`Delivery Package • Order #${delivery.orderId.slice(0, 8)}`}
+        action={
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/deliveries">
+              <Button variant="outline">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
               </Button>
-            </>
-          )}
+            </Link>
 
-          {isStudio && isPublished && (
-            <Button variant="destructive" onClick={handleRevoke} disabled={isRevoking}>
-              {isRevoking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Revoke
-            </Button>
-          )}
-        </div>
-      </PageHeader>
+            {isStudio && isDraft && (
+              <>
+                <Link href={`/dashboard/deliveries/${delivery.id}/edit`}>
+                  <Button variant="outline">Edit</Button>
+                </Link>
+                <Button onClick={handlePublish} disabled={isPublishing}>
+                  {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Send className="mr-2 h-4 w-4" />
+                  Publish
+                </Button>
+              </>
+            )}
+
+            {isStudio && isPublished && (
+              <Button variant="destructive" onClick={handleRevoke} disabled={isRevoking}>
+                {isRevoking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Revoke
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column - Details */}
