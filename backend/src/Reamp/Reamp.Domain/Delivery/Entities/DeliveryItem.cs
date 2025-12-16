@@ -1,3 +1,4 @@
+using Reamp.Domain.Media.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace Reamp.Domain.Delivery.Entities
         public Guid MediaAssetId { get; private set; }
         public string VariantName { get; private set; } = default!; // e.g. wm_1920 / web_1920 / hls
         public int SortOrder { get; private set; }
+        
+        // Navigation property (for Include queries)
+        public MediaAsset? MediaAsset { get; private set; }
 
         private DeliveryItem() { }
 

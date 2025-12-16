@@ -18,6 +18,7 @@ namespace Reamp.Infrastructure.Repositories.Delivery
         {
             return await _set
                 .Include(d => d.Items)
+                    .ThenInclude(i => i.MediaAsset)
                 .Include(d => d.Accesses)
                 .FirstOrDefaultAsync(d => d.Id == id, ct);
         }

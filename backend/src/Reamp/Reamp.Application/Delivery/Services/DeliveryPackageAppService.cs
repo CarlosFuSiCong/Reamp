@@ -41,13 +41,13 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package created with ID: {PackageId}", package.Id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var package = await _deliveryRepo.GetByIdWithDetailsAsync(id, ct);
-            return package?.Adapt<DeliveryPackageDetailDto>();
+            return package == null ? null : MapToDetailDto(package);
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
@@ -92,7 +92,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} updated", id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -141,7 +141,7 @@ namespace Reamp.Application.Delivery.Services
             
             // Reload package with items to return
             var updatedPackage = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
-            return updatedPackage!.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(updatedPackage!);
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveItemAsync(Guid packageId, Guid itemId, CancellationToken ct = default)
@@ -154,7 +154,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item {ItemId} removed from delivery package {PackageId}", itemId, packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> AddAccessAsync(Guid packageId, AddDeliveryAccessDto dto, CancellationToken ct = default)
@@ -180,7 +180,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access added to delivery package {PackageId}", packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveAccessAsync(Guid packageId, Guid accessId, CancellationToken ct = default)
@@ -193,7 +193,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access {AccessId} removed from delivery package {PackageId}", accessId, packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> PublishAsync(Guid id, CancellationToken ct = default)
@@ -212,7 +212,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} published for order {OrderId}", id, package.OrderId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> RevokeAsync(Guid id, CancellationToken ct = default)
@@ -225,7 +225,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} revoked", id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<bool> VerifyAccessPasswordAsync(Guid packageId, string password, CancellationToken ct = default)
@@ -265,6 +265,32 @@ namespace Reamp.Application.Delivery.Services
             var bytes = Encoding.UTF8.GetBytes(password);
             var hash = sha256.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
+        }
+
+        private static DeliveryPackageDetailDto MapToDetailDto(DeliveryPackage package)
+        {
+            return new DeliveryPackageDetailDto
+            {
+                Id = package.Id,
+                OrderId = package.OrderId,
+                ListingId = package.ListingId,
+                Title = package.Title,
+                Status = package.Status,
+                WatermarkEnabled = package.WatermarkEnabled,
+                ExpiresAtUtc = package.ExpiresAtUtc,
+                Items = package.Items.Select(i => new DeliveryItemDto
+                {
+                    Id = i.Id,
+                    MediaAssetId = i.MediaAssetId,
+                    VariantName = i.VariantName,
+                    SortOrder = i.SortOrder,
+                    MediaUrl = i.MediaAsset?.PublicUrl,
+                    ThumbnailUrl = i.MediaAsset?.TryGetVariantUrl("thumbnail", "thumb", "preview")
+                }).ToList(),
+                Accesses = package.Accesses.Adapt<List<DeliveryAccessDto>>(),
+                CreatedAtUtc = package.CreatedAtUtc,
+                UpdatedAtUtc = package.UpdatedAtUtc
+            };
         }
     }
 }
