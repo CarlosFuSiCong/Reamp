@@ -32,7 +32,7 @@ export function useAcceptInvitation() {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       handleMutationSuccess("Invitation accepted", "You have successfully joined the team!");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to accept invitation");
     },
   });
@@ -47,7 +47,7 @@ export function useRejectInvitation() {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       handleMutationSuccess("Invitation rejected", "The invitation has been declined");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to reject invitation");
     },
   });
@@ -62,7 +62,7 @@ export function useCancelInvitation() {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       handleMutationSuccess("Invitation cancelled", "The invitation has been cancelled");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to cancel invitation");
     },
   });
@@ -78,7 +78,7 @@ export function useSendAgencyInvitation() {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       handleMutationSuccess("Invitation sent", "The invitation has been sent successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to send invitation");
     },
   });
@@ -102,7 +102,7 @@ export function useSendStudioInvitation() {
       queryClient.invalidateQueries({ queryKey: ["invitations"] });
       handleMutationSuccess("Invitation sent", "The invitation has been sent successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to send invitation");
     },
   });

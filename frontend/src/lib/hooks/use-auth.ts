@@ -49,7 +49,7 @@ export function useAuth() {
         window.location.href = redirectPath;
       }, 800);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Login error:", error);
       // Don't show toast for login errors - page will show ErrorAlert instead
     },
@@ -78,7 +78,7 @@ export function useAuth() {
         window.location.href = redirectPath;
       }, 800);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error("Registration error:", error);
       // Don't show toast for registration errors - page will show ErrorAlert instead
     },

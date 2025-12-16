@@ -31,7 +31,7 @@ export const staffApi = {
     try {
       const response = await apiClient.get<StaffDetailDto>(`/api/staff/profile/${userProfileId}`);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.status === 404) return null;
       throw error;
     }

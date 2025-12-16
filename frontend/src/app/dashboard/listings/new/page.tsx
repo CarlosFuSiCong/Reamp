@@ -131,7 +131,7 @@ export default function NewListingPage() {
       landAreaSqm: data.landAreaSqm,
     };
 
-    createMutation.mutate(apiData as any, {
+    createMutation.mutate(apiData, {
       onSuccess: () => {
         router.push("/dashboard/listings");
       },

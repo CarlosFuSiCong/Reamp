@@ -68,7 +68,7 @@ export function ApplicationForm({ type, userEmail, onSuccess }: ApplicationFormP
       queryClient.invalidateQueries({ queryKey: ["applications"] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       const errorMessage = error?.message || "Failed to submit application";
       const errors = error?.errors;
 

@@ -63,7 +63,7 @@ export function AvatarUpload({
       const response = await mediaApi.upload(file, setUploadProgress);
       setUploading(false);
       onUpload(response.id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error?.message || "Failed to upload avatar");
       setFile(null);
       setPreview(null);

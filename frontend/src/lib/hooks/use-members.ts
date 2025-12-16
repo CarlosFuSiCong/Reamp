@@ -38,7 +38,7 @@ export function useUpdateAgencyMemberRole() {
         "The member's role has been updated successfully"
       );
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to update member role");
     },
   });
@@ -56,7 +56,7 @@ export function useRemoveAgencyMember() {
       });
       handleMutationSuccess("Member removed", "The member has been removed from the agency");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to remove member");
     },
   });
@@ -92,7 +92,7 @@ export function useUpdateStudioMemberRole() {
         "The member's role has been updated successfully"
       );
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to update member role");
     },
   });
@@ -110,7 +110,7 @@ export function useRemoveStudioMember() {
       });
       handleMutationSuccess("Member removed", "The member has been removed from the studio");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to remove member");
     },
   });

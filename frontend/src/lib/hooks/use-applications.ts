@@ -39,7 +39,7 @@ export function useSubmitAgencyApplication() {
       handleMutationSuccess("Agency application submitted successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to submit agency application");
     },
   });
@@ -54,7 +54,7 @@ export function useSubmitStudioApplication() {
       handleMutationSuccess("Studio application submitted successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to submit studio application");
     },
   });
@@ -70,7 +70,7 @@ export function useReviewApplication() {
       handleMutationSuccess("Application reviewed successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to review application");
     },
   });
@@ -85,7 +85,7 @@ export function useCancelApplication() {
       handleMutationSuccess("Application cancelled successfully");
       queryClient.invalidateQueries({ queryKey: ["applications"] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to cancel application");
     },
   });

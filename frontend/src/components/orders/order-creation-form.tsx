@@ -93,7 +93,13 @@ export function OrderCreationForm() {
     try {
       // Create the order (agencyId and studioId are both optional on frontend)
       // Backend will auto-populate agencyId from the current user's agent record
-      const orderData: any = {
+      const orderData: {
+        title?: string;
+        listingId: string;
+        currency?: string;
+        studioId?: string;
+        scheduledStartUtc?: string;
+      } = {
         title: values.title,
         listingId: values.listingId,
         currency: values.currency,

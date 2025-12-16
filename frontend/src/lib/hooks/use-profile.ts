@@ -12,7 +12,7 @@ export function useUpdateProfile() {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.message || "Failed to update profile");
     },
   });
@@ -28,7 +28,7 @@ export function useUpdateAvatar() {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Avatar updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.message || "Failed to update avatar");
     },
   });
@@ -40,7 +40,7 @@ export function useChangePassword() {
     onSuccess: () => {
       toast.success("Password changed successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.message || "Failed to change password");
     },
   });

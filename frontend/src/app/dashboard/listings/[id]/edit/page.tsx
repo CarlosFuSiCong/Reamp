@@ -160,7 +160,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     };
 
     updateMutation.mutate(
-      { id: resolvedParams.id, data: apiData as any },
+      { id: resolvedParams.id, data: apiData },
       {
         onSuccess: () => {
           router.push("/dashboard/listings");

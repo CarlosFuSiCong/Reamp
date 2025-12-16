@@ -1,6 +1,14 @@
 import apiClient from "@/lib/api-client";
 import { PagedResponse, ShootOrder } from "@/types";
 
+interface BackendPagedResponse<T> {
+  items: T[];
+  totalCount?: number;
+  total?: number;
+  page: number;
+  pageSize: number;
+}
+
 export const ordersApi = {
   async list(params: {
     agencyId?: string;
@@ -10,7 +18,7 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders", {
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders", {
       params,
     });
     // Map totalCount to total for frontend compatibility
@@ -67,7 +75,7 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders/available", {
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders/available", {
       params,
     });
     // Map totalCount to total for frontend compatibility
@@ -82,7 +90,7 @@ export const ordersApi = {
     page?: number;
     pageSize?: number;
   }): Promise<PagedResponse<ShootOrder>> {
-    const response = await apiClient.get<any>("/api/orders/my-orders", {
+    const response = await apiClient.get<BackendPagedResponse<ShootOrder>>("/api/orders/my-orders", {
       params,
     });
     // Map totalCount to total for frontend compatibility

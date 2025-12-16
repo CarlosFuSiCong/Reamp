@@ -39,7 +39,7 @@ export function useCreateOrder() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       handleMutationSuccess("Order created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to create order");
     },
   });
@@ -55,7 +55,7 @@ export function useCancelOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", variables.id] });
       handleMutationSuccess("Order cancelled successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to cancel order");
     },
   });
@@ -72,7 +72,7 @@ export function useStartOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order started successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to start order");
     },
   });
@@ -89,7 +89,7 @@ export function useCompleteOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order completed successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to complete order");
     },
   });
@@ -129,7 +129,7 @@ export function useAcceptOrder() {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       handleMutationSuccess("Order accepted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       handleMutationError(error, "Failed to accept order");
     },
   });
