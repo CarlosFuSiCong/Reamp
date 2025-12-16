@@ -27,6 +27,14 @@ export default function StaffAssignmentPage() {
 
   const isStudio = !!profile?.studioRole;
   const studioId = profile?.studioId;
+  
+  // Check if user has permission to assign staff (Owner = 3, Manager = 2)
+  const roleValue = profile?.studioRole
+    ? typeof profile.studioRole === "string"
+      ? parseInt(profile.studioRole, 10)
+      : Number(profile.studioRole)
+    : 0;
+  const canAssignStaff = roleValue === 2 || roleValue === 3;
 
   const {
     data: ordersData,
@@ -47,6 +55,31 @@ export default function StaffAssignmentPage() {
 
   if (!isStudio || !studioId) {
     return <ErrorState message="Access denied. Studio membership required." />;
+  }
+
+  if (!canAssignStaff) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Staff Assignment"
+          description="Permission required"
+        />
+        <Card className="p-12">
+          <div className="text-center">
+            <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">Access Denied</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Only Studio Owners and Managers can assign staff to orders.
+            </p>
+            <Button asChild className="mt-4" variant="outline">
+              <Link href="/dashboard/orders">
+                View My Orders
+              </Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   const orders = ordersData?.items || [];

@@ -393,8 +393,37 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            if (order.CreatedBy != currentUserId)
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            // Check if user has permission to assign photographer
+            // Only studio managers and owners can assign staff
+            var hasPermission = false;
+            if (order.StudioId.HasValue)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile != null)
+                {
+                    var currentUserStaff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                    if (currentUserStaff != null && currentUserStaff.StudioId == order.StudioId)
+                    {
+                        // Only Manager (2) and Owner (3) can assign staff
+                        if (currentUserStaff.Role == StudioRole.Manager || currentUserStaff.Role == StudioRole.Owner)
+                        {
+                            hasPermission = true;
+                            _logger.LogDebug("User {UserId} with role {Role} is authorized to assign staff for order {OrderId}", 
+                                currentUserId, currentUserStaff.Role, orderId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("User {UserId} with role {Role} attempted to assign staff but lacks permission", 
+                                currentUserId, currentUserStaff.Role);
+                        }
+                    }
+                }
+            }
+
+            if (!hasPermission)
+            {
+                throw new UnauthorizedAccessException("Only studio managers and owners can assign staff to orders");
+            }
 
             var staff = await _staffRepo.GetByIdAsync(dto.PhotographerId, asNoTracking: true, ct);
             if (staff == null || staff.StudioId != order.StudioId)
@@ -413,8 +442,30 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            if (order.CreatedBy != currentUserId)
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            // Check if user has permission to unassign photographer
+            // Only studio managers and owners can unassign staff
+            var hasPermission = false;
+            if (order.StudioId.HasValue)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile != null)
+                {
+                    var currentUserStaff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                    if (currentUserStaff != null && currentUserStaff.StudioId == order.StudioId)
+                    {
+                        // Only Manager (2) and Owner (3) can unassign staff
+                        if (currentUserStaff.Role == StudioRole.Manager || currentUserStaff.Role == StudioRole.Owner)
+                        {
+                            hasPermission = true;
+                        }
+                    }
+                }
+            }
+
+            if (!hasPermission)
+            {
+                throw new UnauthorizedAccessException("Only studio managers and owners can unassign staff from orders");
+            }
 
             order.UnassignPhotographer();
             await _uow.SaveChangesAsync(ct);

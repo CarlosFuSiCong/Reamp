@@ -70,13 +70,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     // Studio navigation (user has studioRole)
     if (profile.studioRole !== undefined && profile.studioRole !== null) {
+      const roleValue =
+        typeof profile.studioRole === "string"
+          ? parseInt(profile.studioRole, 10)
+          : Number(profile.studioRole);
+
       const studioItems: SidebarNavItem[] = [
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
         { title: "Marketplace", href: "/dashboard/marketplace", icon: ShoppingCart },
-        { title: "Assign Staff", href: "/dashboard/staff-assignment", icon: Users },
-        { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
-        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package },
       ];
+
+      // Only Owner (3) and Manager (2) can access staff assignment
+      if (roleValue === 2 || roleValue === 3) {
+        studioItems.push({ title: "Assign Staff", href: "/dashboard/staff-assignment", icon: Users });
+      }
+
+      studioItems.push(
+        { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
+        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package }
+      );
 
       return [...baseItems, ...studioItems];
     }

@@ -26,6 +26,14 @@ export default function AssignStaffPage({ params }: { params: Promise<{ id: stri
 
   const studioId = profile?.studioId;
   const isStudio = !!profile?.studioRole;
+  
+  // Check if user has permission to assign staff (Owner = 3, Manager = 2)
+  const roleValue = profile?.studioRole
+    ? typeof profile.studioRole === "string"
+      ? parseInt(profile.studioRole, 10)
+      : Number(profile.studioRole)
+    : 0;
+  const canAssignStaff = roleValue === 2 || roleValue === 3;
 
   if (orderLoading) {
     return <LoadingState message="Loading order..." />;
@@ -37,6 +45,43 @@ export default function AssignStaffPage({ params }: { params: Promise<{ id: stri
 
   if (!isStudio || !studioId) {
     return <ErrorState message="Access denied. Studio membership required." />;
+  }
+
+  if (!canAssignStaff) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Assign Photographer"
+          description="Permission required"
+          action={
+            <Button variant="outline" asChild>
+              <Link href={`/dashboard/orders/${orderId}`}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Order
+              </Link>
+            </Button>
+          }
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Access Denied</CardTitle>
+            <CardDescription>
+              Only Studio Owners and Managers can assign staff to orders
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              You do not have permission to assign photographers. Please contact your studio manager or owner.
+            </p>
+            <Button asChild className="mt-4">
+              <Link href="/dashboard/orders">
+                View My Orders
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Check if order is in correct status for assignment
