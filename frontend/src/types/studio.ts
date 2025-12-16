@@ -1,4 +1,4 @@
-import { AccountStatus, StaffRole } from "./enums";
+import { AccountStatus, StudioRole } from "./enums";
 
 export interface Studio {
   id: string;
@@ -24,7 +24,7 @@ export interface Staff {
   firstName: string;
   lastName: string;
   phone?: string;
-  role: StaffRole;
+  role: StudioRole;
   status: AccountStatus;
   createdAtUtc: string;
   updatedAtUtc: string;

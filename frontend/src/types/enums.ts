@@ -29,13 +29,6 @@ export enum AccountStatus {
   Suspended = 2,
 }
 
-export enum StaffRole {
-  Photographer = 1,
-  Videographer = 2,
-  Editor = 3,
-  Manager = 4,
-}
-
 // Staff Skills (Flags enum)
 export enum StaffSkills {
   None = 0,

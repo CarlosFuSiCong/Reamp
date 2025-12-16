@@ -52,15 +52,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       return [...baseItems, ...adminItems, ...orgItems];
     }
 
-    // For regular Staff (no organization)
-    if (
-      user.role === UserRole.Staff &&
-      (profile.agencyRole === undefined || profile.agencyRole === null) &&
-      (profile.studioRole === undefined || profile.studioRole === null)
-    ) {
-      return baseItems;
-    }
-
     // Agency navigation (user has agencyRole)
     if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
       const agencyItems: SidebarNavItem[] = [
