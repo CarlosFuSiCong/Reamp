@@ -51,6 +51,9 @@ namespace Reamp.Api.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetOrderList(
+            [FromQuery] Guid? agencyId = null,
+            [FromQuery] Guid? studioId = null,
+            [FromQuery] Guid? listingId = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20,
             [FromQuery] ShootOrderStatus? status = null,
@@ -63,6 +66,9 @@ namespace Reamp.Api.Controllers
             // Create filter from query parameters
             var filter = new OrderFilterDto
             {
+                AgencyId = agencyId,
+                StudioId = studioId,
+                ListingId = listingId,
                 Status = status
                 // keyword filtering is not yet implemented in the backend
             };
