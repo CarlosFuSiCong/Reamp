@@ -76,6 +76,7 @@ export function AvatarUpload({
   // Clear UI state when profile update completes (isUploading: true -> false)
   useEffect(() => {
     if (prevIsUploadingRef.current && !isUploading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
