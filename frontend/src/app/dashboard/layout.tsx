@@ -15,16 +15,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const getNavigationItems = (): SidebarNavItem[] => {
     if (!user || !profile) return [];
 
-    // Debug: Log profile data to console
-    console.log("Dashboard Layout - User & Profile Data:", {
-      userRole: user.role,
-      profileRole: profile.role,
-      agencyId: profile.agencyId,
-      agencyRole: profile.agencyRole,
-      studioId: profile.studioId,
-      studioRole: profile.studioRole,
-    });
-
     // Base items for all authenticated users
     const baseItems: SidebarNavItem[] = [
       { title: "Profile", href: "/dashboard/profile", icon: User },
@@ -79,14 +69,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     // Studio navigation (user has studioRole)
-    const hasStudioRole = profile.studioRole !== undefined && profile.studioRole !== null;
-    console.log("Studio Role Check:", {
-      studioRole: profile.studioRole,
-      hasStudioRole,
-      studioRoleType: typeof profile.studioRole,
-    });
-
-    if (hasStudioRole) {
+    if (profile.studioRole !== undefined && profile.studioRole !== null) {
       const studioItems: SidebarNavItem[] = [
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
         { title: "Marketplace", href: "/dashboard/marketplace", icon: ShoppingCart },
@@ -94,16 +77,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Deliveries", href: "/dashboard/deliveries", icon: Package },
       ];
 
-      console.log("Returning Studio Navigation Items:", studioItems);
       return [...baseItems, ...studioItems];
     }
 
-    console.log("No organization role found, returning base items only");
     return baseItems;
   };
 
   const navItems = getNavigationItems();
-  console.log("Final Navigation Items:", navItems);
 
   if (isLoading) {
     return (
