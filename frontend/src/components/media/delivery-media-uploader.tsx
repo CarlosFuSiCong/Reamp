@@ -114,7 +114,7 @@ export function DeliveryMediaUploader({
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
     const session = await mediaApi.initiateChunkedUpload({
       fileName: file.name,
-      fileSize: file.size,
+      totalSize: file.size,
       contentType: file.type,
       totalChunks,
       ownerStudioId,
