@@ -182,10 +182,16 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {id} not found");
 
+            // Publish the delivery
             package.Publish();
+
+            // TODO: Update related order status to AwaitingConfirmation
+            // This will be implemented when Order domain methods are added
+            // For now, the status update will be handled by the Order service
+
             await _uow.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Delivery package {PackageId} published", id);
+            _logger.LogInformation("Delivery package {PackageId} published for order {OrderId}", id, package.OrderId);
             return package.Adapt<DeliveryPackageDetailDto>();
         }
 
