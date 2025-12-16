@@ -20,6 +20,9 @@ namespace Reamp.Domain.Delivery.Repositories
 
         // Get expired packages that need cleanup
         Task<List<DeliveryPackage>> GetExpiredPackagesAsync(CancellationToken ct = default);
+        
+        // Add delivery items without loading parent package (avoids RowVersion conflicts)
+        Task AddItemsDirectlyAsync(Guid packageId, List<DeliveryItem> items, CancellationToken ct = default);
     }
 }
 

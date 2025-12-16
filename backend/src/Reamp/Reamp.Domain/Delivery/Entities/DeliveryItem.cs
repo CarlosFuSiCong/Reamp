@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +16,7 @@ namespace Reamp.Domain.Delivery.Entities
 
         private DeliveryItem() { }
 
-        internal static DeliveryItem Create(Guid packageId, Guid mediaAssetId, string variantName, int sortOrder)
+        public static DeliveryItem Create(Guid packageId, Guid mediaAssetId, string variantName, int sortOrder)
         {
             if (packageId == Guid.Empty) throw new ArgumentException("PackageId required");
             if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId required");

@@ -70,6 +70,16 @@ namespace Reamp.Infrastructure.Repositories.Delivery
                            d.ExpiresAtUtc.Value <= now)
                 .ToListAsync(ct);
         }
+
+        public async Task AddItemsDirectlyAsync(Guid packageId, List<DeliveryItem> items, CancellationToken ct = default)
+        {
+            // Add items directly to DbSet without loading parent package
+            // This avoids triggering parent entity updates and RowVersion conflicts
+            foreach (var item in items)
+            {
+                await _db.Set<DeliveryItem>().AddAsync(item, ct);
+            }
+        }
     }
 }
 

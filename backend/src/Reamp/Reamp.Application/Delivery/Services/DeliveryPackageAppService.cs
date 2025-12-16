@@ -114,26 +114,30 @@ namespace Reamp.Application.Delivery.Services
 
         public async Task<DeliveryPackageDetailDto> AddItemsBatchAsync(Guid packageId, List<AddDeliveryItemDto> items, CancellationToken ct = default)
         {
-            // Get package with fresh tracking
-            var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
-            if (package == null)
+            // Verify package exists (but don't track it to avoid RowVersion conflicts)
+            var packageExists = await _deliveryRepo.GetByIdAsync(packageId, asNoTracking: true, ct);
+            if (packageExists == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
             _logger.LogInformation("Batch adding {Count} items to package {PackageId}", items.Count, packageId);
 
-            // Add all items in one go
-            foreach (var dto in items)
-            {
-                package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
-            }
+            // Create DeliveryItem entities
+            var deliveryItems = items.Select(dto => 
+                DeliveryItem.Create(packageId, dto.MediaAssetId, dto.VariantName, dto.SortOrder)
+            ).ToList();
+
+            // Add items directly to database without loading parent package
+            // This avoids triggering parent entity updates and RowVersion conflicts
+            await _deliveryRepo.AddItemsDirectlyAsync(packageId, deliveryItems, ct);
             
             // Save once after all items are added
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("{Count} items added to delivery package {PackageId}", items.Count, packageId);
             
-            // Return updated package
-            return package.Adapt<DeliveryPackageDetailDto>();
+            // Reload package with items to return
+            var updatedPackage = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
+            return updatedPackage!.Adapt<DeliveryPackageDetailDto>();
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveItemAsync(Guid packageId, Guid itemId, CancellationToken ct = default)
