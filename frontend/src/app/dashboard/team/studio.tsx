@@ -55,7 +55,7 @@ export default function StudioTeamPage() {
     isLoading: membersLoading,
     error: membersError,
   } = useStudioMembers(studioId);
-  const { data: invitations, isLoading: invitationsLoading } = useStudioInvitations(studioId);
+  const { data: invitations } = useStudioInvitations(studioId);
 
   const updateRole = useUpdateStudioMemberRole();
   const removeMember = useRemoveStudioMember();

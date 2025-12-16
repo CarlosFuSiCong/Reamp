@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShootTask, ShootTaskType } from "@/types";
+import { ShootTask } from "@/types";
 import { getTaskTypeLabel } from "@/lib/utils/enum-labels";
 import { Calendar, DollarSign, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
@@ -18,7 +18,7 @@ export function OrderTasksCard({ tasks, currency }: OrderTasksCardProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {tasks.map((task, index) => (
+          {tasks.map((task) => (
             <div
               key={task.id}
               className="flex items-start justify-between gap-4 p-4 rounded-lg border"

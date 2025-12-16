@@ -2,7 +2,6 @@ import apiClient from "@/lib/api-client";
 import {
   LoginDto,
   RegisterDto,
-  TokenResponse,
   UserInfoDto,
   UserProfile,
   PasswordPolicy,

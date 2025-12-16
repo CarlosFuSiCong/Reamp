@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminApi, StudioSummary } from "@/lib/api/admin";
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/api/admin";
 import {
   Table,
   TableBody,
@@ -27,7 +27,6 @@ import { formatDistanceToNow } from "date-fns";
 
 export function StudiosTable() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   const {
     data: studios,

@@ -47,7 +47,6 @@ export default function AgentOrdersPage() {
 
   // Determine if user is staff
   const isStaff = profile?.studioRole !== undefined && profile?.studioRole !== null;
-  const isAgent = profile?.agencyRole !== undefined && profile?.agencyRole !== null;
 
   // Agent queries
   const {
@@ -169,7 +168,7 @@ export default function AgentOrdersPage() {
     return names[type] || "Unknown";
   };
 
-  const renderOrderCard = (order: ShootOrder, showActions: boolean = true) => (
+  const renderOrderCard = (order: ShootOrder, showActions = true) => (
     <Card key={order.id} className="hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex items-start justify-between">

@@ -78,7 +78,7 @@ export function getRoleDashboard(role: UserRole): string {
   }
 }
 
-export function canAccessRoute(pathname: string, role: UserRole): boolean {
+export function canAccessRoute(): boolean {
   return true;
 }
 

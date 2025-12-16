@@ -8,7 +8,7 @@ export function useStudios(params?: { status?: string; page?: number; pageSize?:
     queryFn: async () => {
       try {
         return await studiosApi.list(params || {});
-      } catch (error) {
+      } catch {
         return { items: [], total: 0, page: 1, pageSize: 20 };
       }
     },

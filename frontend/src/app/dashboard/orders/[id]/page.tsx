@@ -21,13 +21,12 @@ import { useListing } from "@/lib/hooks/use-listings";
 import { useStudio } from "@/lib/hooks/use-studios";
 import { useProfile } from "@/lib/hooks";
 import { OrderStatus } from "@/types";
-import { ArrowLeft, XCircle, Building2, Camera, Home } from "lucide-react";
+import { ArrowLeft, XCircle, Camera, Home } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const router = useRouter();
   const orderId = resolvedParams.id;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -42,7 +41,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     description: "",
   });
 
-  const { data: order, isLoading, error } = useOrder(orderId);
+  const { data: order, isLoading } = useOrder(orderId);
   const { data: listing } = useListing(order?.listingId || null);
   // Filter out empty GUID for studio - marketplace orders have null or empty GUID
   const validStudioId =

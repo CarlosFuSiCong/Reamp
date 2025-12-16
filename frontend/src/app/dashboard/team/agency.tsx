@@ -54,7 +54,7 @@ export default function AgencyTeamPage() {
     isLoading: membersLoading,
     error: membersError,
   } = useAgencyMembers(agencyId);
-  const { data: invitations, isLoading: invitationsLoading } = useAgencyInvitations(agencyId);
+  const { data: invitations } = useAgencyInvitations(agencyId);
 
   const updateRole = useUpdateAgencyMemberRole();
   const removeMember = useRemoveAgencyMember();

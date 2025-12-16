@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Sidebar, Navbar, SidebarNavItem } from "@/components/layout";
-import { LayoutDashboard, Users, Building2, Settings, FileText, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Settings } from "lucide-react";
 
 const sidebarItems: SidebarNavItem[] = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -18,7 +18,7 @@ const sidebarItems: SidebarNavItem[] = [
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

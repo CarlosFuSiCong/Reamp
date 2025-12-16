@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, User, FileText, Bell } from "lucide-react";
+import { Building2, LogOut, FileText, Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
