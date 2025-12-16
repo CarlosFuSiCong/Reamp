@@ -7,3 +7,4 @@ export { OrderActions } from "./order-actions";
 export { OrderCard } from "./order-card";
 export { OrdersEmptyState } from "./orders-empty-state";
 export { StudioWorkflowTabs } from "./studio-workflow-tabs";
+export { AssignStaffForm } from "./assign-staff-form";

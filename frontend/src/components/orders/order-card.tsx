@@ -1,23 +1,26 @@
 import Link from "next/link";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShootOrder } from "@/types";
+import { Button } from "@/components/ui/button";
+import { ShootOrder, OrderStatus } from "@/types";
 import { getOrderStatusConfig } from "@/lib/utils/enum-labels";
-import { Calendar, MapPin, Building2, Camera, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, Building2, Camera, ChevronRight, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface OrderCardProps {
   order: ShootOrder;
   isAgent?: boolean;
   isStudio?: boolean;
+  showActions?: boolean;
 }
 
-export function OrderCard({ order, isAgent, isStudio }: OrderCardProps) {
+export function OrderCard({ order, isAgent, isStudio, showActions = false }: OrderCardProps) {
   const statusConfig = getOrderStatusConfig(order.status);
+  const needsStaffAssignment = isStudio && order.status === OrderStatus.Accepted;
 
   return (
-    <Link href={`/dashboard/orders/${order.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Card className="hover:shadow-md transition-shadow flex flex-col">
+      <Link href={`/dashboard/orders/${order.id}`} className="flex-1">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -88,7 +91,18 @@ export function OrderCard({ order, isAgent, isStudio }: OrderCardProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
-    </Link>
+      </Link>
+      
+      {showActions && needsStaffAssignment && (
+        <CardFooter className="pt-0">
+          <Button asChild className="w-full" size="sm">
+            <Link href={`/dashboard/orders/${order.id}/assign`}>
+              <Users className="mr-2 h-4 w-4" />
+              Assign Staff
+            </Link>
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
   );
 }

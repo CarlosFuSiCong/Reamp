@@ -66,8 +66,28 @@ export const ordersApi = {
   /**
    * Studio schedules order and assigns staff (Accepted -> Scheduled)
    */
-  async scheduleOrder(id: string): Promise<void> {
-    await apiClient.post(`/api/orders/${id}/schedule`);
+  async scheduleOrder(id: string, data?: {
+    scheduledStartUtc?: string;
+    scheduledEndUtc?: string;
+    schedulingNotes?: string;
+  }): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/schedule`, data);
+  },
+
+  /**
+   * Assign photographer to order
+   */
+  async assignPhotographer(orderId: string, photographerId: string): Promise<void> {
+    await apiClient.post(`/api/orders/${orderId}/assign-photographer`, {
+      photographerId,
+    });
+  },
+
+  /**
+   * Unassign photographer from order
+   */
+  async unassignPhotographer(orderId: string): Promise<void> {
+    await apiClient.post(`/api/orders/${orderId}/unassign-photographer`);
   },
 
   /**

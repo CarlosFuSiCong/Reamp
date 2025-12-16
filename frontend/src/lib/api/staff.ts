@@ -7,7 +7,7 @@ export interface StaffDetailDto {
   studioId: string;
   studioName?: string;
   role: number; // StudioRole
-  skills: StaffSkills;
+  skills: number; // StaffSkills as flags
   createdAtUtc: string;
   updatedAtUtc: string;
   firstName: string;
