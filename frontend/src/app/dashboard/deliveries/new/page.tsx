@@ -22,7 +22,7 @@ import {
 import { ChunkedUpload } from "@/components/media";
 import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
-import { MediaAssetDetailDto } from "@/types";
+import { MediaAssetDetailDto, OrderStatus } from "@/types";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Save, Send } from "lucide-react";
 import Link from "next/link";
@@ -45,10 +45,10 @@ export default function NewDeliveryPage() {
   const { data: ordersData } = useQuery({
     queryKey: ["orders", "ready-for-delivery"],
     queryFn: async () => {
-      // Fetch both InProgress and AwaitingDelivery orders
+      // Fetch both InProgress (4) and AwaitingDelivery (5) orders
       const [inProgressOrders, awaitingOrders] = await Promise.all([
-        ordersApi.list({ status: "InProgress", page: 1, pageSize: 100 }),
-        ordersApi.list({ status: "AwaitingDelivery", page: 1, pageSize: 100 }),
+        ordersApi.list({ status: String(OrderStatus.InProgress), page: 1, pageSize: 100 }),
+        ordersApi.list({ status: String(OrderStatus.AwaitingDelivery), page: 1, pageSize: 100 }),
       ]);
       
       return {
@@ -169,7 +169,7 @@ export default function NewDeliveryPage() {
                 <SelectContent>
                   {ordersData?.items.map((order) => (
                     <SelectItem key={order.id} value={order.id}>
-                      Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"} ({order.status === 4 ? "In Progress" : "Awaiting Delivery"})
+                      Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"} ({order.status === OrderStatus.InProgress ? "In Progress" : "Awaiting Delivery"})
                     </SelectItem>
                   ))}
                   {(!ordersData || ordersData.items.length === 0) && (
