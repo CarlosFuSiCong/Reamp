@@ -94,9 +94,11 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
     },
   });
 
+  const { reset } = form;
+  
   useEffect(() => {
     if (listing) {
-      form.reset({
+      reset({
         title: listing.title,
         description: listing.description,
         price: listing.price,
@@ -116,8 +118,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
         country: listing.country,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listing]);
+  }, [listing, reset]);
 
   const onSubmit = async (data: ListingFormValues) => {
     console.log("📝 onSubmit called - Current step:", currentStep, "Total steps:", STEPS.length);
