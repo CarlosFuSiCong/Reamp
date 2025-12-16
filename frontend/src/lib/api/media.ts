@@ -17,7 +17,7 @@ export const mediaApi = {
     dto: InitiateChunkedUploadDto
   ): Promise<UploadSessionDto> => {
     const response = await apiClient.post<UploadSessionDto>(
-      "/media/chunked/initiate",
+      "/api/media/chunked/initiate",
       dto
     );
     return response.data;
@@ -37,7 +37,7 @@ export const mediaApi = {
     formData.append("chunk", chunkData);
 
     const response = await apiClient.post<UploadSessionDto>(
-      "/media/chunked/upload",
+      "/api/media/chunked/upload",
       formData,
       {
         headers: {
@@ -55,7 +55,7 @@ export const mediaApi = {
     sessionId: string
   ): Promise<MediaAssetDetailDto> => {
     const response = await apiClient.post<MediaAssetDetailDto>(
-      `/media/chunked/complete/${sessionId}`
+      `/api/media/chunked/complete/${sessionId}`
     );
     return response.data;
   },
@@ -67,7 +67,7 @@ export const mediaApi = {
     sessionId: string
   ): Promise<UploadSessionDto> => {
     const response = await apiClient.get<UploadSessionDto>(
-      `/media/chunked/status/${sessionId}`
+      `/api/media/chunked/status/${sessionId}`
     );
     return response.data;
   },
@@ -76,7 +76,7 @@ export const mediaApi = {
    * Cancel upload session
    */
   cancelUploadSession: async (sessionId: string): Promise<void> => {
-    await apiClient.delete(`/media/chunked/cancel/${sessionId}`);
+    await apiClient.delete(`/api/media/chunked/cancel/${sessionId}`);
   },
 
   // ===== Media Asset Management =====
@@ -85,7 +85,7 @@ export const mediaApi = {
    * Get media asset by ID
    */
   getById: async (id: string): Promise<MediaAssetDetailDto> => {
-    const response = await apiClient.get<MediaAssetDetailDto>(`/media/${id}`);
+    const response = await apiClient.get<MediaAssetDetailDto>(`/api/media/${id}`);
     return response.data;
   },
 
@@ -98,7 +98,7 @@ export const mediaApi = {
     pageSize?: number;
   }): Promise<PagedResponse<MediaAssetListDto>> => {
     const response = await apiClient.get<PagedResponse<MediaAssetListDto>>(
-      `/media/studio/${params.studioId}`,
+      `/api/media/studio/${params.studioId}`,
       { params }
     );
     return response.data;
