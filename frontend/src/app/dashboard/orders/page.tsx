@@ -34,6 +34,8 @@ export default function OrdersPage() {
     isLoading: ordersLoading,
     error: ordersError,
   } = useOrders({
+    agencyId: isAgent ? profile?.agencyId : undefined,
+    studioId: isStudio ? profile?.studioId : undefined,
     status: statusFilter === "all" ? undefined : statusFilter,
     keyword: searchKeyword || undefined,
     page,
