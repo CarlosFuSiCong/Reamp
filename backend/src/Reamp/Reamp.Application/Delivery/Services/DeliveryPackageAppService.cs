@@ -89,37 +89,21 @@ namespace Reamp.Application.Delivery.Services
 
         public async Task<DeliveryPackageDetailDto> AddItemAsync(Guid packageId, AddDeliveryItemDto dto, CancellationToken ct = default)
         {
-            // Get package with fresh tracking
-            var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
-            if (package == null)
-                throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
-
-            _logger.LogInformation("Loaded package {PackageId}, Items count: {ItemsCount}, RowVersion: {RowVersion}",
-                packageId, package.Items.Count, package.RowVersion != null ? BitConverter.ToString(package.RowVersion) : "NULL");
-
-            // Add item to the package
-            var newItem = package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
-            
-            _logger.LogInformation("Added item {ItemId} to package {PackageId}, Total items: {TotalItems}",
-                newItem.Id, packageId, package.Items.Count);
-            
-            // Save changes
-            await _uow.SaveChangesAsync(ct);
-
-            _logger.LogInformation("Item added to delivery package {PackageId}", packageId);
-            
-            // Return updated package
-            return package.Adapt<DeliveryPackageDetailDto>();
+            // Use batch method for consistency
+            return await AddItemsBatchAsync(packageId, new List<AddDeliveryItemDto> { dto }, ct);
         }
 
         public async Task<DeliveryPackageDetailDto> AddItemsBatchAsync(Guid packageId, List<AddDeliveryItemDto> items, CancellationToken ct = default)
         {
-            // Verify package exists (but don't track it to avoid RowVersion conflicts)
+            if (items == null || items.Count == 0)
+                throw new ArgumentException("At least one item is required", nameof(items));
+
+            // Verify package exists (use no tracking to avoid RowVersion conflicts)
             var packageExists = await _deliveryRepo.GetByIdAsync(packageId, asNoTracking: true, ct);
             if (packageExists == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            _logger.LogInformation("Batch adding {Count} items to package {PackageId}", items.Count, packageId);
+            _logger.LogInformation("Adding {Count} item(s) to delivery package {PackageId}", items.Count, packageId);
 
             // Create DeliveryItem entities
             var deliveryItems = items.Select(dto => 
@@ -133,7 +117,7 @@ namespace Reamp.Application.Delivery.Services
             // Save once after all items are added
             await _uow.SaveChangesAsync(ct);
 
-            _logger.LogInformation("{Count} items added to delivery package {PackageId}", items.Count, packageId);
+            _logger.LogInformation("Successfully added {Count} item(s) to delivery package {PackageId}", items.Count, packageId);
             
             // Reload package with items to return
             var updatedPackage = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);

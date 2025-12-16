@@ -16,16 +16,6 @@ namespace Reamp.Infrastructure.Repositories.Delivery
 
         public async Task<DeliveryPackage?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
         {
-            // Clear any existing tracked entities to avoid RowVersion conflicts
-            var existingEntry = _db.ChangeTracker.Entries<DeliveryPackage>()
-                .FirstOrDefault(e => e.Entity.Id == id);
-            
-            if (existingEntry != null)
-            {
-                existingEntry.State = EntityState.Detached;
-            }
-
-            // Now query with fresh tracking
             return await _set
                 .Include(d => d.Items)
                 .Include(d => d.Accesses)
@@ -75,10 +65,7 @@ namespace Reamp.Infrastructure.Repositories.Delivery
         {
             // Add items directly to DbSet without loading parent package
             // This avoids triggering parent entity updates and RowVersion conflicts
-            foreach (var item in items)
-            {
-                await _db.Set<DeliveryItem>().AddAsync(item, ct);
-            }
+            await _db.Set<DeliveryItem>().AddRangeAsync(items, ct);
         }
     }
 }
