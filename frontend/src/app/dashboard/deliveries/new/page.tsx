@@ -87,7 +87,51 @@ export default function NewDeliveryPage() {
   });
 
   const selectedOrderId = watch("orderId");
-  const selectedOrder = ordersData?.items.find((o) => o.id === selectedOrderId);
+  
+  // Fetch full order details when an order is selected
+  const { data: selectedOrder } = useQuery({
+    queryKey: ["order-detail", selectedOrderId],
+    queryFn: () => ordersApi.getById(selectedOrderId),
+    enabled: !!selectedOrderId,
+  });
+
+  // Determine accepted file types based on order tasks
+  const getAcceptedFileTypes = () => {
+    if (!selectedOrder?.tasks || selectedOrder.tasks.length === 0) {
+      return "image/*,video/*"; // Default: accept both
+    }
+
+    const hasPhotography = selectedOrder.tasks.some((t) => t.type === 1); // Photography
+    const hasVideo = selectedOrder.tasks.some((t) => t.type === 2); // Video
+    const hasFloorplan = selectedOrder.tasks.some((t) => t.type === 4); // Floorplan
+
+    const acceptedTypes: string[] = [];
+    if (hasPhotography || hasFloorplan) {
+      acceptedTypes.push("image/*");
+    }
+    if (hasVideo) {
+      acceptedTypes.push("video/*");
+    }
+
+    return acceptedTypes.length > 0 ? acceptedTypes.join(",") : "image/*,video/*";
+  };
+
+  const getFileTypeDescription = () => {
+    if (!selectedOrder?.tasks || selectedOrder.tasks.length === 0) {
+      return "images and videos";
+    }
+
+    const hasPhotography = selectedOrder.tasks.some((t) => t.type === 1);
+    const hasVideo = selectedOrder.tasks.some((t) => t.type === 2);
+    const hasFloorplan = selectedOrder.tasks.some((t) => t.type === 4);
+
+    const types: string[] = [];
+    if (hasPhotography) types.push("photos");
+    if (hasVideo) types.push("videos");
+    if (hasFloorplan) types.push("floorplans");
+
+    return types.join(" and ");
+  };
 
   const handleSave = async (data: DeliveryFormValues, publish: boolean) => {
     if (uploadedMedia.length === 0) {
@@ -179,11 +223,21 @@ export default function NewDeliveryPage() {
                   <SelectValue placeholder="Select an order to deliver" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ordersData?.items.map((order) => (
-                    <SelectItem key={order.id} value={order.id}>
-                      Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"} ({order.status === OrderStatus.InProgress ? "In Progress" : "Awaiting Delivery"})
-                    </SelectItem>
-                  ))}
+                  {ordersData?.items.map((order) => {
+                    const taskTypes: string[] = [];
+                    if (order.tasks) {
+                      if (order.tasks.some((t) => t.type === 1)) taskTypes.push("📷 Photo");
+                      if (order.tasks.some((t) => t.type === 2)) taskTypes.push("🎬 Video");
+                      if (order.tasks.some((t) => t.type === 4)) taskTypes.push("📐 Floorplan");
+                    }
+                    const taskInfo = taskTypes.length > 0 ? ` [${taskTypes.join(", ")}]` : "";
+                    
+                    return (
+                      <SelectItem key={order.id} value={order.id}>
+                        Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"}{taskInfo}
+                      </SelectItem>
+                    );
+                  })}
                   {(!ordersData || ordersData.items.length === 0) && (
                     <SelectItem value="none" disabled>
                       No orders ready for delivery
@@ -224,17 +278,28 @@ export default function NewDeliveryPage() {
         <Card>
           <CardHeader>
             <CardTitle>Media Files</CardTitle>
-            <CardDescription>Upload photos and videos for this delivery</CardDescription>
+            <CardDescription>
+              {selectedOrder
+                ? `Upload ${getFileTypeDescription()} for this order`
+                : "Select an order first to upload media"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <DeliveryMediaUploader
-              ownerStudioId={user.studioId}
-              onUploadComplete={(assets) => {
-                setUploadedMedia((prev) => [...prev, ...assets]);
-              }}
-              maxFiles={100}
-              maxSizeMB={500}
-            />
+            {selectedOrder ? (
+              <DeliveryMediaUploader
+                ownerStudioId={user.studioId}
+                onUploadComplete={(assets) => {
+                  setUploadedMedia((prev) => [...prev, ...assets]);
+                }}
+                accept={getAcceptedFileTypes()}
+                maxFiles={100}
+                maxSizeMB={500}
+              />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Please select an order above to start uploading media</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
