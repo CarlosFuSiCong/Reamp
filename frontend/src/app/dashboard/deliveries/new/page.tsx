@@ -43,12 +43,24 @@ export default function NewDeliveryPage() {
 
   // Fetch orders that are ready for delivery upload (InProgress or AwaitingDelivery)
   const { data: ordersData } = useQuery({
-    queryKey: ["orders", "ready-for-delivery"],
+    queryKey: ["orders", "ready-for-delivery", user?.studioId],
     queryFn: async () => {
-      // Fetch both InProgress (4) and AwaitingDelivery (5) orders
+      if (!user?.studioId) return { items: [], total: 0 };
+      
+      // Fetch both InProgress (4) and AwaitingDelivery (5) orders for this studio
       const [inProgressOrders, awaitingOrders] = await Promise.all([
-        ordersApi.list({ status: String(OrderStatus.InProgress), page: 1, pageSize: 100 }),
-        ordersApi.list({ status: String(OrderStatus.AwaitingDelivery), page: 1, pageSize: 100 }),
+        ordersApi.list({ 
+          studioId: user.studioId,
+          status: String(OrderStatus.InProgress), 
+          page: 1, 
+          pageSize: 100 
+        }),
+        ordersApi.list({ 
+          studioId: user.studioId,
+          status: String(OrderStatus.AwaitingDelivery), 
+          page: 1, 
+          pageSize: 100 
+        }),
       ]);
       
       return {
