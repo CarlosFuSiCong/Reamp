@@ -5,11 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, User, Loader2 } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Form,
   FormControl,
@@ -26,20 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ordersApi } from "@/lib/api/orders";
 import { useStudioStaff } from "@/lib/hooks/use-studio-staff";
 import { StaffSkills } from "@/types/enums";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 const assignStaffSchema = z.object({
   photographerId: z.string().min(1, "Please select a photographer"),
-  scheduledStartUtc: z.date(),
-  scheduledEndUtc: z.date().optional(),
-  schedulingNotes: z.string().optional(),
 });
 
 type AssignStaffFormValues = z.infer<typeof assignStaffSchema>;
@@ -63,14 +55,13 @@ export function AssignStaffForm({
   // Fetch studio staff members
   const { data: staffData, isLoading: staffLoading } = useStudioStaff({
     studioId,
-    pageSize: 100, // Get all staff for selection
+    pageSize: 100,
   });
 
   const form = useForm<AssignStaffFormValues>({
     resolver: zodResolver(assignStaffSchema),
     defaultValues: {
       photographerId: "",
-      schedulingNotes: "",
     },
   });
 
@@ -78,22 +69,18 @@ export function AssignStaffForm({
   const assignMutation = useMutation({
     mutationFn: async (data: AssignStaffFormValues) => {
       await ordersApi.assignPhotographer(orderId, data.photographerId);
-      // Then schedule the order with dates
-      await ordersApi.scheduleOrder(orderId, {
-        scheduledStartUtc: data.scheduledStartUtc.toISOString(),
-        scheduledEndUtc: data.scheduledEndUtc?.toISOString(),
-        schedulingNotes: data.schedulingNotes,
-      });
+      // Schedule the order (dates already set when order was created)
+      await ordersApi.scheduleOrder(orderId);
     },
     onSuccess: () => {
-      toast.success("Staff assigned successfully");
+      toast.success("Photographer assigned successfully");
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       onSuccess?.();
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
-      toast.error(err.message || "Failed to assign staff");
+      toast.error(err.message || "Failed to assign photographer");
     },
   });
 
@@ -116,9 +103,9 @@ export function AssignStaffForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Assign Staff & Schedule</CardTitle>
+        <CardTitle>Assign Photographer</CardTitle>
         <CardDescription>
-          Select a photographer and schedule the shoot time
+          Select a photographer for this photoshoot
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -185,10 +172,10 @@ export function AssignStaffForm({
                   </div>
                   <Badge variant="secondary">
                     {selectedStaff.role === 1
-                      ? "Owner"
+                      ? "Staff"
                       : selectedStaff.role === 2
                       ? "Manager"
-                      : "Member"}
+                      : "Owner"}
                   </Badge>
                 </div>
                 {selectedStaff.skills && selectedStaff.skills !== 0 && (
@@ -202,119 +189,6 @@ export function AssignStaffForm({
                 )}
               </div>
             )}
-
-            {/* Start Date */}
-            <FormField
-              control={form.control}
-              name="scheduledStartUtc"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Scheduled Start Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    When should the shoot start?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* End Date (Optional) */}
-            <FormField
-              control={form.control}
-              name="scheduledEndUtc"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Scheduled End Date (Optional)</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date() ||
-                          (form.watch("scheduledStartUtc") && date < form.watch("scheduledStartUtc"))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    When should the shoot end?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Notes */}
-            <FormField
-              control={form.control}
-              name="schedulingNotes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any special instructions or notes for this shoot..."
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Add any additional information for the photographer
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* Actions */}
             <div className="flex gap-3 justify-end">
@@ -332,7 +206,7 @@ export function AssignStaffForm({
                 {assignMutation.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Assign & Schedule
+                Assign Photographer
               </Button>
             </div>
           </form>

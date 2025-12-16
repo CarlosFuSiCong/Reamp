@@ -40,8 +40,9 @@ const orderFormSchema = z.object({
   listingId: z.string().min(1, "Please select a listing"),
   studioId: z.string().optional(), // Optional - can be left empty for marketplace claiming
   currency: z.string().min(1),
-  scheduledDate: z.date().optional(),
-  scheduledTime: z.string().optional(),
+  scheduledStartDate: z.date(),
+  scheduledEndDate: z.date().optional(),
+  schedulingNotes: z.string().optional(),
   tasks: z
     .array(
       z.object({
@@ -110,9 +111,13 @@ export function OrderCreationForm() {
         orderData.studioId = values.studioId;
       }
 
-      // Include scheduled date if provided
-      if (values.scheduledDate) {
-        orderData.scheduledStartUtc = values.scheduledDate.toISOString();
+      // Include scheduled dates (required)
+      orderData.scheduledStartUtc = values.scheduledStartDate.toISOString();
+      if (values.scheduledEndDate) {
+        (orderData as any).scheduledEndUtc = values.scheduledEndDate.toISOString();
+      }
+      if (values.schedulingNotes) {
+        (orderData as any).schedulingNotes = values.schedulingNotes;
       }
 
       console.log("📤 Submitting order data:", orderData);
@@ -240,10 +245,10 @@ export function OrderCreationForm() {
 
             <FormField
               control={form.control}
-              name="scheduledDate"
+              name="scheduledStartDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Scheduled Date & Time (Optional)</FormLabel>
+                  <FormLabel>Scheduled Start Date & Time *</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -254,7 +259,7 @@ export function OrderCreationForm() {
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          {field.value ? format(field.value, "PPP HH:mm") : <span>Pick start date & time</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -269,12 +274,63 @@ export function OrderCreationForm() {
                       />
                     </PopoverContent>
                   </Popover>
-                  <div className="flex gap-2">
+                  <Input
+                    type="time"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const [hours, minutes] = e.target.value.split(":");
+                        const newDate = field.value ? new Date(field.value) : new Date();
+                        newDate.setHours(parseInt(hours), parseInt(minutes));
+                        field.onChange(newDate);
+                      }
+                    }}
+                    value={field.value ? format(field.value, "HH:mm") : ""}
+                  />
+                  <FormDescription>When should the photoshoot start?</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scheduledEndDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Scheduled End Date & Time (Optional)</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? format(field.value, "PPP HH:mm") : <span>Pick end date & time</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => {
+                          const startDate = form.watch("scheduledStartDate");
+                          return date < new Date(new Date().setHours(0, 0, 0, 0)) || (startDate && date < startDate);
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {field.value && (
                     <Input
                       type="time"
-                      className="flex-1"
                       onChange={(e) => {
-                        if (field.value && e.target.value) {
+                        if (e.target.value && field.value) {
                           const [hours, minutes] = e.target.value.split(":");
                           const newDate = new Date(field.value);
                           newDate.setHours(parseInt(hours), parseInt(minutes));
@@ -283,8 +339,25 @@ export function OrderCreationForm() {
                       }}
                       value={field.value ? format(field.value, "HH:mm") : ""}
                     />
-                  </div>
-                  <FormDescription>When should the photoshoot take place?</FormDescription>
+                  )}
+                  <FormDescription>When should the photoshoot end?</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="schedulingNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Scheduling Notes (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Any special timing requirements or notes..."
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

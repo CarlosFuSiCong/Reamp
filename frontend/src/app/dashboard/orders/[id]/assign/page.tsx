@@ -96,7 +96,7 @@ export default function AssignStaffPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Assign Staff & Schedule"
+        title="Assign Photographer"
         description={`Order #${orderId.substring(0, 8)}`}
         action={
           <Button variant="outline" asChild>
