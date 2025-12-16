@@ -13,6 +13,8 @@ const orderSteps = [
   { status: OrderStatus.Accepted, label: "Accepted by Studio" },
   { status: OrderStatus.Scheduled, label: "Shoot Scheduled" },
   { status: OrderStatus.InProgress, label: "Shoot In Progress" },
+  { status: OrderStatus.AwaitingDelivery, label: "Awaiting Delivery" },
+  { status: OrderStatus.AwaitingConfirmation, label: "Awaiting Confirmation" },
   { status: OrderStatus.Completed, label: "Completed" },
 ];
 
