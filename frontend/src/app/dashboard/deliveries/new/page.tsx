@@ -24,7 +24,7 @@ import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { MediaAssetDetailDto, OrderStatus } from "@/types";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Send } from "lucide-react";
 import Link from "next/link";
 
 const deliverySchema = z.object({
@@ -118,9 +118,13 @@ export default function NewDeliveryPage() {
         });
       }
 
-      // Step 3: Publish delivery
-      await deliveriesApi.publish(delivery.id);
-      toast.success("Delivery published successfully");
+      // Step 3: Publish or save as draft
+      if (publish) {
+        await deliveriesApi.publish(delivery.id);
+        toast.success("Delivery published successfully");
+      } else {
+        toast.success("Delivery saved as draft. You can add more media later.");
+      }
 
       router.push("/dashboard/deliveries");
     } catch (error: any) {
@@ -149,7 +153,7 @@ export default function NewDeliveryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Create Delivery"
-        description="Upload and deliver media to clients"
+        description="Upload media files and deliver to clients. You can save as draft and add more files later."
         action={
           <Link href="/dashboard/deliveries">
             <Button variant="outline">
@@ -160,7 +164,7 @@ export default function NewDeliveryPage() {
         }
       />
 
-      <form onSubmit={handleSubmit((data) => handleSave(data, true))} className="space-y-6">
+      <form onSubmit={handleSubmit((data) => handleSave(data, false))} className="space-y-6">
         {/* Basic Info */}
         <Card>
           <CardHeader>
@@ -252,11 +256,21 @@ export default function NewDeliveryPage() {
           </Link>
           <Button
             type="submit"
+            variant="outline"
+            disabled={isSaving || uploadedMedia.length === 0}
+          >
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Save className="mr-2 h-4 w-4" />
+            Save Draft
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit((data) => handleSave(data, true))}
             disabled={isSaving || uploadedMedia.length === 0}
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Send className="mr-2 h-4 w-4" />
-            {isSaving ? "Publishing..." : "Publish Delivery"}
+            Save & Publish
           </Button>
         </div>
       </form>
