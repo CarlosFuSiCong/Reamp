@@ -131,7 +131,7 @@ export function DeliveryMediaUploader({
       const end = Math.min(start + CHUNK_SIZE, file.size);
       const chunk = file.slice(start, end);
 
-      await mediaApi.uploadChunk(session.id, chunkIndex, chunk);
+      await mediaApi.uploadChunk(session.sessionId, chunkIndex, chunk);
 
       // Update progress
       const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
@@ -141,7 +141,7 @@ export function DeliveryMediaUploader({
     }
 
     // Step 3: Complete upload
-    const asset = await mediaApi.completeChunkedUpload(session.id);
+    const asset = await mediaApi.completeChunkedUpload(session.sessionId);
 
     // Update status
     setPendingFiles((prev) =>
