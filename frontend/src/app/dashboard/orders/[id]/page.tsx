@@ -40,7 +40,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     description: "",
   });
 
-  const { data: order, isLoading } = useOrder(orderId);
+  const { data: order, isLoading, error } = useOrder(orderId);
   const { data: listing } = useListing(order?.listingId || null);
   // Filter out empty GUID for studio - marketplace orders have null or empty GUID
   const validStudioId =
