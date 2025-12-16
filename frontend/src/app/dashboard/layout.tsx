@@ -73,6 +73,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       const studioItems: SidebarNavItem[] = [
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
         { title: "Marketplace", href: "/dashboard/marketplace", icon: ShoppingCart },
+        { title: "Assign Staff", href: "/dashboard/staff-assignment", icon: Users },
         { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
         { title: "Deliveries", href: "/dashboard/deliveries", icon: Package },
       ];
