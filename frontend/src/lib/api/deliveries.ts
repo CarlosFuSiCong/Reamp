@@ -13,7 +13,7 @@ export const deliveriesApi = {
    * Create delivery package
    */
   create: async (dto: CreateDeliveryPackageDto): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.post<DeliveryPackageDetailDto>("/api/deliveries", dto);
+    const response = await apiClient.post<DeliveryPackageDetailDto>("/api/delivery", dto);
     return response.data;
   },
 
@@ -21,7 +21,7 @@ export const deliveriesApi = {
    * Get delivery package detail
    */
   getById: async (id: string): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.get<DeliveryPackageDetailDto>(`/api/deliveries/${id}`);
+    const response = await apiClient.get<DeliveryPackageDetailDto>(`/api/delivery/${id}`);
     return response.data;
   },
 
@@ -29,7 +29,7 @@ export const deliveriesApi = {
    * Get packages by order
    */
   getByOrderId: async (orderId: string): Promise<DeliveryPackageListDto[]> => {
-    const response = await apiClient.get<DeliveryPackageListDto[]>(`/api/deliveries/order/${orderId}`);
+    const response = await apiClient.get<DeliveryPackageListDto[]>(`/api/delivery/order/${orderId}`);
     return response.data;
   },
 
@@ -37,7 +37,7 @@ export const deliveriesApi = {
    * Get packages by listing
    */
   getByListingId: async (listingId: string): Promise<DeliveryPackageListDto[]> => {
-    const response = await apiClient.get<DeliveryPackageListDto[]>(`/api/deliveries/listing/${listingId}`);
+    const response = await apiClient.get<DeliveryPackageListDto[]>(`/api/delivery/listing/${listingId}`);
     return response.data;
   },
 
@@ -45,7 +45,7 @@ export const deliveriesApi = {
    * Update delivery package
    */
   update: async (id: string, dto: UpdateDeliveryPackageDto): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.put<DeliveryPackageDetailDto>(`/api/deliveries/${id}`, dto);
+    const response = await apiClient.put<DeliveryPackageDetailDto>(`/api/delivery/${id}`, dto);
     return response.data;
   },
 
@@ -53,14 +53,14 @@ export const deliveriesApi = {
    * Delete delivery package
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/deliveries/${id}`);
+    await apiClient.delete(`/api/delivery/${id}`);
   },
 
   /**
    * Add item to delivery package
    */
   addItem: async (id: string, dto: AddDeliveryItemDto): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/deliveries/${id}/items`, dto);
+    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/delivery/${id}/items`, dto);
     return response.data;
   },
 
@@ -68,7 +68,7 @@ export const deliveriesApi = {
    * Remove item from delivery package
    */
   removeItem: async (id: string, itemId: string): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.delete<DeliveryPackageDetailDto>(`/api/deliveries/${id}/items/${itemId}`);
+    const response = await apiClient.delete<DeliveryPackageDetailDto>(`/api/delivery/${id}/items/${itemId}`);
     return response.data;
   },
 
@@ -76,7 +76,7 @@ export const deliveriesApi = {
    * Add access to delivery package
    */
   addAccess: async (id: string, dto: AddDeliveryAccessDto): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/deliveries/${id}/accesses`, dto);
+    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/delivery/${id}/accesses`, dto);
     return response.data;
   },
 
@@ -84,7 +84,7 @@ export const deliveriesApi = {
    * Remove access from delivery package
    */
   removeAccess: async (id: string, accessId: string): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.delete<DeliveryPackageDetailDto>(`/api/deliveries/${id}/accesses/${accessId}`);
+    const response = await apiClient.delete<DeliveryPackageDetailDto>(`/api/delivery/${id}/accesses/${accessId}`);
     return response.data;
   },
 
@@ -93,7 +93,7 @@ export const deliveriesApi = {
    * NOTE: Publishing a delivery will automatically update the order status to AwaitingConfirmation
    */
   publish: async (id: string): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/deliveries/${id}/publish`);
+    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/delivery/${id}/publish`);
     return response.data;
   },
 
@@ -101,7 +101,7 @@ export const deliveriesApi = {
    * Revoke delivery package
    */
   revoke: async (id: string): Promise<DeliveryPackageDetailDto> => {
-    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/deliveries/${id}/revoke`);
+    const response = await apiClient.post<DeliveryPackageDetailDto>(`/api/delivery/${id}/revoke`);
     return response.data;
   },
 };
