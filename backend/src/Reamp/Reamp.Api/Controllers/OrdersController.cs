@@ -77,7 +77,15 @@ namespace Reamp.Api.Controllers
             // If agencyId is provided, filter by createdBy (Agency members view orders they created)
             var createdByFilter = studioId.HasValue ? Guid.Empty : currentUserId;
             
+            _logger.LogInformation(
+                "GetOrderList params - AgencyId: {AgencyId}, StudioId: {StudioId}, CreatedByFilter: {CreatedByFilter}, Status: {Status}",
+                agencyId, studioId, createdByFilter, status);
+            
             var result = await _appService.GetFilteredListAsync(filter, pageRequest, createdByFilter, ct);
+            
+            _logger.LogInformation(
+                "GetOrderList result - TotalCount: {TotalCount}, ItemsCount: {ItemsCount}",
+                result.TotalCount, result.Items.Count);
 
             return Ok(ApiResponse<IPagedList<OrderListDto>>.Ok(result));
         }
