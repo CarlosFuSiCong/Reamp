@@ -7,7 +7,7 @@ using Reamp.Application.Orders.Dtos;
 using Reamp.Application.UserProfiles.Dtos;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Delivery.Entities;
-using Reamp.Domain.Shoots.Entities;
+using Reamp.Domain.Orders.Entities;
 
 namespace Reamp.Application.Common.Mappings
 {

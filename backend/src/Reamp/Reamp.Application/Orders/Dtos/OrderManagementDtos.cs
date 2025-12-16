@@ -18,7 +18,7 @@ namespace Reamp.Application.Orders.Dtos
         public Guid? StudioId { get; set; }
         public Guid? ListingId { get; set; }
         public Guid? PhotographerId { get; set; }
-        public Reamp.Domain.Shoots.Enums.ShootOrderStatus? Status { get; set; }
+        public Reamp.Domain.Orders.Enums.ShootOrderStatus? Status { get; set; }
         public DateTime? DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
     }

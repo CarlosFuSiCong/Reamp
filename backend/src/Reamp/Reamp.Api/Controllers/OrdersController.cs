@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Reamp.Application.Orders.Dtos;
 using Reamp.Application.Orders.Services;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Accounts.Repositories;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 using Reamp.Shared;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,19 +16,13 @@ namespace Reamp.Api.Controllers
     public sealed class OrdersController : ControllerBase
     {
         private readonly IShootOrderAppService _appService;
-        private readonly IUserProfileRepository _userProfileRepo;
-        private readonly IAgentRepository _agentRepo;
         private readonly ILogger<OrdersController> _logger;
 
         public OrdersController(
             IShootOrderAppService appService,
-            IUserProfileRepository userProfileRepo,
-            IAgentRepository agentRepo,
             ILogger<OrdersController> logger)
         {
             _appService = appService;
-            _userProfileRepo = userProfileRepo;
-            _agentRepo = agentRepo;
             _logger = logger;
         }
 
@@ -48,43 +41,6 @@ namespace Reamp.Api.Controllers
         public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderDto dto, CancellationToken ct)
         {
             var currentUserId = GetCurrentUserId();
-            
-            // Auto-populate AgencyId from the current user's agent record if not provided
-            if (dto.AgencyId == Guid.Empty)
-            {
-                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
-                if (userProfile == null)
-                {
-                    _logger.LogWarning("No UserProfile found for ApplicationUserId: {UserId}", currentUserId);
-                    return BadRequest(ApiResponse.Fail("User profile not found"));
-                }
-
-                var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
-                if (agent == null)
-                {
-                    _logger.LogWarning("User {UserId} (UserProfile {ProfileId}) has no agent record", currentUserId, userProfile.Id);
-                    return BadRequest(ApiResponse.Fail("You must be part of an agency to create orders. Please submit an agency application first."));
-                }
-
-                dto.AgencyId = agent.AgencyId;
-                _logger.LogInformation("Auto-populated AgencyId {AgencyId} for user {UserId}", dto.AgencyId, currentUserId);
-            }
-            
-            _logger.LogInformation("PlaceOrder called with: AgencyId={AgencyId}, StudioId={StudioId}, ListingId={ListingId}, Currency={Currency}",
-                dto.AgencyId, dto.StudioId, dto.ListingId, dto.Currency);
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                    .Where(x => x.Value?.Errors.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-                _logger.LogWarning("PlaceOrder validation failed: {Errors}", System.Text.Json.JsonSerializer.Serialize(errors));
-                return BadRequest(errors);
-            }
-
             var result = await _appService.PlaceOrderAsync(dto, currentUserId, ct);
 
             return CreatedAtAction(
@@ -280,8 +236,8 @@ namespace Reamp.Api.Controllers
             var currentUserId = GetCurrentUserId();
             var pageRequest = new PageRequest(page, pageSize);
 
-            Reamp.Domain.Shoots.Enums.ShootOrderStatus? statusEnum = null;
-            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Reamp.Domain.Shoots.Enums.ShootOrderStatus>(status, true, out var parsedStatus))
+            Reamp.Domain.Orders.Enums.ShootOrderStatus? statusEnum = null;
+            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<Reamp.Domain.Orders.Enums.ShootOrderStatus>(status, true, out var parsedStatus))
             {
                 statusEnum = parsedStatus;
             }

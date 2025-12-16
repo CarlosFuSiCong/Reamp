@@ -1,7 +1,7 @@
 using Reamp.Application.Orders.Dtos;
 using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 
 namespace Reamp.Application.Orders.Services
 {

@@ -5,9 +5,9 @@ using Reamp.Application.Read.Staff;
 using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Application.Read.Shared;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Entities;
-using Reamp.Domain.Shoots.Repositories;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Entities;
+using Reamp.Domain.Orders.Repositories;
+using Reamp.Domain.Orders.Enums;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Listings.Repositories;
 using Reamp.Domain.Accounts.Enums;
@@ -19,6 +19,7 @@ namespace Reamp.Application.Orders.Services
     {
         private readonly IShootOrderRepository _repo;
         private readonly IAgencyRepository _agencyRepo;
+        private readonly IAgentRepository _agentRepo;
         private readonly IStudioRepository _studioRepo;
         private readonly IListingRepository _listingRepo;
         private readonly IStaffRepository _staffRepo;
@@ -30,6 +31,7 @@ namespace Reamp.Application.Orders.Services
         public ShootOrderAppService(
             IShootOrderRepository repo,
             IAgencyRepository agencyRepo,
+            IAgentRepository agentRepo,
             IStudioRepository studioRepo,
             IListingRepository listingRepo,
             IStaffRepository staffRepo,
@@ -40,6 +42,7 @@ namespace Reamp.Application.Orders.Services
         {
             _repo = repo;
             _agencyRepo = agencyRepo;
+            _agentRepo = agentRepo;
             _studioRepo = studioRepo;
             _listingRepo = listingRepo;
             _staffRepo = staffRepo;
@@ -51,6 +54,27 @@ namespace Reamp.Application.Orders.Services
 
         public async Task<OrderDetailDto> PlaceOrderAsync(PlaceOrderDto dto, Guid currentUserId, CancellationToken ct = default)
         {
+            // Auto-populate AgencyId if not provided
+            if (dto.AgencyId == Guid.Empty)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile == null)
+                {
+                    _logger.LogWarning("No UserProfile found for ApplicationUserId: {UserId}", currentUserId);
+                    throw new ArgumentException("User profile not found", nameof(currentUserId));
+                }
+
+                var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
+                if (agent == null)
+                {
+                    _logger.LogWarning("User {UserId} (UserProfile {ProfileId}) has no agent record", currentUserId, userProfile.Id);
+                    throw new InvalidOperationException("You must be part of an agency to create orders. Please submit an agency application first.");
+                }
+
+                dto.AgencyId = agent.AgencyId;
+                _logger.LogInformation("Auto-populated AgencyId {AgencyId} for user {UserId}", dto.AgencyId, currentUserId);
+            }
+
             var agency = await _agencyRepo.GetByIdAsync(dto.AgencyId, asNoTracking: true, ct);
             if (agency == null)
                 throw new ArgumentException($"Agency with ID {dto.AgencyId} does not exist", nameof(dto.AgencyId));

@@ -2,14 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Listings.Entities;
-using Reamp.Domain.Shoots.Entities;
+using Reamp.Domain.Orders.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Reamp.Infrastructure.Configurations.Shoots
+namespace Reamp.Infrastructure.Configurations.Orders
 {
     public class ShootOrderConfiguration : IEntityTypeConfiguration<ShootOrder>
     {

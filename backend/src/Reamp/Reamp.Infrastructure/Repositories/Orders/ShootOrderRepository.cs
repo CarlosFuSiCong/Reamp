@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Entities;
-using Reamp.Domain.Shoots.Enums;
-using Reamp.Domain.Shoots.Repositories;
+using Reamp.Domain.Orders.Entities;
+using Reamp.Domain.Orders.Enums;
+using Reamp.Domain.Orders.Repositories;
 using Reamp.Infrastructure.Repositories.Common;
 
 namespace Reamp.Infrastructure.Repositories.Orders

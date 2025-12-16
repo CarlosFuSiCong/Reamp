@@ -7,7 +7,6 @@ using Reamp.Application.Listings.Services;
 using Reamp.Application.Read.Listings;
 using Reamp.Application.Read.Shared;
 using Reamp.Domain.Listings.Enums;
-using Reamp.Domain.Accounts.Repositories;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Reamp.Api.Controllers
@@ -18,21 +17,15 @@ namespace Reamp.Api.Controllers
     {
         private readonly IListingAppService _appService;
         private readonly IListingReadService _readService;
-        private readonly IAgentRepository _agentRepo;
-        private readonly IUserProfileRepository _userProfileRepo;
         private readonly ILogger<ListingsController> _logger;
 
         public ListingsController(
             IListingAppService appService, 
             IListingReadService readService, 
-            IAgentRepository agentRepo,
-            IUserProfileRepository userProfileRepo,
             ILogger<ListingsController> logger)
         {
             _appService = appService;
             _readService = readService;
-            _agentRepo = agentRepo;
-            _userProfileRepo = userProfileRepo;
             _logger = logger;
         }
 
@@ -49,31 +42,8 @@ namespace Reamp.Api.Controllers
         [Authorize(Policy = AuthPolicies.RequireAgentOrAdmin)]
         public async Task<IActionResult> Create([FromBody] CreateListingDto dto, CancellationToken ct)
         {
-            // Get current user's ApplicationUserId from JWT
             var applicationUserId = GetCurrentApplicationUserId();
-            
-            // Get UserProfile to find UserProfileId
-            var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId, asNoTracking: true, ct: ct);
-            if (userProfile == null)
-            {
-                _logger.LogWarning("User {ApplicationUserId} attempted to create listing but has no user profile", applicationUserId);
-                return Forbid();
-            }
-
-            // Get Agent record using UserProfileId
-            var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
-            if (agent == null)
-            {
-                _logger.LogWarning("UserProfile {UserProfileId} (ApplicationUser {ApplicationUserId}) attempted to create listing but has no agent record", 
-                    userProfile.Id, applicationUserId);
-                return Forbid();
-            }
-
-            // Set ownerAgencyId and agentUserId
-            dto.OwnerAgencyId = agent.AgencyId;
-            dto.AgentUserId = userProfile.Id;  // Use UserProfileId, not ApplicationUserId
-
-            var id = await _appService.CreateAsync(dto, ct);
+            var id = await _appService.CreateAsync(dto, applicationUserId, ct);
             return CreatedAtAction(nameof(GetDetail), new { id }, new { id });
         }
 

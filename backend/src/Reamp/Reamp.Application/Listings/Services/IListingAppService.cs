@@ -1,4 +1,4 @@
-﻿using Reamp.Application.Listings.Dtos;
+using Reamp.Application.Listings.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace Reamp.Application.Listings.Services
 {
     public interface IListingAppService
     {
-        Task<Guid> CreateAsync(CreateListingDto dto, CancellationToken ct);
+        Task<Guid> CreateAsync(CreateListingDto dto, Guid applicationUserId, CancellationToken ct);
         Task<Guid> CreateAgentAsync(Guid listingId, CreateListingAgentDto dto, CancellationToken ct);
         Task AssignAgentAsync(Guid listingId, Guid agentUserId, Guid agentSnapshotId, CancellationToken ct);
         Task UnassignPrimaryAgentAsync(Guid listingId, CancellationToken ct);

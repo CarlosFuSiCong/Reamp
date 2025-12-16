@@ -1,12 +1,12 @@
 using Reamp.Domain.Common.Entities;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Reamp.Domain.Shoots.Entities
+namespace Reamp.Domain.Orders.Entities
 {
     public sealed class ShootOrder : AuditableEntity
     {
