@@ -15,6 +15,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const getNavigationItems = (): SidebarNavItem[] => {
     if (!user || !profile) return [];
 
+    // Debug: Log profile data to console
+    console.log("Dashboard Layout - User & Profile Data:", {
+      userRole: user.role,
+      profileRole: profile.role,
+      agencyId: profile.agencyId,
+      agencyRole: profile.agencyRole,
+      studioId: profile.studioId,
+      studioRole: profile.studioRole,
+    });
+
     // Base items for all authenticated users
     const baseItems: SidebarNavItem[] = [
       { title: "Profile", href: "/dashboard/profile", icon: User },
