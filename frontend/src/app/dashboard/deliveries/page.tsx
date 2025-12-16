@@ -9,22 +9,26 @@ import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { DeliveriesTable } from "@/components/deliveries/deliveries-table";
 import { DeliveriesFilters } from "@/components/deliveries/deliveries-filters";
+import { DeliveriesByOrderTable } from "@/components/deliveries/deliveries-by-order-table";
 import Link from "next/link";
 import type { DeliveryPackageListDto } from "@/types/delivery";
+import type { OrderDto } from "@/types";
 
 export default function DeliveriesPage() {
   const { user } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Fetch deliveries based on user role
-  // Temporary solution: Fetch orders first, then get deliveries for each order
-  const { data: deliveries, isLoading } = useQuery({
-    queryKey: ["deliveries", user?.studioId, user?.agencyId],
+  // Fetch orders with their deliveries grouped together
+  const { data: ordersWithDeliveries, isLoading } = useQuery({
+    queryKey: ["orders-with-deliveries", user?.studioId, user?.agencyId],
     queryFn: async () => {
       if (!user) return [];
       
-      const allDeliveries: DeliveryPackageListDto[] = [];
+      const ordersWithDeliveriesData: Array<{
+        order: OrderDto;
+        deliveries: DeliveryPackageListDto[];
+      }> = [];
       
       if (user.studioId) {
         // Fetch studio orders
@@ -38,7 +42,12 @@ export default function DeliveriesPage() {
         for (const order of ordersResponse.items) {
           try {
             const orderDeliveries = await deliveriesApi.getByOrderId(order.id);
-            allDeliveries.push(...orderDeliveries);
+            if (orderDeliveries.length > 0) {
+              ordersWithDeliveriesData.push({
+                order,
+                deliveries: orderDeliveries,
+              });
+            }
           } catch (error) {
             console.error(`Failed to fetch deliveries for order ${order.id}:`, error);
           }
@@ -55,14 +64,19 @@ export default function DeliveriesPage() {
         for (const order of ordersResponse.items) {
           try {
             const orderDeliveries = await deliveriesApi.getByOrderId(order.id);
-            allDeliveries.push(...orderDeliveries);
+            if (orderDeliveries.length > 0) {
+              ordersWithDeliveriesData.push({
+                order,
+                deliveries: orderDeliveries,
+              });
+            }
           } catch (error) {
             console.error(`Failed to fetch deliveries for order ${order.id}:`, error);
           }
         }
       }
       
-      return allDeliveries;
+      return ordersWithDeliveriesData;
     },
     enabled: !!user,
   });
@@ -97,8 +111,8 @@ export default function DeliveriesPage() {
         onStatusChange={setStatusFilter}
       />
 
-      <DeliveriesTable
-        deliveries={deliveries || []}
+      <DeliveriesByOrderTable
+        ordersWithDeliveries={ordersWithDeliveries || []}
         isLoading={isLoading}
         searchQuery={searchQuery}
         statusFilter={statusFilter}
