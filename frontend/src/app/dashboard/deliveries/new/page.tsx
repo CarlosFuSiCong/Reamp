@@ -41,10 +41,21 @@ export default function NewDeliveryPage() {
   const [uploadedMedia, setUploadedMedia] = useState<MediaAssetDetailDto[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch completed orders for this studio
+  // Fetch orders that are ready for delivery upload (InProgress or AwaitingDelivery)
   const { data: ordersData } = useQuery({
-    queryKey: ["orders", "completed"],
-    queryFn: () => ordersApi.list({ status: "Completed", page: 1, pageSize: 100 }),
+    queryKey: ["orders", "ready-for-delivery"],
+    queryFn: async () => {
+      // Fetch both InProgress and AwaitingDelivery orders
+      const [inProgressOrders, awaitingOrders] = await Promise.all([
+        ordersApi.list({ status: "InProgress", page: 1, pageSize: 100 }),
+        ordersApi.list({ status: "AwaitingDelivery", page: 1, pageSize: 100 }),
+      ]);
+      
+      return {
+        items: [...inProgressOrders.items, ...awaitingOrders.items],
+        total: inProgressOrders.total + awaitingOrders.total,
+      };
+    },
     enabled: !!user?.studioId,
   });
 
@@ -153,17 +164,17 @@ export default function NewDeliveryPage() {
               <Label htmlFor="orderId">Order *</Label>
               <Select value={selectedOrderId} onValueChange={(value) => setValue("orderId", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a completed order" />
+                  <SelectValue placeholder="Select an order to deliver" />
                 </SelectTrigger>
                 <SelectContent>
                   {ordersData?.items.map((order) => (
                     <SelectItem key={order.id} value={order.id}>
-                      Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"}
+                      Order #{order.id.slice(0, 8)} - {order.listingTitle || "Listing"} ({order.status === 4 ? "In Progress" : "Awaiting Delivery"})
                     </SelectItem>
                   ))}
                   {(!ordersData || ordersData.items.length === 0) && (
                     <SelectItem value="none" disabled>
-                      No completed orders available
+                      No orders ready for delivery
                     </SelectItem>
                   )}
                 </SelectContent>
