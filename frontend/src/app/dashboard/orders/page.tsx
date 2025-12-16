@@ -166,8 +166,10 @@ export default function OrdersPage() {
     // Step 2: Scheduled - Staff assigned, ready to shoot (已分配人员，待开始拍摄)
     const readyToShoot = orders.filter(o => o.status === OrderStatus.Scheduled);
     
-    // Step 3: InProgress - Shooting, need to upload delivery (拍摄完毕，待上传)
-    const needUpload = orders.filter(o => o.status === OrderStatus.InProgress);
+    // Step 3: InProgress & AwaitingDelivery - Shooting or waiting for upload (拍摄中/待上传)
+    const needUpload = orders.filter(o => 
+      o.status === OrderStatus.InProgress || o.status === OrderStatus.AwaitingDelivery
+    );
     
     // Step 4: AwaitingConfirmation - Uploaded, waiting for agent confirmation (上传完毕，待Agent确认)
     const awaitingConfirmation = orders.filter(o => o.status === OrderStatus.AwaitingConfirmation);
