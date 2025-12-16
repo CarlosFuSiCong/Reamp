@@ -60,6 +60,7 @@ export function InviteMemberDialog({
   });
 
   const sendInvitation = useSendAgencyInvitation();
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRole = watch("targetRole");
 
   const onSubmit = async (data: FormData) => {

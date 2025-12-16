@@ -53,6 +53,7 @@ export function InviteStaffDialog({ studioId, open, onOpenChange }: InviteStaffD
   });
 
   const sendInvitation = useSendStudioInvitation();
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRole = watch("targetRole");
 
   const onSubmit = async (data: FormData) => {
