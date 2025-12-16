@@ -75,7 +75,7 @@ namespace Reamp.Api.Controllers
 
             // If studioId is provided, don't filter by createdBy (Studio members view orders accepted by their studio)
             // If agencyId is provided, filter by createdBy (Agency members view orders they created)
-            var createdByFilter = studioId.HasValue ? Guid.Empty : currentUserId;
+            Guid? createdByFilter = studioId.HasValue ? null : currentUserId;
             
             _logger.LogInformation(
                 "GetOrderList params - AgencyId: {AgencyId}, StudioId: {StudioId}, CreatedByFilter: {CreatedByFilter}, Status: {Status}",

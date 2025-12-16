@@ -30,7 +30,7 @@ namespace Reamp.Application.Orders.Services
         Task ClearScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         
         // Advanced Query
-        Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);
+        Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid? currentUserId, CancellationToken ct = default);
         
         // Photographer-specific operations
         Task<IPagedList<OrderListDto>> GetAvailableOrdersAsync(PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);

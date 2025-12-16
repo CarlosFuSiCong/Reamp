@@ -443,7 +443,7 @@ namespace Reamp.Application.Orders.Services
             await _uow.SaveChangesAsync(ct);
         }
 
-        public async Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default)
+        public async Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid? currentUserId, CancellationToken ct = default)
         {
             var orders = await _repo.ListFilteredAsync(
                 pageRequest,
