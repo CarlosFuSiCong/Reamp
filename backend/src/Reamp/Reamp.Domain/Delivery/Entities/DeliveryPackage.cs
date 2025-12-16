@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Common.Entities;
+using Reamp.Domain.Common.Entities;
 using Reamp.Domain.Delivery.Enums;
 using System;
 using System.Collections.Generic;
@@ -68,7 +68,8 @@ namespace Reamp.Domain.Delivery.Entities
 
             var item = DeliveryItem.Create(Id == Guid.Empty ? Guid.NewGuid() : Id, mediaAssetId, variantName, sortOrder);
             _items.Add(item);
-            Touch();
+            // Note: Do NOT call Touch() here to avoid RowVersion conflicts when adding multiple items
+            // The package UpdatedAtUtc will be updated when publishing or other operations
             return item;
         }
 
@@ -101,7 +102,7 @@ namespace Reamp.Domain.Delivery.Entities
                 throw new KeyNotFoundException($"Item with ID {itemId} not found in this package");
 
             _items.Remove(item);
-            Touch();
+            Touch(); // OK to touch here as it's a single operation
         }
 
         public void RemoveAccess(Guid accessId)
