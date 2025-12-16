@@ -195,7 +195,7 @@ namespace Reamp.Application.Orders.Services
                         _logger.LogDebug("Order {OrderId} belongs to staff's studio {StudioId}", id, staff.StudioId);
                     }
                     // 3. It's a marketplace order (StudioId is null) and they can claim it
-                    else if (!order.StudioId.HasValue && (order.Status == Domain.Shoots.Enums.ShootOrderStatus.Placed || order.Status == Domain.Shoots.Enums.ShootOrderStatus.Accepted))
+                    else if (!order.StudioId.HasValue && (order.Status == ShootOrderStatus.Placed || order.Status == ShootOrderStatus.Accepted))
                     {
                         canViewAsStaff = true;
                         _logger.LogDebug("Order {OrderId} is a marketplace order available for staff {StaffId}", id, staff.Id);
