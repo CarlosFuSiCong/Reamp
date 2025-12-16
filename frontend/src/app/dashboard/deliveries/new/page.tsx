@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChunkedUpload } from "@/components/media";
+import { DeliveryMediaUploader } from "@/components/media/delivery-media-uploader";
 import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { MediaAssetDetailDto, OrderStatus } from "@/types";
@@ -227,23 +227,14 @@ export default function NewDeliveryPage() {
             <CardDescription>Upload photos and videos for this delivery</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChunkedUpload
+            <DeliveryMediaUploader
               ownerStudioId={user.studioId}
-              onUploadComplete={(asset) => {
-                setUploadedMedia((prev) => [...prev, asset]);
-                toast.success(`${asset.originalFileName} uploaded`);
+              onUploadComplete={(assets) => {
+                setUploadedMedia((prev) => [...prev, ...assets]);
               }}
               maxFiles={100}
               maxSizeMB={500}
             />
-
-            {uploadedMedia.length > 0 && (
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  <strong>{uploadedMedia.length}</strong> file(s) uploaded and ready to deliver
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
 
