@@ -24,7 +24,7 @@ import {
   useCompleteOrder,
 } from "@/lib/hooks/use-orders";
 import { useProfile } from "@/lib/hooks";
-import { OrderStatus, ShootOrder, ShootTaskType } from "@/types";
+import { OrderStatus, ShootOrder } from "@/types";
 import { Plus, Calendar, Package, DollarSign, Clock } from "lucide-react";
 import { format } from "date-fns";
 
