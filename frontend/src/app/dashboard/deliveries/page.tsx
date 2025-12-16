@@ -5,26 +5,66 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
-import { deliveriesApi } from "@/lib/api";
+import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { DeliveriesTable } from "@/components/deliveries/deliveries-table";
 import { DeliveriesFilters } from "@/components/deliveries/deliveries-filters";
 import Link from "next/link";
+import type { DeliveryPackageListDto } from "@/types/delivery";
 
 export default function DeliveriesPage() {
   const { user } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // For now, we'll fetch all deliveries
-  // TODO: Add proper filtering and pagination
+  // Fetch deliveries based on user role
+  // Temporary solution: Fetch orders first, then get deliveries for each order
   const { data: deliveries, isLoading } = useQuery({
-    queryKey: ["deliveries", "all"],
+    queryKey: ["deliveries", user?.studioId, user?.agencyId],
     queryFn: async () => {
-      // This will need to be updated based on user role
-      // For now, return empty array
-      return [];
+      if (!user) return [];
+      
+      const allDeliveries: DeliveryPackageListDto[] = [];
+      
+      if (user.studioId) {
+        // Fetch studio orders
+        const ordersResponse = await ordersApi.list({ 
+          studioId: user.studioId, 
+          page: 1, 
+          pageSize: 100 
+        });
+        
+        // Fetch deliveries for each order
+        for (const order of ordersResponse.items) {
+          try {
+            const orderDeliveries = await deliveriesApi.getByOrderId(order.id);
+            allDeliveries.push(...orderDeliveries);
+          } catch (error) {
+            console.error(`Failed to fetch deliveries for order ${order.id}:`, error);
+          }
+        }
+      } else if (user.agencyId) {
+        // Fetch agency orders
+        const ordersResponse = await ordersApi.list({ 
+          agencyId: user.agencyId, 
+          page: 1, 
+          pageSize: 100 
+        });
+        
+        // Fetch deliveries for each order
+        for (const order of ordersResponse.items) {
+          try {
+            const orderDeliveries = await deliveriesApi.getByOrderId(order.id);
+            allDeliveries.push(...orderDeliveries);
+          } catch (error) {
+            console.error(`Failed to fetch deliveries for order ${order.id}:`, error);
+          }
+        }
+      }
+      
+      return allDeliveries;
     },
+    enabled: !!user,
   });
 
   const isStudio = !!user?.studioId;
