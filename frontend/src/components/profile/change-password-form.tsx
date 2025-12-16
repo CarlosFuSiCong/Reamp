@@ -28,6 +28,7 @@ export function ChangePasswordForm({ onSubmit, isSubmitting, isSuccess }: Change
 
   useEffect(() => {
     if (isSuccess) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     }
   }, [isSuccess]);

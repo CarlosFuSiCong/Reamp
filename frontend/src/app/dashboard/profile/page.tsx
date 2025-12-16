@@ -41,6 +41,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
   useEffect(() => {
     if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfileFormData({
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",

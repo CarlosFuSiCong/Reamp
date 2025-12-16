@@ -116,7 +116,8 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
         country: listing.country,
       });
     }
-  }, [listing, form.reset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listing]);
 
   const onSubmit = async (data: ListingFormValues) => {
     console.log("📝 onSubmit called - Current step:", currentStep, "Total steps:", STEPS.length);

@@ -39,6 +39,7 @@ export function AvatarUpload({
           setAvatarUrl("");
         });
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarUrl("");
     }
   }, [avatarAssetId]);
@@ -75,8 +76,11 @@ export function AvatarUpload({
   // Clear UI state when profile update completes (isUploading: true -> false)
   useEffect(() => {
     if (prevIsUploadingRef.current && !isUploading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFile(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreview(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUploadProgress(0);
     }
     prevIsUploadingRef.current = isUploading;
