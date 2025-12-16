@@ -81,24 +81,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (profile.studioRole !== undefined && profile.studioRole !== null) {
       const studioItems: SidebarNavItem[] = [
         { title: "Studio", href: "/dashboard/studio", icon: Building2 },
-      ];
-
-      const roleValue =
-        typeof profile.studioRole === "string"
-          ? parseInt(profile.studioRole, 10)
-          : Number(profile.studioRole);
-
-      // Owner & Manager can manage team
-      if (roleValue === StudioRole.Owner || roleValue === StudioRole.Manager) {
-        studioItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
-      }
-
-      // All studio members can view marketplace, orders, and deliveries
-      studioItems.push(
         { title: "Marketplace", href: "/dashboard/orders/marketplace", icon: ShoppingCart },
         { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
-        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package }
-      );
+        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package },
+      ];
 
       return [...baseItems, ...studioItems];
     }
