@@ -1,4 +1,4 @@
-﻿using Reamp.Application.Accounts.Studios.Dtos;
+using Reamp.Application.Accounts.Studios.Dtos;
 using Reamp.Domain.Accounts.Entities;
 using Reamp.Domain.Common.Abstractions;
 using System;
@@ -13,6 +13,7 @@ namespace Reamp.Application.Accounts.Studios.Services
     {
         Task<Guid> CreateAsync(CreateStudioDto dto, CancellationToken ct);
         Task<IPagedList<Studio>> ListAsync(int page, int pageSize, string? search, CancellationToken ct);
+        Task<Studio?> GetByIdAsync(Guid id, CancellationToken ct);
         Task<Studio?> GetBySlugAsync(string slug, CancellationToken ct);
     }
 }
