@@ -1,6 +1,7 @@
 using Mapster;
 using Microsoft.Extensions.Logging;
 using Reamp.Application.Delivery.Dtos;
+using Reamp.Application.Orders.Services;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Delivery.Entities;
 using Reamp.Domain.Delivery.Repositories;
@@ -12,15 +13,18 @@ namespace Reamp.Application.Delivery.Services
     public sealed class DeliveryPackageAppService : IDeliveryPackageAppService
     {
         private readonly IDeliveryPackageRepository _deliveryRepo;
+        private readonly IShootOrderAppService _orderService;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<DeliveryPackageAppService> _logger;
 
         public DeliveryPackageAppService(
             IDeliveryPackageRepository deliveryRepo,
+            IShootOrderAppService orderService,
             IUnitOfWork uow,
             ILogger<DeliveryPackageAppService> logger)
         {
             _deliveryRepo = deliveryRepo;
+            _orderService = orderService;
             _uow = uow;
             _logger = logger;
         }
@@ -204,14 +208,23 @@ namespace Reamp.Application.Delivery.Services
 
             // Publish the delivery
             package.Publish();
-
-            // TODO: Update related order status to AwaitingConfirmation
-            // This will be implemented when Order domain methods are added
-            // For now, the status update will be handled by the Order service
-
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} published for order {OrderId}", id, package.OrderId);
+
+            // Automatically update order status to AwaitingConfirmation
+            try
+            {
+                await _orderService.MarkAwaitingConfirmationAsync(package.OrderId, ct);
+                _logger.LogInformation("Order {OrderId} automatically marked as awaiting confirmation after delivery publish", package.OrderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to update order {OrderId} status after delivery publish. Order may need manual status update.", package.OrderId);
+                // Don't fail the delivery publish if order update fails
+                // The delivery is already published and saved
+            }
+
             return MapToDetailDto(package);
         }
 

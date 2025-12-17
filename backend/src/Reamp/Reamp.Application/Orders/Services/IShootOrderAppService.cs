@@ -17,6 +17,7 @@ namespace Reamp.Application.Orders.Services
         Task AcceptAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task ScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task StartAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
+        Task MarkAwaitingConfirmationAsync(Guid orderId, CancellationToken ct = default);
         Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task CancelAsync(Guid orderId, Guid currentUserId, string? reason = null, CancellationToken ct = default);
         

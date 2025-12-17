@@ -344,6 +344,18 @@ namespace Reamp.Application.Orders.Services
             await _uow.SaveChangesAsync(ct);
         }
 
+        public async Task MarkAwaitingConfirmationAsync(Guid orderId, CancellationToken ct = default)
+        {
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            order.MarkAwaitingConfirmation();
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Order {OrderId} marked as awaiting confirmation", orderId);
+        }
+
         public async Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
         {
             var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);

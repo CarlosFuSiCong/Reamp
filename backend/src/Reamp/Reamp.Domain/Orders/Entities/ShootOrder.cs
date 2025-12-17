@@ -107,10 +107,24 @@ namespace Reamp.Domain.Orders.Entities
             Status = ShootOrderStatus.InProgress; Touch();
         }
 
+        public void MarkAwaitingDelivery()
+        {
+            if (Status != ShootOrderStatus.InProgress)
+                throw new InvalidOperationException("Order must be in progress to mark as awaiting delivery");
+            Status = ShootOrderStatus.AwaitingDelivery; Touch();
+        }
+
+        public void MarkAwaitingConfirmation()
+        {
+            if (Status != ShootOrderStatus.InProgress && Status != ShootOrderStatus.AwaitingDelivery)
+                throw new InvalidOperationException("Order must be in progress or awaiting delivery");
+            Status = ShootOrderStatus.AwaitingConfirmation; Touch();
+        }
+
         public void Complete()
         {
-            if (Status != ShootOrderStatus.InProgress && Status != ShootOrderStatus.Scheduled)
-                throw new InvalidOperationException("Must be in progress/scheduled");
+            if (Status != ShootOrderStatus.AwaitingConfirmation && Status != ShootOrderStatus.InProgress)
+                throw new InvalidOperationException("Order must be awaiting confirmation or in progress to complete");
             Status = ShootOrderStatus.Completed; Touch();
         }
 
