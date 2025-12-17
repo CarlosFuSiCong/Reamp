@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Eye, Package, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DeliveryPackageListDto, OrderDto } from "@/types";
+import { DeliveryPackageListDto, ShootOrder } from "@/types";
 import { LoadingState } from "@/components/shared";
 import { DeliveryStatusBadge } from "./delivery-status-badge";
 import { useState } from "react";
@@ -13,7 +13,7 @@ import { getOrderStatusConfig } from "@/lib/utils/enum-labels";
 
 interface DeliveriesByOrderTableProps {
   ordersWithDeliveries: Array<{
-    order: OrderDto;
+    order: ShootOrder;
     deliveries: DeliveryPackageListDto[];
   }>;
   isLoading: boolean;

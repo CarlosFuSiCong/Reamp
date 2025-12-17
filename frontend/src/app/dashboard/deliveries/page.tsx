@@ -12,7 +12,7 @@ import { DeliveriesFilters } from "@/components/deliveries/deliveries-filters";
 import { DeliveriesByOrderTable } from "@/components/deliveries/deliveries-by-order-table";
 import Link from "next/link";
 import type { DeliveryPackageListDto } from "@/types/delivery";
-import type { OrderDto } from "@/types";
+import type { ShootOrder } from "@/types";
 
 export default function DeliveriesPage() {
   const { user } = useProfile();
@@ -27,7 +27,7 @@ export default function DeliveriesPage() {
       if (!user) return [];
       
       const ordersWithDeliveriesData: Array<{
-        order: OrderDto;
+        order: ShootOrder;
         deliveries: DeliveryPackageListDto[];
       }> = [];
       
