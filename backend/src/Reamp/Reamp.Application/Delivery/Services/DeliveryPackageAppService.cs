@@ -216,13 +216,12 @@ namespace Reamp.Application.Delivery.Services
             try
             {
                 await _orderService.MarkAwaitingConfirmationAsync(package.OrderId, ct);
-                _logger.LogInformation("Order {OrderId} automatically marked as awaiting confirmation after delivery publish", package.OrderId);
+                _logger.LogInformation("Order {OrderId} automatically updated to AwaitingConfirmation after delivery publish", package.OrderId);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to update order {OrderId} status after delivery publish. Order may need manual status update.", package.OrderId);
+                _logger.LogWarning(ex, "Failed to update order {OrderId} status to AwaitingConfirmation. Order may need manual status update.", package.OrderId);
                 // Don't fail the delivery publish if order update fails
-                // The delivery is already published and saved
             }
 
             return MapToDetailDto(package);

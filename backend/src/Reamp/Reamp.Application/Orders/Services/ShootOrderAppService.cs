@@ -284,11 +284,10 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            // Check if user has permission to schedule the order
-            var isCreator = order.CreatedBy == currentUserId;
+            // Only studio members can schedule orders (not the creator/agent)
             var isStudioMember = false;
 
-            if (!isCreator && order.StudioId.HasValue)
+            if (order.StudioId.HasValue)
             {
                 // Check if user is a member of the studio that accepted this order
                 var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
@@ -303,11 +302,11 @@ namespace Reamp.Application.Orders.Services
                 }
             }
 
-            if (!isCreator && !isStudioMember)
+            if (!isStudioMember)
             {
-                _logger.LogWarning("User {UserId} attempted to schedule order {OrderId} without permission. Creator: {CreatedBy}, StudioId: {StudioId}",
-                    currentUserId, orderId, order.CreatedBy, order.StudioId);
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+                _logger.LogWarning("User {UserId} attempted to schedule order {OrderId} without studio permission. StudioId: {StudioId}",
+                    currentUserId, orderId, order.StudioId);
+                throw new UnauthorizedAccessException("Only studio members can schedule orders");
             }
 
             order.MarkScheduled();

@@ -123,8 +123,9 @@ namespace Reamp.Domain.Orders.Entities
 
         public void Complete()
         {
-            if (Status != ShootOrderStatus.AwaitingConfirmation && Status != ShootOrderStatus.InProgress)
-                throw new InvalidOperationException("Order must be awaiting confirmation or in progress to complete");
+            // Business rule: Orders must go through AwaitingConfirmation (delivery + agent review) before completion
+            if (Status != ShootOrderStatus.AwaitingConfirmation)
+                throw new InvalidOperationException("Order must be awaiting confirmation (after delivery publication) to complete");
             Status = ShootOrderStatus.Completed; Touch();
         }
 
