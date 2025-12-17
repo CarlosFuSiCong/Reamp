@@ -107,7 +107,7 @@ export function DeliveriesByOrderTable({
                       <h3 className="font-semibold">
                         Order #{order.id.slice(0, 8)}
                       </h3>
-                      <Badge variant={statusConfig.variant as any}>
+                      <Badge variant={statusConfig.variant}>
                         {statusConfig.label}
                       </Badge>
                     </div>

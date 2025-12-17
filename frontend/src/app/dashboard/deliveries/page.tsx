@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
-import { DeliveriesTable } from "@/components/deliveries/deliveries-table";
 import { DeliveriesFilters } from "@/components/deliveries/deliveries-filters";
 import { DeliveriesByOrderTable } from "@/components/deliveries/deliveries-by-order-table";
 import Link from "next/link";
