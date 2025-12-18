@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PageHeader, LoadingState, ErrorState } from "@/components/shared";
+import { LoadingState, ErrorState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderCard, OrdersEmptyState, StudioWorkflowTabs } from "@/components/orders";
@@ -39,25 +39,23 @@ export default function OrdersPage() {
   if (isStudio) {
     return (
       <div className="space-y-6">
-        {/* Header */}
+        {/* Header with Icon */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-700 flex items-center justify-center text-white">
+              <div className="h-10 w-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-md">
                 <ShoppingCart className="h-5 w-5" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Orders</h1>
-                <p className="text-muted-foreground mt-0.5">
-                  Manage your accepted orders through each workflow step
-                </p>
+                <p className="text-sm text-gray-600 mt-1">Manage your accepted orders through each workflow step</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Workflow Tabs */}
-        <Card className="border-0 shadow-lg">
+        <Card className="shadow-lg">
           <CardContent className="p-6">
             <StudioWorkflowTabs {...workflowGroups} />
           </CardContent>
@@ -69,22 +67,20 @@ export default function OrdersPage() {
   // Agent view: Grid of all orders
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Icon */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
               <ShoppingCart className="h-5 w-5" />
             </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-gray-900">Orders</h1>
-              <p className="text-muted-foreground mt-0.5">
-                Manage your photography orders
-              </p>
+              <p className="text-sm text-gray-600 mt-1">Manage your photography orders</p>
             </div>
           </div>
         </div>
-        <Button asChild className="shadow-lg hover:shadow-xl transition-all">
+        <Button asChild className="shadow-md">
           <Link href="/dashboard/orders/new">
             <Plus className="mr-2 h-4 w-4" />
             New Order
@@ -94,19 +90,19 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       {orders.length === 0 ? (
-        <Card className="border-0 shadow-lg">
+        <Card className="shadow-lg">
           <CardContent className="p-0">
             <div className="text-center py-16 px-4">
-              <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-6">
-                <Package className="h-12 w-12 text-purple-600" />
+              <div className="mx-auto h-16 w-16 rounded-full bg-purple-50 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
+              <p className="text-sm text-gray-600 mb-6">
                 Create your first order to get started with professional photography services
               </p>
-              <Button asChild size="lg" className="shadow-lg">
+              <Button asChild className="shadow-md">
                 <Link href="/dashboard/orders/new">
-                  <Plus className="mr-2 h-5 w-5" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Create Your First Order
                 </Link>
               </Button>

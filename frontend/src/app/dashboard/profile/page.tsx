@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Lock, FileText, Mail, Briefcase, Shield } from "lucide-react";
+import { User, Lock, FileText, Mail, Briefcase, UserCircle2 } from "lucide-react";
 import { profilesApi } from "@/lib/api/profiles";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { LoadingState, ErrorState } from "@/components/shared";
@@ -71,16 +71,21 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
 
   return (
     <div className="space-y-6">
-      {/* Simple Header */}
+      {/* Header with Icon */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Profile Settings</h1>
-          <div className="flex items-center gap-3 mt-2">
-            <p className="text-muted-foreground">
-              {profile.displayName || profile.firstName || "User"} • {user?.email}
-            </p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+              <UserCircle2 className="h-5 w-5" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Profile Settings</h1>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-gray-600 ml-[52px]">
+            <span>{profile.displayName || profile.firstName || "User"}</span>
+            <span>•</span>
+            <span>{user?.email}</span>
+            <span>•</span>
             <Badge variant="outline" className="text-xs">
-              <Shield className="h-3 w-3 mr-1" />
               {getUserRoleLabel(profile.role)}
             </Badge>
           </div>
@@ -88,7 +93,7 @@ export default function ProfilePage({ searchParams }: { searchParams: Promise<{ 
       </div>
 
       {/* Tabs Section */}
-      <Card className="border-0 shadow-md">
+      <Card className="shadow-lg">
         <CardContent className="p-6">
           <Tabs defaultValue={defaultTab} className="space-y-6">
             <TabsList className="w-full justify-start h-auto p-1 bg-gray-100">
