@@ -4,8 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, FileImage } from "lucide-react";
 import type { ListingMedia } from "@/types";
+import { ListingMediaRole } from "@/types/enums";
 
 interface ImageGalleryProps {
   media: ListingMedia[];
@@ -15,15 +16,23 @@ interface ImageGalleryProps {
 export function ImageGallery({ media, title }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [showingFloorPlans, setShowingFloorPlans] = useState(false);
 
-  // Filter visible media and get cover first
-  const visibleMedia = media
-    ?.filter((m) => m.isVisible !== false)
+  // Separate photos and floor plans
+  const photos = media
+    ?.filter((m) => m.isVisible !== false && m.role !== ListingMediaRole.FloorPlan && Number(m.role) !== 3)
     .sort((a, b) => {
       if (a.isCover) return -1;
       if (b.isCover) return 1;
       return a.sortOrder - b.sortOrder;
     }) || [];
+
+  const floorPlans = media
+    ?.filter((m) => m.isVisible !== false && (m.role === ListingMediaRole.FloorPlan || Number(m.role) === 3))
+    .sort((a, b) => a.sortOrder - b.sortOrder) || [];
+
+  const visibleMedia = showingFloorPlans ? floorPlans : photos;
+  const hasFloorPlans = floorPlans.length > 0;
 
   if (visibleMedia.length === 0) {
     return (
@@ -54,6 +63,30 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
   return (
     <>
       <div className="space-y-4">
+        {/* Media Type Tabs */}
+        {hasFloorPlans && (
+          <div className="flex gap-2 border-b border-gray-200">
+            <Button
+              variant={!showingFloorPlans ? "default" : "ghost"}
+              className="rounded-b-none"
+              onClick={() => setShowingFloorPlans(false)}
+            >
+              Photos ({photos.length})
+            </Button>
+            <Button
+              variant={showingFloorPlans ? "default" : "ghost"}
+              className="rounded-b-none gap-2"
+              onClick={() => {
+                setShowingFloorPlans(true);
+                setSelectedIndex(0);
+              }}
+            >
+              <FileImage className="h-4 w-4" />
+              Floor Plans ({floorPlans.length})
+            </Button>
+          </div>
+        )}
+
         {/* Main Image */}
         <div className="relative aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden group">
           <Image

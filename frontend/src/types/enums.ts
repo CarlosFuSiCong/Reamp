@@ -101,9 +101,9 @@ export enum MediaProcessStatus {
 }
 
 export enum ListingMediaRole {
-  Cover = 0,
-  Gallery = 1,
-  FloorPlan = 2,
-  Video = 3,
-  VrPreview = 4,
+  Gallery = 0,      // Default role for photos
+  Cover = 2,        // Unused in backend (isCover flag is used instead)
+  FloorPlan = 3,    // Floor plans
+  VRPreview = 4,    // VR/360 previews
+  TourVideo = 5,    // Video tours
 }
