@@ -91,7 +91,7 @@ export default function RegisterPage() {
             label="Email address"
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="name@company.com"
             autoComplete="email"
             error={errors.email?.message}
             register={register("email")}
@@ -101,10 +101,10 @@ export default function RegisterPage() {
             label="Password"
             name="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Create a strong password"
             autoComplete="new-password"
             error={errors.password?.message}
-            helperText="Must be at least 6 characters and contain a special character (!@#$%^&*)"
+            helperText="Minimum 6 characters with at least one special character (!@#$%^&*)"
             register={register("password")}
           />
 
@@ -112,7 +112,7 @@ export default function RegisterPage() {
             label="Confirm password"
             name="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder="Re-enter your password"
             autoComplete="new-password"
             error={errors.confirmPassword?.message}
             register={register("confirmPassword")}

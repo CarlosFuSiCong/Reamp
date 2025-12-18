@@ -36,7 +36,7 @@ export default function ApplyPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <LoadingState message="Loading..." />
+        <LoadingState message="Loading application" />
       </div>
     );
   }

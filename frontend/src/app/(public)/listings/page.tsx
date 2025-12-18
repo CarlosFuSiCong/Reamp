@@ -182,8 +182,8 @@ function ListingsContent() {
 
 export default function ListingsPage() {
   return (
-    <Suspense fallback={<LoadingState message="Loading..." />}>
-      <ListingsContent />
-    </Suspense>
+      <Suspense fallback={<LoadingState message="Loading listings" />}>
+        <ListingsContent />
+      </Suspense>
   );
 }
