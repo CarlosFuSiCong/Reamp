@@ -5,6 +5,7 @@ import {
   OrderStatus,
   DeliveryStatus,
   ShootTaskType,
+  UserRole,
 } from "@/types";
 
 type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
@@ -62,6 +63,14 @@ export const taskTypeLabels: Record<ShootTaskType, string> = {
   [ShootTaskType.Floorplan]: "Floorplan",
 };
 
+export const userRoleLabels: Record<UserRole, string> = {
+  [UserRole.None]: "None",
+  [UserRole.User]: "User",
+  [UserRole.Agent]: "Agent",
+  [UserRole.Staff]: "Staff",
+  [UserRole.Admin]: "Admin",
+};
+
 export function getListingStatusConfig(status: ListingStatus): StatusConfig {
   return listingStatusConfig[status] || { label: "Unknown", variant: "secondary" };
 }
@@ -84,4 +93,8 @@ export function getPropertyTypeLabel(type: PropertyType): string {
 
 export function getTaskTypeLabel(type: ShootTaskType): string {
   return taskTypeLabels[type] || "Unknown";
+}
+
+export function getUserRoleLabel(role: UserRole): string {
+  return userRoleLabels[role] || "Unknown";
 }
