@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FormControl, FormMessage } from "@/components/ui/form";
-import { Loader } from "@googlemaps/js-api-loader";
+import { importLibrary } from "@googlemaps/js-api-loader";
 import { MapPin } from "lucide-react";
 
 export interface AddressComponents {
@@ -44,20 +44,15 @@ export function AddressAutocomplete({
       return;
     }
 
-    const loader = new Loader({
-      apiKey,
-      version: "weekly",
-      libraries: ["places"],
-    });
-
     setIsLoading(true);
 
-    loader
-      .load()
-      .then(() => {
+    // 使用新的函数式 API
+    importLibrary("places")
+      .then((placesLibrary) => {
         if (!inputRef.current) return;
 
-        autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+        // @ts-ignore - Google Maps types
+        autocompleteRef.current = new placesLibrary.Autocomplete(inputRef.current, {
           types: ["address"],
           componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
           fields: ["address_components", "formatted_address", "geometry"],
