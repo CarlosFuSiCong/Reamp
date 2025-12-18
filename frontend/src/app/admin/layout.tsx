@@ -38,19 +38,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen flex-col">
-        <Navbar breadcrumbs={[{ label: "Admin" }]} />
-
-        <div className="flex flex-1 overflow-hidden">
-          <aside className="hidden w-64 border-r bg-background lg:block overflow-y-auto">
-            <div className="p-4">
+      <Navbar breadcrumbs={[{ label: "Admin" }]} />
+      
+      <div className="container mx-auto py-6 px-4">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <aside className="col-span-12 md:col-span-3 lg:col-span-2">
+            <div className="sticky top-6">
               <Sidebar items={sidebarItems} />
             </div>
           </aside>
 
-          <main className="flex-1 overflow-y-auto">
-            <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8">{children}</div>
-          </main>
+          {/* Main Content */}
+          <main className="col-span-12 md:col-span-9 lg:col-span-10">{children}</main>
         </div>
       </div>
     </div>
