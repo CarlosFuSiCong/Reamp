@@ -63,13 +63,13 @@ export default function HomePage() {
                 {user.role === UserRole.User && (
                   <>
                     <Link href="/apply">
-                          <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20">
+                          <Button size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">
                             <Building2 className="mr-2 h-5 w-5" />
                         Apply for Organization
                       </Button>
                     </Link>
                     <Link href="/dashboard/profile?tab=applications">
-                          <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                          <Button size="lg" variant="outline" className="h-12 px-8 text-base hover:bg-gray-50">
                             View Applications
                       </Button>
                     </Link>
@@ -77,7 +77,7 @@ export default function HomePage() {
                 )}
                 {user.role === UserRole.Agent && (
                   <Link href="/dashboard/agency">
-                        <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20">
+                        <Button size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">
                           Agency Dashboard
                           <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -85,7 +85,7 @@ export default function HomePage() {
                 )}
                 {user.role === UserRole.Staff && (
                   <Link href="/dashboard/studio">
-                        <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20">
+                        <Button size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">
                           Studio Dashboard
                           <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -93,7 +93,7 @@ export default function HomePage() {
                 )}
                 {user.role === UserRole.Admin && (
                   <Link href="/dashboard/admin">
-                        <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20">
+                        <Button size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20">
                           Admin Dashboard
                           <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -103,7 +103,7 @@ export default function HomePage() {
             ) : (
               <>
                 <Link href="/register">
-                      <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform">
+                      <Button size="lg" className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 hover:scale-105 transition-all">
                     Get Started
                         <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
