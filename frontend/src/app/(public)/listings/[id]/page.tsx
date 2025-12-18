@@ -188,16 +188,20 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <CardHeader>
                   <CardTitle>Location</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium">{listing.addressLine1}</p>
-                      {listing.addressLine2 && <p className="text-gray-600">{listing.addressLine2}</p>}
+                <CardContent>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="space-y-1">
+                      <p className="font-semibold text-gray-900">{listing.addressLine1}</p>
+                      {listing.addressLine2 && (
+                        <p className="text-gray-600">{listing.addressLine2}</p>
+                      )}
                       <p className="text-gray-600">
                         {listing.city}, {listing.state} {listing.postcode}
                       </p>
-                      <p className="text-gray-600">{listing.country}</p>
+                      <p className="text-gray-500 text-sm">
+                        {listing.country === 'AU' ? 'Australia' : listing.country}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
