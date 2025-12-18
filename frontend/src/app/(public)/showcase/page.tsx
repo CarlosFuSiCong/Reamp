@@ -463,7 +463,6 @@ export default function ShowcasePage() {
           </section>
         </div>
       </main>
-      
       <Footer />
     </div>
   );
