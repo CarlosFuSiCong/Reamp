@@ -31,7 +31,7 @@ export function ListingAddressFields({ form }: ListingAddressFieldsProps) {
       form.setValue("postcode", components.postcode, { shouldValidate: true });
       form.setValue("country", components.country, { shouldValidate: true });
 
-      // Store coordinates if available (we'll need to add these fields to the form schema)
+      // Store coordinates if available
       if (components.latitude && components.longitude) {
         form.setValue("latitude", components.latitude);
         form.setValue("longitude", components.longitude);
@@ -148,16 +148,6 @@ export function ListingAddressFields({ form }: ListingAddressFieldsProps) {
     );
   }
 
-  const fullAddress = [
-    form.watch("addressLine1"),
-    form.watch("addressLine2"),
-    form.watch("city"),
-    form.watch("state"),
-    form.watch("postcode"),
-  ]
-    .filter(Boolean)
-    .join(", ");
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -168,7 +158,7 @@ export function ListingAddressFields({ form }: ListingAddressFieldsProps) {
       </div>
 
       <AddressAutocomplete
-        value={fullAddress}
+        value=""
         onChange={handleAddressSelect}
         placeholder="Start typing an Australian address... (e.g., 1 George Street, Sydney)"
       />

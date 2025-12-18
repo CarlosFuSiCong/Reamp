@@ -35,9 +35,15 @@ export function AddressAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [isApiReady, setIsApiReady] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
   
   // 使用 @vis.gl/react-google-maps 的 hook 加载 Places library
   const places = useMapsLibrary("places");
+
+  // 同步外部 value 变化到内部状态（当表单字段被其他方式更新时）
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
   useEffect(() => {
     if (!places || !inputRef.current) {
@@ -98,7 +104,9 @@ export function AddressAutocomplete({
 
         components.line1 = [streetNumber, route].filter(Boolean).join(" ");
 
-        onChange(place.formatted_address || value, components);
+        const formattedAddress = place.formatted_address || "";
+        setInputValue(formattedAddress);
+        onChange(formattedAddress, components);
       });
     } catch (error) {
       console.error("Failed to initialize Google Places Autocomplete:", error);
@@ -109,17 +117,24 @@ export function AddressAutocomplete({
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [places, onChange, value]);
+  }, [places, onChange]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  // 处理输入变化
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    onChange(newValue); // 通知父组件输入值变化（不含地址组件）
+  };
 
   if (!apiKey) {
     return (
       <FormControl>
         <Input
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={inputValue}
+          onChange={handleInputChange}
           placeholder={placeholder}
           disabled={disabled}
         />
@@ -135,11 +150,12 @@ export function AddressAutocomplete({
           <Input
             ref={inputRef}
             type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+            value={inputValue}
+            onChange={handleInputChange}
             placeholder={placeholder}
             disabled={disabled}
             className="pl-10"
+            autoComplete="off"
           />
         </div>
       </FormControl>
