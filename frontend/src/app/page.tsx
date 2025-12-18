@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Navbar, Footer } from "@/components/layout";
-import { Building2, Camera, Users, CheckCircle, ArrowRight } from "lucide-react";
+import { Building2, Camera, Users, CheckCircle, ArrowRight, Sparkles } from "lucide-react";
 import { UserRole } from "@/types/enums";
 
 export default function HomePage() {
@@ -184,6 +184,12 @@ export default function HomePage() {
               <Button size="lg" variant="outline" className="gap-2">
                 Browse Properties
                 <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/showcase">
+              <Button size="lg" variant="secondary" className="gap-2">
+                <Sparkles className="h-5 w-5" />
+                View Platform Demo
               </Button>
             </Link>
             {isAuthenticated && user ? (

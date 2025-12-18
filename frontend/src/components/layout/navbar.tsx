@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, FileText, Bell, Home, Search } from "lucide-react";
+import { Building2, LogOut, FileText, Bell, Home, Search, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +91,12 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
               <Button variant="ghost" size="sm" className="gap-2">
                 <Search className="h-4 w-4" />
                 Browse Properties
+              </Button>
+            </Link>
+            <Link href="/showcase">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                Platform Demo
               </Button>
             </Link>
           </div>
