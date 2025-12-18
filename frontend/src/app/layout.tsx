@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { GoogleMapsProvider } from "@/components/maps";
 import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
@@ -51,7 +52,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <GoogleMapsProvider>{children}</GoogleMapsProvider>
+        </QueryProvider>
         <Toaster />
       </body>
     </html>

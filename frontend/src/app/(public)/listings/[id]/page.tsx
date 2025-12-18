@@ -4,6 +4,7 @@ import { listingsApi } from "@/lib/api";
 import { ImageGallery } from "@/components/public";
 import { Footer } from "@/components/layout";
 import { Navbar } from "@/components/layout";
+import { PropertyMap } from "@/components/maps";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -201,6 +202,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Property Map */}
+              <PropertyMap
+                latitude={listing.latitude}
+                longitude={listing.longitude}
+                address={`${listing.addressLine1}, ${listing.city}, ${listing.state} ${listing.postcode}`}
+                title="Property Location"
+              />
             </div>
 
             {/* Sidebar */}
