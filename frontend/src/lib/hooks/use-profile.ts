@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { profilesApi, UpdateProfileDto } from "@/lib/api/profiles";
 import { toast } from "sonner";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useRouter } from "next/navigation";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
@@ -37,10 +39,17 @@ export function useUpdateAvatar() {
 }
 
 export function useChangePassword() {
+  const logout = useAuthStore((state) => state.logout);
+  const router = useRouter();
+  
   return useMutation({
     mutationFn: profilesApi.changePassword,
     onSuccess: () => {
-      toast.success("Password changed successfully");
+      toast.success("Password changed successfully. Please log in again.");
+      setTimeout(() => {
+        logout();
+        router.push("/login");
+      }, 1500);
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
