@@ -80,29 +80,21 @@ export function DeliveriesByOrderTable({
 
         return (
           <div key={order.id} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            {/* Order Header */}
+            {/* Order Header - Clickable */}
             <div
               className="bg-gray-50 p-4 cursor-pointer hover:bg-gray-100 transition-colors border-b"
               onClick={() => toggleOrder(order.id)}
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {/* Toggle Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 rounded-md hover:bg-gray-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleOrder(order.id);
-                    }}
-                  >
+                  {/* Toggle Icon */}
+                  <div className="flex-shrink-0">
                     {isExpanded ? (
-                      <ChevronDown className="h-4 w-4 text-gray-600" />
+                      <ChevronDown className="h-5 w-5 text-gray-600" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-gray-600" />
+                      <ChevronRight className="h-5 w-5 text-gray-600" />
                     )}
-                  </Button>
+                  </div>
 
                   {/* Order Info */}
                   <div className="flex-1 min-w-0">
@@ -154,10 +146,11 @@ export function DeliveriesByOrderTable({
             {/* Deliveries List */}
             {isExpanded && (
               <div className="divide-y bg-white">
-                {deliveries.map((delivery, index) => (
-                  <div
+                {deliveries.map((delivery) => (
+                  <Link
                     key={delivery.id}
-                    className="p-4 hover:bg-blue-50/30 transition-colors"
+                    href={`/dashboard/deliveries/${delivery.id}`}
+                    className="block p-4 hover:bg-blue-50/30 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -186,15 +179,10 @@ export function DeliveriesByOrderTable({
                         </div>
                       </div>
 
-                      {/* View Button */}
-                      <Link href={`/dashboard/deliveries/${delivery.id}`}>
-                        <Button variant="outline" size="sm" className="flex-shrink-0">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </Link>
+                      {/* Arrow indicator for link */}
+                      <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
