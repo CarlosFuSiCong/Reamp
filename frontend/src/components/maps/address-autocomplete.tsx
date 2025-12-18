@@ -6,21 +6,18 @@ import { FormControl, FormMessage } from "@/components/ui/form";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { MapPin } from "lucide-react";
 
-// Type declaration for Google Maps
 declare global {
   interface Window {
-    google?: typeof google;
-  }
-  namespace google {
-    namespace maps {
-      namespace places {
-        class Autocomplete {
-          constructor(input: HTMLInputElement, opts?: any);
-          addListener(event: string, handler: () => void): void;
-          getPlace(): any;
-        }
-      }
-    }
+    google?: {
+      maps: {
+        places: {
+          Autocomplete: any;
+        };
+        event: {
+          clearInstanceListeners: (instance: any) => void;
+        };
+      };
+    };
   }
 }
 
@@ -51,7 +48,7 @@ export function AddressAutocomplete({
   error,
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const autocompleteRef = useRef<any>(null);
   const [isApiReady, setIsApiReady] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   
@@ -97,8 +94,8 @@ export function AddressAutocomplete({
         let streetNumber = "";
         let route = "";
 
-        place.address_components.forEach((component) => {
-          const types = component.types;
+        place.address_components.forEach((component: any) => {
+          const types = component.types as string[];
 
           if (types.includes("street_number")) {
             streetNumber = component.long_name;
@@ -129,8 +126,12 @@ export function AddressAutocomplete({
     }
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      if (autocompleteRef.current && typeof window !== 'undefined' && window.google) {
+        try {
+          window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        } catch (e) {
+          console.error("Error clearing listeners:", e);
+        }
       }
     };
   }, [places, onChange]);

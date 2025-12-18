@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { listingsApi } from "@/lib/api";
 import { ImageGallery } from "@/components/public";
 import { Footer } from "@/components/layout";
+
+// Force dynamic rendering since we need API data
+export const dynamic = 'force-dynamic';
 import { Navbar } from "@/components/layout";
 import { PropertyMap } from "@/components/maps";
 import { Button } from "@/components/ui/button";

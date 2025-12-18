@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { listingsApi } from "@/lib/api";
@@ -11,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import { useState } from "react";
 
-export default function ListingsPage() {
+function ListingsContent() {
   const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
   const pageSize = 12;
@@ -78,16 +79,20 @@ export default function ListingsPage() {
             </div>
           ) : data?.items.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <SearchX className="w-10 h-10 text-gray-400" />
+              <div className="flex justify-center mb-6">
+                <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center">
+                  <SearchX className="h-10 w-10 text-gray-400" />
                 </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  No properties found
-                </h3>
-              <p className="text-gray-500 max-w-md mx-auto mb-8">
-                We couldn't find any properties matching your search criteria. Try adjusting your filters or browsing all listings.
-                </p>
-              <Button onClick={() => window.location.href = '/listings'} variant="outline">
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">No properties found</h2>
+              <p className="text-gray-600 mb-6">
+                Try adjusting your search filters or check back later for new listings
+              </p>
+              <Button
+                onClick={() => window.location.href = "/listings"}
+                variant="outline"
+                className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
+              >
                 Clear Filters
               </Button>
             </div>
@@ -100,7 +105,7 @@ export default function ListingsPage() {
                   <p className="text-gray-500 mt-1">
                     Showing <span className="font-semibold text-gray-900">{data?.items.length || 0}</span> of{" "}
                     <span className="font-semibold text-gray-900">{data?.total || 0}</span> results
-                  </p>
+                </p>
                 </div>
               </div>
 
@@ -172,5 +177,13 @@ export default function ListingsPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense fallback={<LoadingState message="Loading..." />}>
+      <ListingsContent />
+    </Suspense>
   );
 }

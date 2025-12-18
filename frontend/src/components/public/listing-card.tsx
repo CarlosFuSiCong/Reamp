@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bed, Bath, Car, Maximize, MapPin, ArrowUpRight } from "lucide-react";
 import type { Listing } from "@/types";
+import { ListingType } from "@/types";
 import { getPropertyTypeLabel, getListingTypeLabel } from "@/lib/utils/enum-labels";
 
 interface ListingCardProps {
@@ -49,9 +50,9 @@ export function ListingCard({ listing }: ListingCardProps) {
           
           <div className="absolute top-3 right-3">
             <Badge
-              variant={listing.listingType === "Sale" ? "default" : "secondary"}
+              variant={listing.listingType === ListingType.ForSale ? "default" : "secondary"}
               className={`${
-                listing.listingType === "Sale" 
+                listing.listingType === ListingType.ForSale 
                   ? "bg-gray-900 text-white hover:bg-gray-800" 
                   : "bg-green-500 text-white hover:bg-green-600"
               } shadow-sm border-0`}
@@ -63,7 +64,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           <div className="absolute bottom-3 left-3 text-white">
              <p className="font-bold text-xl drop-shadow-md">
               {formatPrice(listing.price, listing.currency)}
-              {listing.listingType === "Rent" && (
+              {listing.listingType === ListingType.ForRent && (
                 <span className="text-sm font-normal opacity-90 ml-1">/mo</span>
               )}
             </p>
