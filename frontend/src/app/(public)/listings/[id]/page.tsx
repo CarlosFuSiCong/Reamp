@@ -202,7 +202,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <h2 className="text-2xl font-bold text-gray-900">Location</h2>
                 
                 {/* Map */}
-                {listing.latitude && listing.longitude && (
+                {listing.latitude && listing.longitude ? (
                   <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                     <PropertyMap
                       latitude={listing.latitude}
@@ -210,17 +210,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       address={`${listing.addressLine1}, ${listing.city}, ${listing.state}`}
                     />
                   </div>
-                )}
-                
-                {/* Address */}
-                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                  <div className="space-y-2 text-gray-700">
-                    <p className="font-medium">{listing.addressLine1}</p>
-                    {listing.addressLine2 && <p>{listing.addressLine2}</p>}
-                    <p>{listing.city}, {listing.state} {listing.postcode}</p>
-                    <p>{listing.country}</p>
+                ) : (
+                  <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                    <div className="space-y-2 text-gray-700">
+                      <p className="font-medium">{listing.addressLine1}</p>
+                      {listing.addressLine2 && <p>{listing.addressLine2}</p>}
+                      <p>{listing.city}, {listing.state} {listing.postcode}</p>
+                      <p>{listing.country}</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
