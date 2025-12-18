@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface PasswordFormData {
   currentPassword: string;
@@ -37,17 +38,17 @@ export function ChangePasswordForm({ onSubmit, isSubmitting, isSuccess }: Change
     e.preventDefault();
 
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("New password and confirm password do not match");
+      toast.error("New password and confirm password do not match");
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      alert("Password must be at least 6 characters long");
+      toast.error("Password must be at least 6 characters long");
       return;
     }
 
     if (!/[^a-zA-Z0-9]/.test(formData.newPassword)) {
-      alert("Password must contain at least one special character");
+      toast.error("Password must contain at least one special character");
       return;
     }
 
