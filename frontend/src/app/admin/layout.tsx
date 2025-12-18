@@ -10,7 +10,7 @@ import { Sidebar, Navbar, SidebarNavItem } from "@/components/layout";
 import { LayoutDashboard, User } from "lucide-react";
 
 const sidebarItems: SidebarNavItem[] = [
-  { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { title: "Admin Panel", href: "/admin", icon: LayoutDashboard },
   { title: "Profile", href: "/dashboard/profile", icon: User },
 ];
 
