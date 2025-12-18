@@ -10,6 +10,7 @@ import { AuthLayout } from "@/components/auth/auth-layout";
 import { FormField } from "@/components/auth/form-field";
 import { ErrorAlert } from "@/components/auth/error-alert";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { showToast } from "@/lib/utils/toast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -35,6 +36,7 @@ export default function LoginPage() {
     try {
       setErrorMessage("");
       await login(data);
+      showToast.success("Welcome back!", "You have successfully signed in");
     } catch (error: unknown) {
       console.error("Login failed:", error);
 
@@ -42,7 +44,6 @@ export default function LoginPage() {
       const err = error as { statusCode?: number; message?: string; errors?: string[] };
 
       if (err.statusCode === 401) {
-        // 401 means account doesn't exist or wrong password
         message = "Account does not exist or password is incorrect.";
       } else if (err.statusCode === 400) {
         message = "Invalid input. Please check your email and password.";
@@ -55,6 +56,7 @@ export default function LoginPage() {
       }
 
       setErrorMessage(message);
+      showToast.error("Login failed", message);
     }
   };
 

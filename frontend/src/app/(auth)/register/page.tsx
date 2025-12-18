@@ -11,6 +11,7 @@ import { AuthLayout } from "@/components/auth/auth-layout";
 import { FormField } from "@/components/auth/form-field";
 import { ErrorAlert } from "@/components/auth/error-alert";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { showToast } from "@/lib/utils/toast";
 
 const registerSchema = z
   .object({
@@ -49,6 +50,7 @@ export default function RegisterPage() {
     try {
       setErrorMessage("");
       await registerUser(data);
+      showToast.success("Account created successfully", "Welcome to Reamp! Please sign in to continue");
     } catch (error: unknown) {
       console.error("Registration failed:", error);
 
@@ -68,6 +70,7 @@ export default function RegisterPage() {
       }
 
       setErrorMessage(message);
+      showToast.error("Registration failed", message);
     }
   };
 

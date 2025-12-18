@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { showToast } from "./toast";
 
 interface ErrorResponse {
   message?: string;
@@ -13,15 +13,15 @@ export function handleMutationError(
   const errorResponse = error as ErrorResponse;
   const errorMessage = errorResponse?.message || fallbackMessage;
 
-  toast.error(errorMessage, { duration });
+  showToast.error(errorMessage);
 
   if (errorResponse?.errors && Array.isArray(errorResponse.errors)) {
     errorResponse.errors.forEach((err: string) => {
-      toast.error(err, { duration });
+      showToast.error(err);
     });
   }
 }
 
 export function handleMutationSuccess(message: string, description?: string): void {
-  toast.success(message, description ? { description } : undefined);
+  showToast.success(message, description);
 }
