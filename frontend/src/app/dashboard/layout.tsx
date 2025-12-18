@@ -24,6 +24,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (user.role === UserRole.Admin) {
       const adminItems: SidebarNavItem[] = [
         { title: "Admin Panel", href: "/admin", icon: Settings },
+        { title: "Profile", href: "/dashboard/profile", icon: User },
       ];
 
       // Admins might also have organization roles, so include those too
@@ -39,7 +40,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         orgItems.push({ title: "Studio", href: "/dashboard/studio", icon: Building2 });
       }
 
-      return [...baseItems, ...adminItems, ...orgItems];
+      return [...adminItems, ...orgItems];
     }
 
     // Agency navigation (user has agencyRole)
