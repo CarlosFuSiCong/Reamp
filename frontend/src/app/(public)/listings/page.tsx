@@ -98,21 +98,23 @@ export default function ListingsPage() {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Available Properties</h2>
                   <p className="text-gray-500 mt-1">
-                    Showing <span className="font-semibold text-gray-900">{data.items.length}</span> of{" "}
-                    <span className="font-semibold text-gray-900">{data.totalCount}</span> results
-                </p>
+                    Showing <span className="font-semibold text-gray-900">{data?.items.length || 0}</span> of{" "}
+                    <span className="font-semibold text-gray-900">{data?.total || 0}</span> results
+                  </p>
                 </div>
               </div>
 
               {/* Listings Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
-                {data.items.map((listing) => (
+                {data?.items.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
               </div>
 
               {/* Pagination */}
-              {data.totalPages > 1 && (
+              {data && Math.ceil(data.total / data.pageSize) > 1 && (() => {
+                const totalPages = Math.ceil(data.total / data.pageSize);
+                return (
                 <div className="flex justify-center items-center gap-2 mt-12">
                   <Button
                     variant="outline"
@@ -125,14 +127,14 @@ export default function ListingsPage() {
                   </Button>
 
                   <div className="flex items-center gap-2">
-                    {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum: number;
-                      if (data.totalPages <= 5) {
+                      if (totalPages <= 5) {
                         pageNum = i + 1;
                       } else if (page <= 3) {
                         pageNum = i + 1;
-                      } else if (page >= data.totalPages - 2) {
-                        pageNum = data.totalPages - 4 + i;
+                      } else if (page >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
                       } else {
                         pageNum = page - 2 + i;
                       }
@@ -155,13 +157,14 @@ export default function ListingsPage() {
                     variant="outline"
                     size="icon"
                     onClick={() => handlePageChange(page + 1)}
-                    disabled={page === data.totalPages}
+                    disabled={page === totalPages}
                     className="h-10 w-10"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-              )}
+                );
+              })()}
             </>
           )}
         </section>

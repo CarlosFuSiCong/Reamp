@@ -114,7 +114,7 @@ export default function AgentDashboardPage() {
                     <p className="text-sm text-gray-600">{activity.description}</p>
                     <div className="flex items-center gap-2 pt-1">
                       <Calendar className="h-3 w-3 text-gray-400" />
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+                      <p className="text-xs text-gray-500">{activity.timestamp}</p>
                     </div>
                   </div>
                 </div>

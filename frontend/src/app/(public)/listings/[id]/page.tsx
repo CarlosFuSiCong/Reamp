@@ -8,6 +8,7 @@ import { PropertyMap } from "@/components/maps";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ListingType } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import {
   Bed,
@@ -123,9 +124,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                         {getPropertyTypeLabel(listing.propertyType)}
                       </Badge>
                       <Badge
-                        variant={listing.listingType === "Sale" ? "default" : "secondary"}
+                        variant={listing.listingType === ListingType.ForSale ? "default" : "secondary"}
                         className={`text-sm font-medium px-3 py-1 ${
-                          listing.listingType === "Sale" 
+                          listing.listingType === ListingType.ForSale 
                             ? "bg-gray-900 hover:bg-gray-800" 
                             : "bg-green-100 text-green-800 hover:bg-green-200 border-green-200"
                         }`}
@@ -146,7 +147,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   <div className="text-left md:text-right shrink-0">
                     <p className="text-3xl md:text-4xl font-bold text-blue-600 tracking-tight">
                       {formatPrice(listing.price, listing.currency)}
-                      {listing.listingType === "Rent" && (
+                      {listing.listingType === ListingType.ForRent && (
                         <span className="text-lg font-medium text-gray-500 ml-1">/mo</span>
                       )}
                     </p>
@@ -193,16 +194,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
               <Separator className="bg-gray-200" />
 
-              {/* Location Map */}
+              {/* Location */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-gray-900">Location</h2>
-                <div className="h-[400px] rounded-2xl overflow-hidden shadow-md border border-gray-200 relative group">
-              <PropertyMap
-                latitude={listing.latitude}
-                longitude={listing.longitude}
-                address={`${listing.addressLine1}, ${listing.city}, ${listing.state} ${listing.postcode}`}
-                title="Property Location"
-              />
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                  <div className="space-y-2 text-gray-700">
+                    <p className="font-medium">{listing.addressLine1}</p>
+                    {listing.addressLine2 && <p>{listing.addressLine2}</p>}
+                    <p>{listing.city}, {listing.state} {listing.postcode}</p>
+                    <p>{listing.country}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -312,7 +313,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": listing.listingType === "Sale" ? "RealEstateListing" : "Apartment",
+            "@type": listing.listingType === ListingType.ForSale ? "RealEstateListing" : "Apartment",
             name: listing.title,
             description: listing.description,
             image: listing.media?.map((m) => m.thumbnailUrl).filter(Boolean),

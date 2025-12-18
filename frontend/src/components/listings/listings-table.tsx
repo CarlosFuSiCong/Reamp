@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StatusBadge } from "@/components/shared";
-import { Listing, ListingStatus } from "@/types";
+import { Listing, ListingStatus, ListingType } from "@/types";
 import { getListingTypeLabel } from "@/lib/utils/enum-labels";
 import { MoreHorizontal, Edit, Eye, Archive, Trash, MapPin, DollarSign, Home, Send } from "lucide-react";
 
@@ -97,7 +97,7 @@ export function ListingsTable({ listings, onPublish, onArchive, onDelete }: List
                       {listing.currency} {listing.price.toLocaleString()}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {listing.listingType === 0 ? 'Sale' : 'Rent'}
+                      {listing.listingType === ListingType.ForSale ? 'Sale' : 'Rent'}
                     </span>
                   </div>
                 </div>

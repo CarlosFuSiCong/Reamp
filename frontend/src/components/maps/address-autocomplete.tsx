@@ -6,6 +6,24 @@ import { FormControl, FormMessage } from "@/components/ui/form";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { MapPin } from "lucide-react";
 
+// Type declaration for Google Maps
+declare global {
+  interface Window {
+    google?: typeof google;
+  }
+  namespace google {
+    namespace maps {
+      namespace places {
+        class Autocomplete {
+          constructor(input: HTMLInputElement, opts?: any);
+          addListener(event: string, handler: () => void): void;
+          getPlace(): any;
+        }
+      }
+    }
+  }
+}
+
 export interface AddressComponents {
   line1: string;
   line2?: string;
@@ -57,8 +75,9 @@ export function AddressAutocomplete({
         fields: ["address_components", "formatted_address", "geometry"],
       });
 
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current?.getPlace();
+      if (autocompleteRef.current) {
+        autocompleteRef.current.addListener("place_changed", () => {
+          const place = autocompleteRef.current?.getPlace();
 
         if (!place || !place.address_components) {
           return;
@@ -103,7 +122,8 @@ export function AddressAutocomplete({
         const formattedAddress = place.formatted_address || "";
         setInputValue(formattedAddress);
         onChange(formattedAddress, components);
-      });
+        });
+      }
     } catch (error) {
       console.error("Failed to initialize Google Places Autocomplete:", error);
     }
