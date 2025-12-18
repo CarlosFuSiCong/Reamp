@@ -59,7 +59,7 @@ export default function ListingsPage() {
         {/* Search Section - Floating overlap */}
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-12">
           <div className="max-w-5xl mx-auto">
-            <ListingsSearch />
+              <ListingsSearch />
           </div>
         </section>
 
@@ -71,22 +71,22 @@ export default function ListingsPage() {
             </div>
           ) : error ? (
             <div className="py-20">
-              <ErrorState
-                title="Failed to load listings"
-                message="Unable to fetch property listings. Please try again later."
-              />
+            <ErrorState
+              title="Failed to load listings"
+              message="Unable to fetch property listings. Please try again later."
+            />
             </div>
           ) : data?.items.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <SearchX className="w-10 h-10 text-gray-400" />
-              </div>
+                </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                No properties found
-              </h3>
+                  No properties found
+                </h3>
               <p className="text-gray-500 max-w-md mx-auto mb-8">
                 We couldn't find any properties matching your search criteria. Try adjusting your filters or browsing all listings.
-              </p>
+                </p>
               <Button onClick={() => window.location.href = '/listings'} variant="outline">
                 Clear Filters
               </Button>
@@ -100,7 +100,7 @@ export default function ListingsPage() {
                   <p className="text-gray-500 mt-1">
                     Showing <span className="font-semibold text-gray-900">{data.items.length}</span> of{" "}
                     <span className="font-semibold text-gray-900">{data.totalCount}</span> results
-                  </p>
+                </p>
                 </div>
               </div>
 
