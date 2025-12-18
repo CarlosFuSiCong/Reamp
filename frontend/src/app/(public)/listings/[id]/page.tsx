@@ -23,9 +23,10 @@ import {
 import { getPropertyTypeLabel, getListingTypeLabel } from "@/lib/utils/enum-labels";
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
   try {
-    const listing = await listingsApi.getByIdPublic(params.id);
+    const listing = await listingsApi.getByIdPublic(id);
     const coverImage = listing.media?.find((m) => m.isCover) || listing.media?.[0];
     const imageUrl = coverImage?.thumbnailUrl;
 
@@ -52,11 +53,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function ListingDetailPage({ params }: { params: { id: string } }) {
+export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   let listing;
   
   try {
-    listing = await listingsApi.getByIdPublic(params.id);
+    listing = await listingsApi.getByIdPublic(id);
   } catch {
     notFound();
   }
