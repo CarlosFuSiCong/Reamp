@@ -292,7 +292,7 @@ export default function HomePage() {
                   </Button>
                 </Link>
                     <Link href="/contact">
-                      <Button size="lg" variant="outline" className="h-14 px-8 text-lg w-full sm:w-auto text-white border-white hover:bg-white/10 hover:text-white">
+                      <Button size="lg" variant="outline" className="h-14 px-8 text-lg w-full sm:w-auto bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white hover:text-blue-600 hover:border-white transition-colors">
                         Contact Sales
                 </Button>
               </Link>
