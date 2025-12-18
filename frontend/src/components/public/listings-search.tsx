@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, RotateCcw, Filter } from "lucide-react";
 import { PropertyType, ListingType } from "@/types/enums";
 import { getPropertyTypeLabel, getListingTypeLabel } from "@/lib/utils/enum-labels";
+import { Separator } from "@/components/ui/separator";
 
 export function ListingsSearch() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export function ListingsSearch() {
   const [listingType, setListingType] = useState(searchParams.get("type") || "");
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -40,83 +42,120 @@ export function ListingsSearch() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="bg-white rounded-xl shadow-xl shadow-blue-900/5 p-6 border border-gray-100">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
         {/* Keyword Search */}
-        <div className="lg:col-span-3">
-          <Input
-            placeholder="Search by location, title, or keywords..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-full"
-          />
+        <div className="lg:col-span-5 space-y-2">
+          <label className="text-sm font-medium text-gray-700 ml-1">Location or Keyword</label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by city, address, or ID..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              className="w-full pl-10 h-11"
+            />
+          </div>
         </div>
 
         {/* Property Type */}
-        <Select value={propertyType} onValueChange={setPropertyType}>
-          <SelectTrigger>
-            <SelectValue placeholder="Property Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            {Object.values(PropertyType)
-              .filter((v) => typeof v === "number")
-              .map((type) => (
-                <SelectItem key={type} value={type.toString()}>
-                  {getPropertyTypeLabel(type as PropertyType)}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+        <div className="lg:col-span-3 space-y-2">
+          <label className="text-sm font-medium text-gray-700 ml-1">Property Type</label>
+          <Select value={propertyType} onValueChange={setPropertyType}>
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {Object.values(PropertyType)
+                .filter((v) => typeof v === "number")
+                .map((type) => (
+                  <SelectItem key={type} value={type.toString()}>
+                    {getPropertyTypeLabel(type as PropertyType)}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Listing Type */}
-        <Select value={listingType} onValueChange={setListingType}>
-          <SelectTrigger>
-            <SelectValue placeholder="Sale or Rent" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            {Object.values(ListingType)
-              .filter((v) => typeof v === "number")
-              .map((type) => (
-                <SelectItem key={type} value={type.toString()}>
-                  {getListingTypeLabel(type as ListingType)}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+        <div className="lg:col-span-2 space-y-2">
+          <label className="text-sm font-medium text-gray-700 ml-1">Status</label>
+          <Select value={listingType} onValueChange={setListingType}>
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Sale or Rent" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {Object.values(ListingType)
+                .filter((v) => typeof v === "number")
+                .map((type) => (
+                  <SelectItem key={type} value={type.toString()}>
+                    {getListingTypeLabel(type as ListingType)}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Price Range */}
-        <div className="flex gap-2">
-          <Input
-            type="number"
-            placeholder="Min Price"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            className="w-full"
-          />
-          <Input
-            type="number"
-            placeholder="Max Price"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            className="w-full"
-          />
+        {/* Action Buttons */}
+        <div className="lg:col-span-2 flex gap-2">
+           <Button onClick={handleSearch} className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-base shadow-lg shadow-blue-600/20">
+            Search
+          </Button>
+           <Button 
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} 
+            variant="outline" 
+            className={`h-11 w-11 p-0 flex-shrink-0 ${isAdvancedOpen ? 'bg-gray-100' : ''}`}
+            title="Advanced Filters"
+          >
+            <Filter className="h-4 w-4 text-gray-600" />
+          </Button>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 mt-4">
-        <Button onClick={handleSearch} className="flex-1 gap-2">
-          <Search className="h-4 w-4" />
-          Search
-        </Button>
-        <Button onClick={handleReset} variant="outline">
-          Reset
-        </Button>
-      </div>
+      {/* Advanced Filters */}
+      {isAdvancedOpen && (
+        <>
+          <Separator className="my-6" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="md:col-span-2 space-y-2">
+               <label className="text-sm font-medium text-gray-700 ml-1">Price Range</label>
+               <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="w-full pl-7 h-10"
+                    />
+                  </div>
+                  <span className="self-center text-gray-400">-</span>
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <Input
+                      type="number"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="w-full pl-7 h-10"
+                    />
+                  </div>
+               </div>
+            </div>
+            
+            <div className="md:col-span-2 flex justify-end">
+               <Button onClick={handleReset} variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 gap-2 h-10">
+                <RotateCcw className="h-4 w-4" />
+                Reset Filters
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
