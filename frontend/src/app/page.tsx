@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/layout";
+import { Navbar, Footer } from "@/components/layout";
 import { Building2, Camera, Users, CheckCircle, ArrowRight } from "lucide-react";
 import { UserRole } from "@/types/enums";
 
@@ -179,47 +179,57 @@ export default function HomePage() {
           <p className="text-lg text-gray-600 mb-8">
             Join the platform and start managing your real estate photography workflow today.
           </p>
-          {isAuthenticated && user ? (
-            user.role === UserRole.User ? (
-              <Link href="/apply">
-                <Button size="lg" variant="secondary" className="gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Apply Now
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            ) : user.role === UserRole.Agent ? (
-              <Link href="/dashboard/agency">
-                <Button size="lg" variant="secondary" className="gap-2">
-                  Go to Agency Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            ) : user.role === UserRole.Staff ? (
-              <Link href="/dashboard/studio">
-                <Button size="lg" variant="secondary" className="gap-2">
-                  Go to Studio Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/admin">
-                <Button size="lg" variant="secondary" className="gap-2">
-                  Go to Admin Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            )
-          ) : (
-            <Link href="/register">
-              <Button size="lg" variant="secondary" className="gap-2">
-                Create Account
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/listings">
+              <Button size="lg" variant="outline" className="gap-2">
+                Browse Properties
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-          )}
+            {isAuthenticated && user ? (
+              user.role === UserRole.User ? (
+                <Link href="/apply">
+                  <Button size="lg" className="gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Apply Now
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : user.role === UserRole.Agent ? (
+                <Link href="/dashboard/agency">
+                  <Button size="lg" className="gap-2">
+                    Go to Dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : user.role === UserRole.Staff ? (
+                <Link href="/dashboard/studio">
+                  <Button size="lg" className="gap-2">
+                    Go to Dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/admin">
+                  <Button size="lg" className="gap-2">
+                    Go to Dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )
+            ) : (
+              <Link href="/register">
+                <Button size="lg" className="gap-2">
+                  Create Account
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
