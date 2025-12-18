@@ -59,7 +59,7 @@ export function AddressAutocomplete({
 
         autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
           types: ["address"],
-          componentRestrictions: { country: ["au", "us", "gb", "nz", "ca"] },
+          componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
           fields: ["address_components", "formatted_address", "geometry"],
         });
 

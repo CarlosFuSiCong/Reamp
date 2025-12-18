@@ -170,7 +170,7 @@ export function ListingAddressFields({ form }: ListingAddressFieldsProps) {
       <AddressAutocomplete
         value={fullAddress}
         onChange={handleAddressSelect}
-        placeholder="Start typing an address..."
+        placeholder="Start typing an Australian address... (e.g., 1 George Street, Sydney)"
       />
 
       <div className="space-y-4 pt-4">
