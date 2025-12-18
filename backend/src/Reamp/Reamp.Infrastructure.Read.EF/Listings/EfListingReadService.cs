@@ -53,7 +53,21 @@ namespace Reamp.Infrastructure.Read.EF.Listings
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(x => new ListingSummaryDto(
-                    x.Id, x.Title, x.Price, x.Currency, x.Status, x.ListingType, x.PropertyType))
+                    x.Id, x.Title, x.Price, x.Currency, x.Status, x.ListingType, x.PropertyType,
+                    x.Bedrooms, x.Bathrooms, x.ParkingSpaces,
+                    x.FloorAreaSqm, x.LandAreaSqm,
+                    x.Address.City, x.Address.State,
+                    x.MediaRefs.Where(m => m.IsVisible).OrderBy(m => m.SortOrder)
+                        .Select(m => new ListingMediaItemDto(
+                            m.MediaAssetId, 
+                            m.Role.ToString(), 
+                            m.SortOrder, 
+                            m.IsCover,
+                            _db.Set<Domain.Media.Entities.MediaAsset>()
+                                .Where(ma => ma.Id == m.MediaAssetId)
+                                .Select(ma => ma.PublicUrl)
+                                .FirstOrDefault(),
+                            m.IsVisible)).ToList()))
                 .ToListAsync(ct);
 
             return new PageResult<ListingSummaryDto>
@@ -77,7 +91,16 @@ namespace Reamp.Infrastructure.Read.EF.Listings
                     l.FloorAreaSqm, l.LandAreaSqm,
                     l.Address.Line1, l.Address.Line2, l.Address.City, l.Address.State, l.Address.Postcode, l.Address.Country,
                     l.MediaRefs.Where(m => m.IsVisible).OrderBy(m => m.SortOrder)
-                        .Select(m => new ListingMediaItemDto(m.MediaAssetId, m.Role.ToString(), m.SortOrder, m.IsCover)).ToList(),
+                        .Select(m => new ListingMediaItemDto(
+                            m.MediaAssetId, 
+                            m.Role.ToString(), 
+                            m.SortOrder, 
+                            m.IsCover,
+                            _db.Set<Domain.Media.Entities.MediaAsset>()
+                                .Where(ma => ma.Id == m.MediaAssetId)
+                                .Select(ma => ma.PublicUrl)
+                                .FirstOrDefault(),
+                            m.IsVisible)).ToList(),
                     l.AgentSnapshots.OrderBy(a => a.SortOrder)
                         .Select(a => new ListingAgentItemDto(a.FirstName, a.LastName, a.Email, a.PhoneNumber, a.IsPrimary, a.SortOrder)).ToList()
                 ))
@@ -96,7 +119,17 @@ namespace Reamp.Infrastructure.Read.EF.Listings
                     l.FloorAreaSqm, l.LandAreaSqm,
                     l.Address.Line1, l.Address.Line2, l.Address.City, l.Address.State, l.Address.Postcode, l.Address.Country,
                     l.MediaRefs.OrderBy(m => m.SortOrder)
-                        .Select(m => new EditorMediaItemDto(m.Id, m.MediaAssetId, m.Role.ToString(), m.SortOrder, m.IsCover, m.IsVisible)).ToList(),
+                        .Select(m => new EditorMediaItemDto(
+                            m.Id, 
+                            m.MediaAssetId, 
+                            m.Role.ToString(), 
+                            m.SortOrder, 
+                            m.IsCover, 
+                            m.IsVisible,
+                            _db.Set<Domain.Media.Entities.MediaAsset>()
+                                .Where(ma => ma.Id == m.MediaAssetId)
+                                .Select(ma => ma.PublicUrl)
+                                .FirstOrDefault())).ToList(),
                     l.AgentSnapshots.OrderBy(a => a.SortOrder)
                         .Select(a => new EditorAgentItemDto(a.Id, a.FirstName, a.LastName, a.Email, a.PhoneNumber, a.IsPrimary, a.SortOrder)).ToList()
                 ))

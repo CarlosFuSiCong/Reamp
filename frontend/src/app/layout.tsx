@@ -16,7 +16,31 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Reamp - Real Estate Media Platform",
-  description: "Professional real estate photography and media management platform",
+  description: "Professional real estate photography and media management platform connecting agencies with photography studios",
+  keywords: ["real estate", "photography", "property", "media", "listings"],
+  openGraph: {
+    title: "Reamp - Real Estate Media Platform",
+    description: "Professional real estate photography and media management platform",
+    type: "website",
+    locale: "en_US",
+    siteName: "Reamp",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Reamp - Real Estate Media Platform",
+    description: "Professional real estate photography and media management platform",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

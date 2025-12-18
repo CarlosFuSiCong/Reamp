@@ -2,6 +2,29 @@ import apiClient from "@/lib/api-client";
 import type { Listing, PagedResponse, AddMediaDto, ReorderMediaDto, SetMediaVisibilityDto } from "@/types";
 
 export const listingsApi = {
+  // Public read-only listings (no auth required)
+  async listPublic(params: {
+    status?: string;
+    type?: string;
+    property?: string;
+    keyword?: string;
+    page?: number;
+    pageSize?: number;
+    sortBy?: string;
+    desc?: boolean;
+  }): Promise<PagedResponse<Listing>> {
+    const response = await apiClient.get<PagedResponse<Listing>>("/api/listings", {
+      params,
+    });
+    return response.data;
+  },
+
+  async getByIdPublic(id: string): Promise<Listing> {
+    const response = await apiClient.get<Listing>(`/api/listings/${id}`);
+    return response.data;
+  },
+
+  // Authenticated listings
   async list(params: {
     agencyId?: string;
     status?: string;
