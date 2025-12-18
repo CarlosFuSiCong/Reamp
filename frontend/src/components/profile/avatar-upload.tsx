@@ -81,8 +81,6 @@ export function AvatarUpload({
       }
 
       const result = await response.json();
-      console.log("Upload response:", result); // Debug: check response structure
-      
       const assetId = result.data?.id;
 
       if (!assetId) {
@@ -91,8 +89,6 @@ export function AvatarUpload({
 
       // Update preview to show uploaded image immediately
       const uploadedUrl = result.data?.publicUrl || result.data?.variants?.[0]?.transformedUrl;
-      console.log("Extracted URL:", uploadedUrl); // Debug: check extracted URL
-      
       if (uploadedUrl) {
         setAvatarUrl(uploadedUrl);
       }
