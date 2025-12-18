@@ -45,7 +45,7 @@ export function ListingsSearch() {
     <div className="bg-white rounded-xl shadow-xl shadow-blue-900/5 p-6 border border-gray-100">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
         {/* Keyword Search */}
-        <div className="lg:col-span-5 space-y-2">
+        <div className="lg:col-span-10 space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Location or Keyword</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -57,46 +57,6 @@ export function ListingsSearch() {
               className="w-full pl-10 h-11"
             />
           </div>
-        </div>
-
-        {/* Property Type */}
-        <div className="lg:col-span-3 space-y-2">
-          <label className="text-sm font-medium text-gray-700 ml-1">Property Type</label>
-          <Select value={propertyType} onValueChange={setPropertyType}>
-            <SelectTrigger className="h-11">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              {Object.values(PropertyType)
-                .filter((v) => typeof v === "number")
-                .map((type) => (
-                  <SelectItem key={type} value={type.toString()}>
-                    {getPropertyTypeLabel(type as PropertyType)}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Listing Type */}
-        <div className="lg:col-span-2 space-y-2">
-          <label className="text-sm font-medium text-gray-700 ml-1">Status</label>
-          <Select value={listingType} onValueChange={setListingType}>
-            <SelectTrigger className="h-11">
-              <SelectValue placeholder="Sale or Rent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {Object.values(ListingType)
-                .filter((v) => typeof v === "number")
-                .map((type) => (
-                  <SelectItem key={type} value={type.toString()}>
-                    {getListingTypeLabel(type as ListingType)}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Action Buttons */}
@@ -120,6 +80,47 @@ export function ListingsSearch() {
         <>
           <Separator className="my-6" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Property Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 ml-1">Property Type</label>
+              <Select value={propertyType} onValueChange={setPropertyType}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {Object.values(PropertyType)
+                    .filter((v) => typeof v === "number")
+                    .map((type) => (
+                      <SelectItem key={type} value={type.toString()}>
+                        {getPropertyTypeLabel(type as PropertyType)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Listing Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 ml-1">Status</label>
+              <Select value={listingType} onValueChange={setListingType}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Sale or Rent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {Object.values(ListingType)
+                    .filter((v) => typeof v === "number")
+                    .map((type) => (
+                      <SelectItem key={type} value={type.toString()}>
+                        {getListingTypeLabel(type as ListingType)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Price Range */}
             <div className="md:col-span-2 space-y-2">
                <label className="text-sm font-medium text-gray-700 ml-1">Price Range</label>
                <div className="flex gap-3">
@@ -147,7 +148,7 @@ export function ListingsSearch() {
                </div>
             </div>
             
-            <div className="md:col-span-2 flex justify-end">
+            <div className="md:col-span-4 flex justify-end mt-2">
                <Button onClick={handleReset} variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 gap-2 h-10">
                 <RotateCcw className="h-4 w-4" />
                 Reset Filters
