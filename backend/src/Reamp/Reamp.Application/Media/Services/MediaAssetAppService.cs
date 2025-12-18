@@ -45,13 +45,21 @@ namespace Reamp.Application.Media.Services
                 throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
 
             // Security: Verify user is a staff member of the target studio
-            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, dto.OwnerStudioId, ct);
-            if (!isStaffMember)
+            // Special case: Guid.Empty means user-owned media (e.g., avatars), no studio check required
+            if (dto.OwnerStudioId != Guid.Empty)
             {
-                _logger.LogWarning(
-                    "User {UserId} attempted to upload media to Studio {StudioId} but is not a staff member",
-                    currentUserId, dto.OwnerStudioId);
-                throw new UnauthorizedAccessException("You are not authorized to upload media to this studio. You must be a staff member.");
+                var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, dto.OwnerStudioId, ct);
+                if (!isStaffMember)
+                {
+                    _logger.LogWarning(
+                        "User {UserId} attempted to upload media to Studio {StudioId} but is not a staff member",
+                        currentUserId, dto.OwnerStudioId);
+                    throw new UnauthorizedAccessException("You are not authorized to upload media to this studio. You must be a staff member.");
+                }
+            }
+            else
+            {
+                _logger.LogInformation("User {UserId} uploading user-owned media (e.g., avatar)", currentUserId);
             }
 
             // Validate content type
