@@ -7,7 +7,7 @@ A full-stack platform connecting real estate agents with professional photograph
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
 
-## 🌟 Features
+## Features
 
 ### Core Functionality
 - **Multi-Role System**: Admin, Agent, Staff, and User roles with granular permissions
@@ -25,7 +25,7 @@ A full-stack platform connecting real estate agents with professional photograph
 - **Responsive Design**: Mobile-first UI with modern components
 - **Type Safety**: Full TypeScript and C# type coverage
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework**: Next.js 16 (React 19) with App Router
@@ -49,7 +49,7 @@ A full-stack platform connecting real estate agents with professional photograph
 - **Database**: SQL Server 2022 (Linux)
 - **Package Manager**: pnpm (frontend), NuGet (backend)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 20+ and pnpm
@@ -90,7 +90,7 @@ Frontend will be available at http://localhost:3000
 - **Backend API**: http://localhost:5000
 - **API Documentation**: http://localhost:5000/swagger
 
-## 👤 Test Accounts
+## Test Accounts
 
 See [TEST-ACCOUNTS.md](./TEST-ACCOUNTS.md) for complete account information.
 
@@ -100,7 +100,7 @@ See [TEST-ACCOUNTS.md](./TEST-ACCOUNTS.md) for complete account information.
 | Admin | admin@reamp.com | Test@123 |
 | Agent | agent1@reamp.com | Test@123 |
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Reamp/
@@ -123,59 +123,7 @@ Reamp/
 └── .cursor/rules/         # Development rules
 ```
 
-## 🔧 Development
-
-### Frontend Development
-
-```bash
-cd frontend
-
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Run type checking
-pnpm type-check
-
-# Run linting
-pnpm lint
-
-# Build for production
-pnpm build
-```
-
-### Backend Development
-
-```bash
-cd backend/src/Reamp
-
-# Restore packages
-dotnet restore
-
-# Run the API
-dotnet run --project Reamp.Api
-
-# Run tests
-dotnet test
-
-# Create migration
-dotnet ef migrations add MigrationName --project Reamp.Infrastructure --startup-project Reamp.Api
-```
-
-### Database Management
-
-```powershell
-# Reset database (⚠️ Deletes all data)
-cd backend/docker
-.\reset-database.ps1
-
-# Inject sample data
-.\inject-sample-data.ps1
-```
-
-## 🏗️ Architecture
+## Architecture
 
 ### Backend Architecture (DDD)
 
@@ -220,7 +168,7 @@ cd backend/docker
 └─────────────────────────────────────────┘
 ```
 
-## 📋 Core Workflows
+## Core Workflows
 
 ### 1. Agency Registration
 ```
@@ -237,7 +185,7 @@ Agent creates Listing → Creates Order → Studio accepts → Assigns Staff →
 Owner invites member → Member receives email → Accepts invitation → Joins team with assigned role
 ```
 
-## 🔐 Environment Variables
+## Environment Variables
 
 ### Frontend (.env.local)
 ```env
@@ -259,7 +207,59 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
 }
 ```
 
-## 🧪 Testing
+## Development
+
+### Frontend Development
+
+```bash
+cd frontend
+
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Run type checking
+pnpm type-check
+
+# Run linting
+pnpm lint
+
+# Build for production
+pnpm build
+```
+
+### Backend Development
+
+```bash
+cd backend/src/Reamp
+
+# Restore packages
+dotnet restore
+
+# Run the API
+dotnet run --project Reamp.Api
+
+# Run tests
+dotnet test
+
+# Create migration
+dotnet ef migrations add MigrationName --project Reamp.Infrastructure --startup-project Reamp.Api
+```
+
+### Database Management
+
+```powershell
+# Reset database (WARNING: Deletes all data)
+cd backend/docker
+.\reset-database.ps1
+
+# Inject sample data
+.\inject-sample-data.ps1
+```
+
+## Testing
 
 ### Run All Tests
 ```bash
@@ -272,7 +272,7 @@ cd frontend
 pnpm test
 ```
 
-## 📝 Code Style & Rules
+## Code Style & Rules
 
 This project follows strict coding conventions:
 - **Commits**: Conventional Commits format
@@ -280,31 +280,31 @@ This project follows strict coding conventions:
 - **Backend**: DDD patterns (see `.cursor/rules/ddd-backend.mdc`)
 - **General**: Common rules (see `.cursor/rules/common.mdc`)
 
-## 🤝 Contributing
+## Contributing
 
 1. Create a feature branch: `git checkout -b feat/feature-name`
 2. Follow commit conventions: `feat:`, `fix:`, `refactor:`, etc.
 3. Ensure tests pass and code is formatted
 4. Create a pull request
 
-## 📄 License
+## License
 
 This project is proprietary and confidential.
 
-## 🔗 Links
+## Links
 
 - [Test Accounts](./TEST-ACCOUNTS.md) - Test user credentials and roles
 - [API Documentation](http://localhost:5000/swagger) - Interactive API docs (when running)
 
-## 🐛 Known Issues
+## Known Issues
 
 - Google Maps integration requires API key configuration
 - Some advanced features are still in development
 
-## 📧 Support
+## Support
 
 For questions or issues, please contact the development team.
 
 ---
 
-**Built with ❤️ using modern web technologies**
+Built with modern web technologies
