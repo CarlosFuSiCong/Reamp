@@ -92,7 +92,7 @@ export default function HomePage() {
                   </Link>
                 )}
                 {user.role === UserRole.Admin && (
-                  <Link href="/admin">
+                  <Link href="/dashboard/admin">
                         <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20">
                           Admin Dashboard
                           <ArrowRight className="ml-2 h-5 w-5" />

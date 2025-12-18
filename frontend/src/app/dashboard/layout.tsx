@@ -28,7 +28,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (user.role === UserRole.Admin) {
       const adminItems: SidebarNavItem[] = [
         { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
-        { title: "Admin Panel", href: "/admin", icon: Settings },
+        { title: "Admin Panel", href: "/dashboard/admin", icon: Settings },
         { title: "Profile", href: "/dashboard/profile", icon: User },
       ];
 

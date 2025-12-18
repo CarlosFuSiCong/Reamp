@@ -48,7 +48,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
 
     switch (user.role) {
       case UserRole.Admin:
-        return "/admin";
+        return "/dashboard/admin";
       case UserRole.Agent:
       case UserRole.Staff:
       case UserRole.User:

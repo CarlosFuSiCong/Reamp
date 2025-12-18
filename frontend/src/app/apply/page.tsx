@@ -80,7 +80,7 @@ export default function ApplyPage() {
           </AlertDescription>
         </Alert>
         <div className="mt-6 flex gap-4">
-          <Link href="/admin">
+          <Link href="/dashboard/admin">
             <Button>Go to Admin Panel</Button>
           </Link>
           <Link href="/">
