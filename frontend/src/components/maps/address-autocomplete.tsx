@@ -34,7 +34,7 @@ export function AddressAutocomplete({
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isApiReady, setIsApiReady] = useState(false);
   
   // 使用 @vis.gl/react-google-maps 的 hook 加载 Places library
   const places = useMapsLibrary("places");
@@ -45,60 +45,64 @@ export function AddressAutocomplete({
     }
 
     // Places library 加载完成
-    setIsLoading(false);
+    setIsApiReady(true);
 
-    // 创建 Autocomplete 实例
-    autocompleteRef.current = new places.Autocomplete(inputRef.current, {
-      types: ["address"],
-      componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
-      fields: ["address_components", "formatted_address", "geometry"],
-    });
-
-    autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace();
-
-      if (!place || !place.address_components) {
-        return;
-      }
-
-      const components: AddressComponents = {
-        line1: "",
-        line2: "",
-        city: "",
-        state: "",
-        postcode: "",
-        country: "",
-        latitude: place.geometry?.location?.lat(),
-        longitude: place.geometry?.location?.lng(),
-      };
-
-      let streetNumber = "";
-      let route = "";
-
-      place.address_components.forEach((component) => {
-        const types = component.types;
-
-        if (types.includes("street_number")) {
-          streetNumber = component.long_name;
-        } else if (types.includes("route")) {
-          route = component.long_name;
-        } else if (types.includes("subpremise")) {
-          components.line2 = component.long_name;
-        } else if (types.includes("locality")) {
-          components.city = component.long_name;
-        } else if (types.includes("administrative_area_level_1")) {
-          components.state = component.short_name;
-        } else if (types.includes("postal_code")) {
-          components.postcode = component.long_name;
-        } else if (types.includes("country")) {
-          components.country = component.long_name;
-        }
+    try {
+      // 创建 Autocomplete 实例
+      autocompleteRef.current = new places.Autocomplete(inputRef.current, {
+        types: ["address"],
+        componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
+        fields: ["address_components", "formatted_address", "geometry"],
       });
 
-      components.line1 = [streetNumber, route].filter(Boolean).join(" ");
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current?.getPlace();
 
-      onChange(place.formatted_address || value, components);
-    });
+        if (!place || !place.address_components) {
+          return;
+        }
+
+        const components: AddressComponents = {
+          line1: "",
+          line2: "",
+          city: "",
+          state: "",
+          postcode: "",
+          country: "",
+          latitude: place.geometry?.location?.lat(),
+          longitude: place.geometry?.location?.lng(),
+        };
+
+        let streetNumber = "";
+        let route = "";
+
+        place.address_components.forEach((component) => {
+          const types = component.types;
+
+          if (types.includes("street_number")) {
+            streetNumber = component.long_name;
+          } else if (types.includes("route")) {
+            route = component.long_name;
+          } else if (types.includes("subpremise")) {
+            components.line2 = component.long_name;
+          } else if (types.includes("locality")) {
+            components.city = component.long_name;
+          } else if (types.includes("administrative_area_level_1")) {
+            components.state = component.short_name;
+          } else if (types.includes("postal_code")) {
+            components.postcode = component.long_name;
+          } else if (types.includes("country")) {
+            components.country = component.long_name;
+          }
+        });
+
+        components.line1 = [streetNumber, route].filter(Boolean).join(" ");
+
+        onChange(place.formatted_address || value, components);
+      });
+    } catch (error) {
+      console.error("Failed to initialize Google Places Autocomplete:", error);
+    }
 
     return () => {
       if (autocompleteRef.current) {
@@ -134,13 +138,13 @@ export function AddressAutocomplete({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            disabled={disabled || isLoading}
+            disabled={disabled}
             className="pl-10"
           />
         </div>
       </FormControl>
       {error && <FormMessage>{error}</FormMessage>}
-      {isLoading && (
+      {!isApiReady && (
         <p className="text-xs text-muted-foreground mt-1">Loading address suggestions...</p>
       )}
     </div>
