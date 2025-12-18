@@ -7,10 +7,11 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Sidebar, Navbar, SidebarNavItem } from "@/components/layout";
-import { LayoutDashboard, Users, Building2, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Settings, User } from "lucide-react";
 
 const sidebarItems: SidebarNavItem[] = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { title: "Profile", href: "/dashboard/profile", icon: User },
   { title: "Users", href: "/admin/users", icon: Users },
   { title: "Agencies", href: "/admin/agencies", icon: Building2 },
   { title: "Studios", href: "/admin/studios", icon: Building2 },
