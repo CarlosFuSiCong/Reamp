@@ -52,7 +52,7 @@ export function Navbar({ breadcrumbs }: NavbarProps) {
       case UserRole.Agent:
       case UserRole.Staff:
       case UserRole.User:
-        return "/dashboard/profile";
+        return "/dashboard";
       default:
         return "/";
     }
