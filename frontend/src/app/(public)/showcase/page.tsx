@@ -461,6 +461,7 @@ export default function ShowcasePage() {
             </Card>
           </section>
         </div>
+        </div>
       </main>
       <Footer />
     </div>
