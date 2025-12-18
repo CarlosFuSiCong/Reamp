@@ -14,7 +14,7 @@ export function Footer() {
               © {new Date().getFullYear()} All rights reserved.
             </p>
           </div>
-          
+
           <div className="flex gap-6 text-sm text-gray-500">
              <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link>
              <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link>

@@ -58,7 +58,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             >
               {getListingTypeLabel(listing.listingType)}
             </Badge>
-          </div>
+        </div>
 
           <div className="absolute bottom-3 left-3 text-white">
              <p className="font-bold text-xl drop-shadow-md">
@@ -68,24 +68,24 @@ export function ListingCard({ listing }: ListingCardProps) {
               )}
             </p>
           </div>
-        </div>
+          </div>
 
         <CardContent className="p-5 flex flex-col flex-grow">
           {/* Title & Location */}
           <div className="mb-4 flex-grow">
             <div className="flex justify-between items-start gap-2 mb-2">
               <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                {listing.title}
-              </h3>
+            {listing.title}
+          </h3>
               <ArrowUpRight className="h-5 w-5 text-gray-300 group-hover:text-blue-600 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
             </div>
             
             <div className="flex items-start gap-1.5 text-sm text-gray-500">
               <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-400" />
               <span className="line-clamp-1 font-medium">
-                {listing.city}, {listing.state}
-              </span>
-            </div>
+              {listing.city}, {listing.state}
+            </span>
+          </div>
           </div>
 
           <Separator className="mb-4 bg-gray-50" />
@@ -93,24 +93,24 @@ export function ListingCard({ listing }: ListingCardProps) {
           {/* Features */}
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center gap-4">
-              {listing.bedrooms > 0 && (
+            {listing.bedrooms > 0 && (
                 <div className="flex items-center gap-1.5" title={`${listing.bedrooms} Bedrooms`}>
                   <Bed className="h-4 w-4 text-gray-400" />
                   <span className="font-semibold">{listing.bedrooms}</span>
-                </div>
-              )}
-              {listing.bathrooms > 0 && (
+              </div>
+            )}
+            {listing.bathrooms > 0 && (
                 <div className="flex items-center gap-1.5" title={`${listing.bathrooms} Bathrooms`}>
                   <Bath className="h-4 w-4 text-gray-400" />
                   <span className="font-semibold">{listing.bathrooms}</span>
-                </div>
-              )}
-              {listing.parkingSpaces > 0 && (
+              </div>
+            )}
+            {listing.parkingSpaces > 0 && (
                 <div className="flex items-center gap-1.5" title={`${listing.parkingSpaces} Parking Spaces`}>
                   <Car className="h-4 w-4 text-gray-400" />
                   <span className="font-semibold">{listing.parkingSpaces}</span>
-                </div>
-              )}
+              </div>
+            )}
             </div>
             
             {(listing.floorAreaSqm || listing.landAreaSqm) && (

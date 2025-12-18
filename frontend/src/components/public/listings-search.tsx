@@ -49,13 +49,13 @@ export function ListingsSearch() {
           <label className="text-sm font-medium text-gray-700 ml-1">Location or Keyword</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+          <Input
               placeholder="Search by city, address, or ID..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="w-full pl-10 h-11"
-            />
+          />
           </div>
         </div>
 
@@ -73,87 +73,87 @@ export function ListingsSearch() {
             <Filter className="h-4 w-4 text-gray-600" />
           </Button>
         </div>
-      </div>
+        </div>
 
       {/* Advanced Filters */}
       {isAdvancedOpen && (
         <>
           <Separator className="my-6" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end animate-in fade-in slide-in-from-top-2 duration-200">
-            {/* Property Type */}
+        {/* Property Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 ml-1">Property Type</label>
-              <Select value={propertyType} onValueChange={setPropertyType}>
+        <Select value={propertyType} onValueChange={setPropertyType}>
                 <SelectTrigger className="h-10">
                   <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {Object.values(PropertyType)
-                    .filter((v) => typeof v === "number")
-                    .map((type) => (
-                      <SelectItem key={type} value={type.toString()}>
-                        {getPropertyTypeLabel(type as PropertyType)}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {Object.values(PropertyType)
+              .filter((v) => typeof v === "number")
+              .map((type) => (
+                <SelectItem key={type} value={type.toString()}>
+                  {getPropertyTypeLabel(type as PropertyType)}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
             </div>
 
-            {/* Listing Type */}
+        {/* Listing Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 ml-1">Status</label>
-              <Select value={listingType} onValueChange={setListingType}>
+        <Select value={listingType} onValueChange={setListingType}>
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Sale or Rent" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  {Object.values(ListingType)
-                    .filter((v) => typeof v === "number")
-                    .map((type) => (
-                      <SelectItem key={type} value={type.toString()}>
-                        {getListingTypeLabel(type as ListingType)}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            <SelectValue placeholder="Sale or Rent" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            {Object.values(ListingType)
+              .filter((v) => typeof v === "number")
+              .map((type) => (
+                <SelectItem key={type} value={type.toString()}>
+                  {getListingTypeLabel(type as ListingType)}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
             </div>
 
-            {/* Price Range */}
+        {/* Price Range */}
             <div className="md:col-span-2 space-y-2">
                <label className="text-sm font-medium text-gray-700 ml-1">Price Range</label>
                <div className="flex gap-3">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                    <Input
-                      type="number"
+          <Input
+            type="number"
                       placeholder="Min"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
                       className="w-full pl-7 h-10"
-                    />
+          />
                   </div>
                   <span className="self-center text-gray-400">-</span>
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                    <Input
-                      type="number"
+          <Input
+            type="number"
                       placeholder="Max"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
                       className="w-full pl-7 h-10"
-                    />
+          />
                   </div>
-               </div>
-            </div>
-            
+        </div>
+      </div>
+
             <div className="md:col-span-4 flex justify-end mt-2">
                <Button onClick={handleReset} variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 gap-2 h-10">
                 <RotateCcw className="h-4 w-4" />
                 Reset Filters
-              </Button>
-            </div>
+        </Button>
+      </div>
           </div>
         </>
       )}
