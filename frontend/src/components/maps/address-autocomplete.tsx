@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { FormControl, FormMessage } from "@/components/ui/form";
-import { importLibrary } from "@googlemaps/js-api-loader";
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { MapPin } from "lucide-react";
 
 export interface AddressComponents {
@@ -34,94 +34,82 @@ export function AddressAutocomplete({
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isApiAvailable, setIsApiAvailable] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // 使用 @vis.gl/react-google-maps 的 hook 加载 Places library
+  const places = useMapsLibrary("places");
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!apiKey || !inputRef.current) {
+    if (!places || !inputRef.current) {
       return;
     }
 
-    setIsLoading(true);
+    // Places library 加载完成
+    setIsLoading(false);
 
-    // 使用新的函数式 API
-    importLibrary("places")
-      .then((placesLibrary) => {
-        if (!inputRef.current) return;
+    // 创建 Autocomplete 实例
+    autocompleteRef.current = new places.Autocomplete(inputRef.current, {
+      types: ["address"],
+      componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
+      fields: ["address_components", "formatted_address", "geometry"],
+    });
 
-        // @ts-ignore - Google Maps types
-        autocompleteRef.current = new placesLibrary.Autocomplete(inputRef.current, {
-          types: ["address"],
-          componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
-          fields: ["address_components", "formatted_address", "geometry"],
-        });
+    autocompleteRef.current.addListener("place_changed", () => {
+      const place = autocompleteRef.current?.getPlace();
 
-        autocompleteRef.current.addListener("place_changed", () => {
-          const place = autocompleteRef.current?.getPlace();
+      if (!place || !place.address_components) {
+        return;
+      }
 
-          if (!place || !place.address_components) {
-            return;
-          }
+      const components: AddressComponents = {
+        line1: "",
+        line2: "",
+        city: "",
+        state: "",
+        postcode: "",
+        country: "",
+        latitude: place.geometry?.location?.lat(),
+        longitude: place.geometry?.location?.lng(),
+      };
 
-          const components: AddressComponents = {
-            line1: "",
-            line2: "",
-            city: "",
-            state: "",
-            postcode: "",
-            country: "",
-            latitude: place.geometry?.location?.lat(),
-            longitude: place.geometry?.location?.lng(),
-          };
+      let streetNumber = "";
+      let route = "";
 
-          let streetNumber = "";
-          let route = "";
+      place.address_components.forEach((component) => {
+        const types = component.types;
 
-          place.address_components.forEach((component) => {
-            const types = component.types;
-
-            if (types.includes("street_number")) {
-              streetNumber = component.long_name;
-            } else if (types.includes("route")) {
-              route = component.long_name;
-            } else if (types.includes("subpremise")) {
-              components.line2 = component.long_name;
-            } else if (types.includes("locality")) {
-              components.city = component.long_name;
-            } else if (types.includes("administrative_area_level_1")) {
-              components.state = component.short_name;
-            } else if (types.includes("postal_code")) {
-              components.postcode = component.long_name;
-            } else if (types.includes("country")) {
-              components.country = component.long_name;
-            }
-          });
-
-          components.line1 = [streetNumber, route].filter(Boolean).join(" ");
-
-          onChange(place.formatted_address || value, components);
-        });
-
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Failed to load Google Maps API:", error);
-        setIsApiAvailable(false);
-        setIsLoading(false);
+        if (types.includes("street_number")) {
+          streetNumber = component.long_name;
+        } else if (types.includes("route")) {
+          route = component.long_name;
+        } else if (types.includes("subpremise")) {
+          components.line2 = component.long_name;
+        } else if (types.includes("locality")) {
+          components.city = component.long_name;
+        } else if (types.includes("administrative_area_level_1")) {
+          components.state = component.short_name;
+        } else if (types.includes("postal_code")) {
+          components.postcode = component.long_name;
+        } else if (types.includes("country")) {
+          components.country = component.long_name;
+        }
       });
+
+      components.line1 = [streetNumber, route].filter(Boolean).join(" ");
+
+      onChange(place.formatted_address || value, components);
+    });
 
     return () => {
       if (autocompleteRef.current) {
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, []);
+  }, [places, onChange, value]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  if (!apiKey || !isApiAvailable) {
+  if (!apiKey) {
     return (
       <FormControl>
         <Input
