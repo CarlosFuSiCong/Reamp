@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
   Building2, 
   Camera, 
@@ -17,7 +18,12 @@ import {
   ShoppingBag,
   Truck,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Database,
+  Server,
+  Cloud,
+  Layers,
+  Code
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -32,438 +38,321 @@ export const metadata: Metadata = {
 
 export default function ShowcasePage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50/30">
       <Navbar />
-      <main className="flex-1 bg-gradient-to-b from-gray-50 to-white">
+      <main className="flex-1">
         {/* Hero Section */}
-        <section className="border-b bg-white">
-          <div className="container mx-auto px-4 py-16 max-w-6xl">
-            <div className="text-center space-y-4">
-              <Badge variant="secondary" className="mb-2">
-                Demo Platform
+        <section className="relative overflow-hidden pt-20 pb-32 bg-white">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,theme(colors.blue.50),white)] opacity-60" />
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="mx-auto max-w-4xl text-center space-y-8">
+              <Badge variant="secondary" className="px-4 py-1.5 text-sm bg-blue-50 text-blue-700 border-blue-100 rounded-full font-medium">
+                Live Demo Platform
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                Reamp Platform Showcase
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 leading-tight">
+                Reamp Platform <span className="text-blue-600 block sm:inline">Showcase</span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                A comprehensive real estate media management platform connecting real estate agents with professional photography studios
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Experience the next generation of real estate media management. 
+                Seamlessly connecting agencies with professional studios.
               </p>
+              <div className="flex flex-wrap justify-center gap-4 pt-4">
+                <Link href="#agent-features">
+                  <Button size="lg" className="h-12 px-8 text-base shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700">
+                    Explore Features
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/listings">
+                  <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-white hover:bg-gray-50">
+                    View Live Listings
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Main Content */}
-        <div className="container mx-auto px-4 py-12 max-w-6xl">
-        <div className="grid gap-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 max-w-7xl">
           {/* Agent Dashboard Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Building2 className="h-8 w-8 text-blue-600" />
-              <div>
-                <h2 className="text-3xl font-bold">Agent Dashboard</h2>
-                <p className="text-gray-600">Manage properties, orders, and media assets</p>
+          <section id="agent-features" className="scroll-mt-24">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-100 rounded-2xl">
+                  <Building2 className="h-8 w-8 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Agent Dashboard</h2>
+                  <p className="text-lg text-gray-500 mt-1">Manage properties, orders, and media assets</p>
+                </div>
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Agent Features */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Listing Management
-                  </CardTitle>
-                  <CardDescription>
-                    Create and manage property listings with rich media
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Create unlimited property listings</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Upload and manage property photos & floor plans</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Track listing status and performance</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShoppingBag className="h-5 w-5" />
-                    Order Photography Services
-                  </CardTitle>
-                  <CardDescription>
-                    Book professional photography shoots from the marketplace
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Browse available studios and services</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Place and track photography orders</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Receive and review delivered media</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ImageIcon className="h-5 w-5" />
-                    Media Library
-                  </CardTitle>
-                  <CardDescription>
-                    Organize and link media to listings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Cloud storage integration (Cloudinary)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Drag-and-drop media organization</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Multiple role support (gallery, cover, floor plans)</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Team Collaboration
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your agency team and permissions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Multi-agent agency support</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Role-based access control</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Shared listing management</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Agent Demo Login */}
-            <Card className="border-blue-200 bg-blue-50">
-              <CardHeader>
-                <CardTitle className="text-blue-900">Try Agent Dashboard</CardTitle>
-                <CardDescription className="text-blue-700">
-                  Login with demo credentials to explore agent features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Demo Credentials:</p>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Email:</span>
-                        <code className="ml-2 px-2 py-1 bg-gray-100 rounded">agent1@reamp.com</code>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Password:</span>
-                        <code className="ml-2 px-2 py-1 bg-gray-100 rounded">Test@123</code>
-                      </div>
+              <Card className="border-blue-100 bg-blue-50/50 shadow-sm min-w-[300px]">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-blue-900">Demo Account</p>
+                    <div className="text-xs text-blue-700 font-mono bg-blue-100 px-2 py-1 rounded">
+                      agent1@reamp.com / Test@123
                     </div>
                   </div>
                   <Link href="/login">
-                    <Button className="w-full" size="lg">
-                      Login as Agent
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Login</Button>
                   </Link>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <FeatureCard 
+                icon={FileText}
+                title="Listing Management"
+                description="Create and manage property listings with rich media"
+                features={[
+                  "Create unlimited property listings",
+                  "Upload photos & floor plans",
+                  "Track listing status"
+                ]}
+                color="blue"
+              />
+              <FeatureCard 
+                icon={ShoppingBag}
+                title="Order Services"
+                description="Book professional photography shoots from the marketplace"
+                features={[
+                  "Browse available studios",
+                  "Place and track orders",
+                  "Review delivered media"
+                ]}
+                color="blue"
+              />
+              <FeatureCard 
+                icon={ImageIcon}
+                title="Media Library"
+                description="Organize and link media to listings"
+                features={[
+                  "Cloud storage integration",
+                  "Drag-and-drop organization",
+                  "Multiple media roles"
+                ]}
+                color="blue"
+              />
+              <FeatureCard 
+                icon={Users}
+                title="Team Collaboration"
+                description="Manage your agency team and permissions"
+                features={[
+                  "Multi-agent support",
+                  "Role-based access",
+                  "Shared management"
+                ]}
+                color="blue"
+              />
+            </div>
           </section>
 
-          <div className="border-t my-8" />
+          <Separator className="my-20" />
 
           {/* Studio Dashboard Section */}
           <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Camera className="h-8 w-8 text-purple-600" />
-              <div>
-                <h2 className="text-3xl font-bold">Studio Dashboard</h2>
-                <p className="text-gray-600">Professional photography service management</p>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-100 rounded-2xl">
+                  <Camera className="h-8 w-8 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Studio Dashboard</h2>
+                  <p className="text-lg text-gray-500 mt-1">Professional photography service management</p>
+                </div>
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Studio Features */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Order Management
-                  </CardTitle>
-                  <CardDescription>
-                    Accept and manage photography orders
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>View incoming orders from agents</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Accept or decline based on availability</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Track order status and deadlines</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserCheck className="h-5 w-5" />
-                    Staff Assignment
-                  </CardTitle>
-                  <CardDescription>
-                    Assign photographers to shoots
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Manage studio staff and skills</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Assign staff based on expertise</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Schedule management</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    Delivery Management
-                  </CardTitle>
-                  <CardDescription>
-                    Package and deliver completed work
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Upload processed photos and media</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Create delivery packages with access control</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Secure delivery links (public/token/private)</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Media Upload
-                  </CardTitle>
-                  <CardDescription>
-                    Advanced upload capabilities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Chunked upload for large files</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Real-time upload progress via SignalR</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Automatic cloud processing</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Studio Demo Login */}
-            <Card className="border-purple-200 bg-purple-50">
-              <CardHeader>
-                <CardTitle className="text-purple-900">Try Studio Dashboard</CardTitle>
-                <CardDescription className="text-purple-700">
-                  Login with demo credentials to explore studio features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Demo Credentials:</p>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Email:</span>
-                        <code className="ml-2 px-2 py-1 bg-gray-100 rounded">staff1@reamp.com</code>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Password:</span>
-                        <code className="ml-2 px-2 py-1 bg-gray-100 rounded">Test@123</code>
-                      </div>
+              <Card className="border-purple-100 bg-purple-50/50 shadow-sm min-w-[300px]">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-purple-900">Demo Account</p>
+                    <div className="text-xs text-purple-700 font-mono bg-purple-100 px-2 py-1 rounded">
+                      staff1@reamp.com / Test@123
                     </div>
                   </div>
                   <Link href="/login">
-                    <Button className="w-full" size="lg" variant="secondary">
-                      Login as Studio Staff
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700">Login</Button>
                   </Link>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <FeatureCard 
+                icon={Package}
+                title="Order Management"
+                description="Accept and manage photography orders"
+                features={[
+                  "View incoming orders",
+                  "Accept/decline workflows",
+                  "Track deadlines"
+                ]}
+                color="purple"
+              />
+              <FeatureCard 
+                icon={UserCheck}
+                title="Staff Assignment"
+                description="Assign photographers to shoots"
+                features={[
+                  "Manage studio staff",
+                  "Skill-based assignment",
+                  "Schedule management"
+                ]}
+                color="purple"
+              />
+              <FeatureCard 
+                icon={Truck}
+                title="Delivery"
+                description="Package and deliver completed work"
+                features={[
+                  "Upload processed media",
+                  "Secure delivery links",
+                  "Access control"
+                ]}
+                color="purple"
+              />
+              <FeatureCard 
+                icon={Calendar}
+                title="Media Upload"
+                description="Advanced upload capabilities"
+                features={[
+                  "Chunked large file upload",
+                  "Real-time progress",
+                  "Auto processing"
+                ]}
+                color="purple"
+              />
+            </div>
           </section>
 
-          <div className="border-t my-8" />
+          <Separator className="my-20" />
 
           {/* Technology Stack */}
-          <section className="space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">Technology Stack</h2>
-              <p className="text-gray-600">Built with modern, scalable technologies</p>
+          <section className="space-y-12">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-bold text-gray-900">Technology Stack</h2>
+              <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+                Built with modern, scalable technologies to ensure performance, security, and reliability.
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Frontend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• Next.js 15 (App Router)</li>
-                    <li>• TypeScript</li>
-                    <li>• Tailwind CSS</li>
-                    <li>• shadcn/ui Components</li>
-                    <li>• TanStack Query</li>
-                    <li>• Zustand State Management</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Backend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• ASP.NET Core 8</li>
-                    <li>• Entity Framework Core</li>
-                    <li>• SQL Server</li>
-                    <li>• Clean Architecture (DDD)</li>
-                    <li>• CQRS Pattern</li>
-                    <li>• SignalR for Real-time</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Infrastructure</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• Docker & Docker Compose</li>
-                    <li>• Cloudinary CDN</li>
-                    <li>• JWT Authentication</li>
-                    <li>• Role-based Authorization</li>
-                    <li>• RESTful API</li>
-                    <li>• Cookie-based Sessions</li>
-                  </ul>
-                </CardContent>
-              </Card>
+            <div className="grid md:grid-cols-3 gap-8">
+              <TechCard 
+                icon={Layers}
+                title="Frontend"
+                items={[
+                  "Next.js 15 (App Router)",
+                  "TypeScript & Tailwind CSS",
+                  "shadcn/ui Components",
+                  "TanStack Query",
+                  "Zustand State"
+                ]}
+              />
+              <TechCard 
+                icon={Server}
+                title="Backend"
+                items={[
+                  "ASP.NET Core 8",
+                  "Entity Framework Core",
+                  "Clean Architecture (DDD)",
+                  "CQRS Pattern",
+                  "SignalR Real-time"
+                ]}
+              />
+              <TechCard 
+                icon={Cloud}
+                title="Infrastructure"
+                items={[
+                  "Docker Containerization",
+                  "Cloudinary CDN",
+                  "SQL Server",
+                  "JWT Authentication",
+                  "RESTful API"
+                ]}
+              />
             </div>
           </section>
 
-          {/* Quick Links */}
-          <section className="mt-12">
-            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-none">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Ready to Explore?</CardTitle>
-                <CardDescription className="text-base">
-                  Start by browsing public listings or login to test the dashboard
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <Link href="/listings">
-                    <Button size="lg" variant="outline">
-                      Browse Listings
+          {/* CTA Section */}
+          <section className="mt-24">
+            <div className="relative rounded-3xl overflow-hidden bg-gray-900 text-white p-12 text-center">
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
+              <div className="relative z-10 space-y-8 max-w-3xl mx-auto">
+                <h2 className="text-3xl md:text-4xl font-bold">Ready to Experience Reamp?</h2>
+                <p className="text-xl text-gray-300">
+                  Join the platform transforming real estate media management.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/register">
+                    <Button size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700">
+                      Get Started Free
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  <Link href="/login">
-                    <Button size="lg">
-                      Login to Dashboard
+                  <Link href="/contact">
+                    <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-transparent text-white border-white hover:bg-white/10 hover:text-white">
+                      Contact Sales
                     </Button>
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </section>
-        </div>
         </div>
       </main>
       <Footer />
     </div>
+  );
+}
+
+function FeatureCard({ icon: Icon, title, description, features, color }: any) {
+  const isBlue = color === 'blue';
+  
+  return (
+    <Card className={`border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${isBlue ? 'hover:shadow-blue-100' : 'hover:shadow-purple-100'}`}>
+      <CardHeader>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${isBlue ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+          <Icon className="h-6 w-6" />
+        </div>
+        <CardTitle className="text-xl font-bold">{title}</CardTitle>
+        <CardDescription className="text-sm line-clamp-2">{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-3">
+          {features.map((feature: string, i: number) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+              <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${isBlue ? 'text-blue-500' : 'text-purple-500'}`} />
+              <span className="leading-tight">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TechCard({ icon: Icon, title, items }: any) {
+  return (
+    <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-gray-100 rounded-lg">
+            <Icon className="h-5 w-5 text-gray-700" />
+          </div>
+          <CardTitle className="text-lg">{title}</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {items.map((item: string, i: number) => (
+            <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
