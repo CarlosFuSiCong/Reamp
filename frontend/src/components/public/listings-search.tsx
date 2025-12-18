@@ -60,11 +60,13 @@ export function ListingsSearch() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            {Object.values(PropertyType).map((type) => (
-              <SelectItem key={type} value={type}>
-                {getPropertyTypeLabel(type)}
-              </SelectItem>
-            ))}
+            {Object.values(PropertyType)
+              .filter((v) => typeof v === "number")
+              .map((type) => (
+                <SelectItem key={type} value={type.toString()}>
+                  {getPropertyTypeLabel(type as PropertyType)}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
 
@@ -75,11 +77,13 @@ export function ListingsSearch() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
-            {Object.values(ListingType).map((type) => (
-              <SelectItem key={type} value={type}>
-                {getListingTypeLabel(type)}
-              </SelectItem>
-            ))}
+            {Object.values(ListingType)
+              .filter((v) => typeof v === "number")
+              .map((type) => (
+                <SelectItem key={type} value={type.toString()}>
+                  {getListingTypeLabel(type as ListingType)}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
 
