@@ -84,6 +84,53 @@ namespace Reamp.Api.Controllers.Media
             }
         }
 
+        // POST /api/media/avatar - Upload avatar (no studio required)
+        [HttpPost("avatar")]
+        [RequestSizeLimit(5 * 1024 * 1024)] // 5MB limit for avatars
+        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile file, CancellationToken ct)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(ApiResponse<object>.Fail("File is required"));
+
+                // Validate file type
+                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
+                if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                    return BadRequest(ApiResponse<object>.Fail("Only image files (JPEG, PNG, GIF, WEBP) are allowed"));
+
+                // Validate file size (5MB)
+                if (file.Length > 5 * 1024 * 1024)
+                    return BadRequest(ApiResponse<object>.Fail("Avatar file size must not exceed 5MB"));
+
+                var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("Uploading avatar for user {UserId}", currentUserId);
+
+                // Use Guid.Empty as placeholder for user-owned media (not studio-owned)
+                using var stream = file.OpenReadStream();
+                var dto = new UploadMediaDto
+                {
+                    OwnerStudioId = Guid.Empty, // Special case: user avatar
+                    FileStream = stream,
+                    FileName = file.FileName,
+                    ContentType = file.ContentType,
+                    FileSize = file.Length,
+                    Description = "User avatar"
+                };
+
+                var result = await _mediaAssetAppService.UploadAsync(dto, currentUserId, ct);
+
+                return Ok(ApiResponse<MediaAssetDetailDto>.Ok(
+                    result,
+                    "Avatar uploaded successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading avatar");
+                return StatusCode(500, ApiResponse<object>.Fail("An error occurred while uploading avatar"));
+            }
+        }
+
         // GET /api/media/{id} - Get media details
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)

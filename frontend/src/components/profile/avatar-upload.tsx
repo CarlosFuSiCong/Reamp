@@ -59,16 +59,49 @@ export function AvatarUpload({
   const handleUpload = async () => {
     if (!file) return;
 
-    toast.info("Avatar upload feature is coming soon. Please contact support if you need to update your avatar.");
-    setFile(null);
-    setPreview(null);
-    
-    // TODO: Implement avatar upload
-    // Current issue: Media upload requires ownerStudioId, but regular users don't have studios
-    // Solution options:
-    // 1. Add a dedicated avatar upload endpoint that doesn't require studioId
-    // 2. Create a system-wide "user-avatars" storage bucket
-    // 3. Allow uploads without studio ownership for avatar-specific media
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://localhost:5000/api/media/avatar", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to upload avatar");
+      }
+
+      const result = await response.json();
+      const assetId = result.data?.id;
+
+      if (!assetId) {
+        throw new Error("No asset ID returned from server");
+      }
+
+      onUpload(assetId);
+      toast.success("Avatar uploaded successfully");
+      
+      setFile(null);
+      setPreview(null);
+      setUploadProgress(100);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to upload avatar");
+      setFile(null);
+      setPreview(null);
+      setUploadProgress(0);
+    } finally {
+      setUploading(false);
+    }
   };
 
   // Clear UI state when profile update completes (isUploading: true -> false)
