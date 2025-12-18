@@ -13,6 +13,7 @@ namespace Reamp.Application.Read.Listings.DTOs
         int Bedrooms, int Bathrooms, int ParkingSpaces,
         double? FloorAreaSqm, double? LandAreaSqm,
         string AddressLine1, string? AddressLine2, string City, string State, string Postcode, string Country,
+        double? Latitude, double? Longitude,
         IReadOnlyList<ListingMediaItemDto> Media, IReadOnlyList<ListingAgentItemDto> Agents);
 
     public sealed record ListingMediaItemDto(Guid MediaAssetId, string Role, int SortOrder, bool IsCover, string? ThumbnailUrl, bool IsVisible = true);
