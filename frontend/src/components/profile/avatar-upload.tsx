@@ -126,7 +126,7 @@ export function AvatarUpload({
       <CardContent>
         <div className="flex items-center gap-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={preview || avatarUrl || ""} />
+            <AvatarImage src={preview || avatarUrl || undefined} />
             <AvatarFallback>{displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
