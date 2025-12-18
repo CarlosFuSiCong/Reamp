@@ -59,20 +59,16 @@ export function AvatarUpload({
   const handleUpload = async () => {
     if (!file) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-
-    try {
-      // TODO: Implement avatar upload using chunked upload
-      throw new Error("Avatar upload not yet implemented");
-    } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast.error(err?.message || "Failed to upload avatar");
-      setFile(null);
-      setPreview(null);
-      setUploadProgress(0);
-      setUploading(false);
-    }
+    toast.info("Avatar upload feature is coming soon. Please contact support if you need to update your avatar.");
+    setFile(null);
+    setPreview(null);
+    
+    // TODO: Implement avatar upload
+    // Current issue: Media upload requires ownerStudioId, but regular users don't have studios
+    // Solution options:
+    // 1. Add a dedicated avatar upload endpoint that doesn't require studioId
+    // 2. Create a system-wide "user-avatars" storage bucket
+    // 3. Allow uploads without studio ownership for avatar-specific media
   };
 
   // Clear UI state when profile update completes (isUploading: true -> false)
