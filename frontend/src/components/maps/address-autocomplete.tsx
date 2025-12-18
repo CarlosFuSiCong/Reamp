@@ -37,10 +37,8 @@ export function AddressAutocomplete({
   const [isApiReady, setIsApiReady] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   
-  // 使用 @vis.gl/react-google-maps 的 hook 加载 Places library
   const places = useMapsLibrary("places");
 
-  // 同步外部 value 变化到内部状态（当表单字段被其他方式更新时）
   useEffect(() => {
     setInputValue(value);
   }, [value]);
@@ -50,14 +48,12 @@ export function AddressAutocomplete({
       return;
     }
 
-    // Places library 加载完成
     setIsApiReady(true);
 
     try {
-      // 创建 Autocomplete 实例
       autocompleteRef.current = new places.Autocomplete(inputRef.current, {
         types: ["address"],
-        componentRestrictions: { country: "au" }, // 仅限澳大利亚地址
+        componentRestrictions: { country: "au" },
         fields: ["address_components", "formatted_address", "geometry"],
       });
 
@@ -121,11 +117,10 @@ export function AddressAutocomplete({
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // 处理输入变化
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    onChange(newValue); // 通知父组件输入值变化（不含地址组件）
+    onChange(newValue);
   };
 
   if (!apiKey) {
