@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { PageHeader } from "@/components/shared";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { deliveriesApi, ordersApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { DeliveriesFilters } from "@/components/deliveries/deliveries-filters";
@@ -82,41 +83,82 @@ export default function DeliveriesPage() {
   });
 
   const isStudio = !!user?.studioId;
+  const hasDeliveries = ordersWithDeliveries && ordersWithDeliveries.length > 0;
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Deliveries"
-        description={
-          isStudio
-            ? "Manage delivery packages for completed orders"
-            : "View media deliveries from photography studios"
-        }
-        action={
-          isStudio ? (
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-700 flex items-center justify-center text-white">
+              <Package className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">Deliveries</h1>
+              <p className="text-muted-foreground mt-0.5">
+                {isStudio
+                  ? "Manage delivery packages for completed orders"
+                  : "View media deliveries from photography studios"}
+              </p>
+            </div>
+          </div>
+        </div>
+        {isStudio && (
+          <Button asChild className="shadow-lg hover:shadow-xl transition-all">
             <Link href="/dashboard/deliveries/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Delivery
-              </Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Delivery
             </Link>
-          ) : undefined
-        }
-      />
+          </Button>
+        )}
+      </div>
 
-      <DeliveriesFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-      />
+      {/* Filters Card */}
+      <Card className="border-0 shadow-md">
+        <CardContent className="pt-6">
+          <DeliveriesFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+          />
+        </CardContent>
+      </Card>
 
-      <DeliveriesByOrderTable
-        ordersWithDeliveries={ordersWithDeliveries || []}
-        isLoading={isLoading}
-        searchQuery={searchQuery}
-        statusFilter={statusFilter}
-      />
+      {/* Deliveries Table Card */}
+      <Card className="border-0 shadow-lg">
+        <CardContent className="p-0">
+          {!isLoading && !hasDeliveries ? (
+            <div className="text-center py-16 px-4">
+              <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center mb-6">
+                <Package className="h-12 w-12 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No deliveries yet</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                {isStudio
+                  ? "Create your first delivery package to share photos and videos with clients"
+                  : "Deliveries from photography studios will appear here"}
+              </p>
+              {isStudio && (
+                <Button asChild size="lg" className="shadow-lg">
+                  <Link href="/dashboard/deliveries/new">
+                    <Plus className="mr-2 h-5 w-5" />
+                    Create Your First Delivery
+                  </Link>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <DeliveriesByOrderTable
+              ordersWithDeliveries={ordersWithDeliveries || []}
+              isLoading={isLoading}
+              searchQuery={searchQuery}
+              statusFilter={statusFilter}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
