@@ -87,6 +87,12 @@ export function AvatarUpload({
         throw new Error("No asset ID returned from server");
       }
 
+      // Update preview to show uploaded image immediately
+      const uploadedUrl = result.data?.publicUrl || result.data?.variants?.[0]?.url;
+      if (uploadedUrl) {
+        setAvatarUrl(uploadedUrl);
+      }
+
       onUpload(assetId);
       toast.success("Avatar uploaded successfully");
       
