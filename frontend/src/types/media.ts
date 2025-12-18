@@ -17,29 +17,35 @@ export enum MediaResourceType {
 // DTOs
 export interface MediaAssetDetailDto {
   id: string;
-  originalFileName: string;
-  storedFileName: string;
+  ownerStudioId?: string;
+  studioName?: string;
+  uploaderUserId: string;
+  uploaderName?: string;
   mediaProvider: MediaProvider;
-  externalId?: string;
+  providerAssetId: string;
   resourceType: MediaResourceType;
   processStatus: MediaProcessStatus;
-  sizeBytes: number;
   contentType: string;
+  sizeBytes: number;
+  widthPx?: number;
+  heightPx?: number;
+  durationSeconds?: number;
+  originalFileName: string;
+  publicUrl: string;
   checksumSha256?: string;
-  ownerStudioId?: string;
-  uploadedBy: string;
-  uploadedAt: string;
+  description?: string;
+  tags?: string[];
   variants: MediaVariantDto[];
+  createdAtUtc: string;
+  updatedAtUtc: string;
 }
 
 export interface MediaVariantDto {
-  id: string;
   variantName: string;
-  url: string;
-  width?: number;
-  height?: number;
-  sizeBytes: number;
-  format?: string;
+  transformedUrl: string;
+  widthPx?: number;
+  heightPx?: number;
+  sizeBytes?: number;
 }
 
 export interface MediaAssetListDto {

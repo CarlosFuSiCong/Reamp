@@ -4,6 +4,7 @@ import { listingsApi } from "@/lib/api";
 import { ImageGallery } from "@/components/public";
 import { Footer } from "@/components/layout";
 import { Navbar } from "@/components/layout";
+import { PropertyMap } from "@/components/maps";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -187,20 +188,35 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <CardHeader>
                   <CardTitle>Location</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <p className="font-medium">{listing.addressLine1}</p>
-                      {listing.addressLine2 && <p className="text-gray-600">{listing.addressLine2}</p>}
-                      <p className="text-gray-600">
-                        {listing.city}, {listing.state} {listing.postcode}
-                      </p>
-                      <p className="text-gray-600">{listing.country}</p>
+                <CardContent>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <div className="flex items-center gap-2 flex-wrap text-gray-700">
+                      <span className="font-semibold">{listing.addressLine1}</span>
+                      {listing.addressLine2 && (
+                        <>
+                          <span className="text-gray-400">·</span>
+                          <span>{listing.addressLine2}</span>
+                        </>
+                      )}
+                      <span className="text-gray-400">·</span>
+                      <span>{listing.city}, {listing.state} {listing.postcode}</span>
+                      <span className="text-gray-400">·</span>
+                      <span className="text-gray-500">
+                        {listing.country === 'AU' ? 'Australia' : listing.country}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Property Map */}
+              <PropertyMap
+                latitude={listing.latitude}
+                longitude={listing.longitude}
+                address={`${listing.addressLine1}, ${listing.city}, ${listing.state} ${listing.postcode}`}
+                title="Property Location"
+              />
             </div>
 
             {/* Sidebar */}

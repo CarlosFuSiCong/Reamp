@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Media.Enums;
+using Reamp.Domain.Media.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +54,7 @@ namespace Reamp.Domain.Media.Entities
             string? publicUrl = null,
             string? checksumSha256 = null)
         {
-            if (ownerStudioId == Guid.Empty) throw new ArgumentException("OwnerStudioId is required.", nameof(ownerStudioId));
+            // Note: OwnerStudioId can be Guid.Empty for user-owned media (e.g., avatars)
             if (uploaderUserId == Guid.Empty) throw new ArgumentException("UploaderUserId is required.", nameof(uploaderUserId));
             if (string.IsNullOrWhiteSpace(providerAssetId)) throw new ArgumentException("ProviderAssetId is required.", nameof(providerAssetId));
             if (string.IsNullOrWhiteSpace(contentType)) throw new ArgumentException("ContentType is required.", nameof(contentType));

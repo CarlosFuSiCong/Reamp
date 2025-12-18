@@ -45,13 +45,21 @@ namespace Reamp.Application.Media.Services
                 throw new ArgumentException("CurrentUserId is required.", nameof(currentUserId));
 
             // Security: Verify user is a staff member of the target studio
-            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, dto.OwnerStudioId, ct);
-            if (!isStaffMember)
+            // Special case: Guid.Empty means user-owned media (e.g., avatars), no studio check required
+            if (dto.OwnerStudioId != Guid.Empty)
             {
-                _logger.LogWarning(
-                    "User {UserId} attempted to upload media to Studio {StudioId} but is not a staff member",
-                    currentUserId, dto.OwnerStudioId);
-                throw new UnauthorizedAccessException("You are not authorized to upload media to this studio. You must be a staff member.");
+                var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, dto.OwnerStudioId, ct);
+                if (!isStaffMember)
+                {
+                    _logger.LogWarning(
+                        "User {UserId} attempted to upload media to Studio {StudioId} but is not a staff member",
+                        currentUserId, dto.OwnerStudioId);
+                    throw new UnauthorizedAccessException("You are not authorized to upload media to this studio. You must be a staff member.");
+                }
+            }
+            else
+            {
+                _logger.LogInformation("User {UserId} uploading user-owned media (e.g., avatar)", currentUserId);
             }
 
             // Validate content type
@@ -155,14 +163,20 @@ namespace Reamp.Application.Media.Services
             if (asset == null)
                 return null;
 
-            // Security: Verify user is a staff member of the asset's owner studio
-            var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, asset.OwnerStudioId, ct);
-            if (!isStaffMember)
+            // Security: Allow access if:
+            // 1. User-owned media (OwnerStudioId is Guid.Empty, e.g., avatars)
+            // 2. User is the uploader
+            // 3. User is a staff member of the asset's owner studio
+            if (asset.OwnerStudioId != Guid.Empty && asset.UploaderUserId != currentUserId)
             {
-                _logger.LogWarning(
-                    "User {UserId} attempted to view asset {AssetId} from Studio {StudioId} but is not a staff member",
-                    currentUserId, id, asset.OwnerStudioId);
-                throw new UnauthorizedAccessException("You are not authorized to view this media asset. You must be a staff member of the studio.");
+                var isStaffMember = await _staffRepository.IsApplicationUserStaffOfStudioAsync(currentUserId, asset.OwnerStudioId, ct);
+                if (!isStaffMember)
+                {
+                    _logger.LogWarning(
+                        "User {UserId} attempted to view asset {AssetId} from Studio {StudioId} but is not a staff member",
+                        currentUserId, id, asset.OwnerStudioId);
+                    throw new UnauthorizedAccessException("You are not authorized to view this media asset. You must be a staff member of the studio.");
+                }
             }
 
             return MapToDetailDto(asset);

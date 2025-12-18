@@ -8,10 +8,10 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
+            <Link href="/" className="flex items-center gap-2 mb-4 w-fit">
               <Building2 className="h-8 w-8 text-blue-500" />
               <span className="text-2xl font-bold text-white">Reamp</span>
-            </div>
+            </Link>
             <p className="text-gray-400 mb-4 max-w-md">
               Professional real estate media platform connecting agencies with photography studios.
               Streamline your property photography workflow.
@@ -64,19 +64,23 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
+            <h3 className="text-white font-semibold mb-4">Contact</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Mail className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">contact@reamp.com</span>
+                <a href="mailto:sicong.fu@outlook.com" className="text-sm hover:text-white transition-colors">
+                  sicong.fu@outlook.com
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Phone className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <a href="tel:+61481727786" className="text-sm hover:text-white transition-colors">
+                  0481 727 786
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <span className="text-sm">123 Main St, San Francisco, CA 94105</span>
+                <span className="text-sm">Adelaide, Australia</span>
               </li>
             </ul>
           </div>

@@ -1,4 +1,4 @@
-﻿using Reamp.Domain.Common.Entities;
+using Reamp.Domain.Common.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +9,11 @@ namespace Reamp.Domain.Accounts.Entities
 {
     public sealed class Client : AuditableEntity
     {
-        public Guid UserProfileId { get; private set; }   // 1:1 到 UserProfile
-        public Guid AgencyId { get; private set; }        // 必填
-        public Guid? AgencyBranchId { get; private set; } // 可选
+        public Guid UserProfileId { get; private set; }
+        public Guid AgencyId { get; private set; }
+        public Guid? AgencyBranchId { get; private set; }
 
-        private Client() { } // EF
+        private Client() { }
 
         public Client(Guid userProfileId, Guid agencyId, Guid? agencyBranchId = null)
         {

@@ -90,6 +90,7 @@ namespace Reamp.Infrastructure.Read.EF.Listings
                     l.Bedrooms, l.Bathrooms, l.ParkingSpaces,
                     l.FloorAreaSqm, l.LandAreaSqm,
                     l.Address.Line1, l.Address.Line2, l.Address.City, l.Address.State, l.Address.Postcode, l.Address.Country,
+                    l.Address.Latitude, l.Address.Longitude,
                     l.MediaRefs.Where(m => m.IsVisible).OrderBy(m => m.SortOrder)
                         .Select(m => new ListingMediaItemDto(
                             m.MediaAssetId, 
@@ -118,6 +119,7 @@ namespace Reamp.Infrastructure.Read.EF.Listings
                     l.Bedrooms, l.Bathrooms, l.ParkingSpaces,
                     l.FloorAreaSqm, l.LandAreaSqm,
                     l.Address.Line1, l.Address.Line2, l.Address.City, l.Address.State, l.Address.Postcode, l.Address.Country,
+                    l.Address.Latitude, l.Address.Longitude,
                     l.MediaRefs.OrderBy(m => m.SortOrder)
                         .Select(m => new EditorMediaItemDto(
                             m.Id, 

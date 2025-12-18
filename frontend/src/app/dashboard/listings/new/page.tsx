@@ -31,6 +31,7 @@ import { useCreateListing } from "@/lib/hooks/use-listings";
 import { useProfile } from "@/lib/hooks";
 import { ListingType, PropertyType, MediaAssetDetailDto } from "@/types";
 import { ChevronLeft, ChevronRight, Save, Image as ImageIcon, Trash2 } from "lucide-react";
+import { ListingAddressFields } from "@/components/listings";
 
 const listingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -54,6 +55,8 @@ const listingSchema = z.object({
   state: z.string().min(2, "State is required"),
   postcode: z.string().min(3, "Postcode is required"),
   country: z.string().min(2, "Country is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type ListingFormValues = z.infer<typeof listingSchema>;
@@ -92,6 +95,8 @@ export default function NewListingPage() {
       state: "",
       postcode: "",
       country: "Australia",
+      latitude: undefined,
+      longitude: undefined,
     },
   });
 
@@ -377,93 +382,7 @@ export default function NewListingPage() {
                 <CardDescription>Enter the property location</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="addressLine1"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Street Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123 Main Street" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="addressLine2"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address Line 2 (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Unit 5" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Sydney" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>State</FormLabel>
-                        <FormControl>
-                          <Input placeholder="NSW" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="postcode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Postcode</FormLabel>
-                        <FormControl>
-                          <Input placeholder="2000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Country</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Australia" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ListingAddressFields form={form} />
               </CardContent>
             </Card>
           )}

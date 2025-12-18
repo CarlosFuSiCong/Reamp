@@ -4,12 +4,11 @@ using Reamp.Domain.Accounts.Enums;
 namespace Reamp.Application.Common.Services
 {
     /// <summary>
-    /// 账户关联查询服务 - 用于处理跨聚合的复杂查询
-    /// 注意：这是为了实用性的架构权衡，在严格的 DDD 中应该使用 Read Model (CQRS)
+    /// Account query service for cross-aggregate queries.
+    /// Note: This is a pragmatic architectural trade-off. Strict DDD would use Read Model (CQRS).
     /// </summary>
     public interface IAccountQueryService
     {
-        // Client 相关查询
         Task<Agency?> GetAgencyAsync(Guid agencyId, CancellationToken ct = default);
         Task<AgencyBranch?> GetAgencyBranchAsync(Guid branchId, CancellationToken ct = default);
         Task<Studio?> GetStudioAsync(Guid studioId, CancellationToken ct = default);

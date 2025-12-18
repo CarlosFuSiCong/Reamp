@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Navbar } from "@/components/layout";
+import { Footer } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,26 +32,28 @@ export const metadata: Metadata = {
 
 export default function ShowcasePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <section className="border-b bg-white">
-        <div className="container mx-auto px-4 py-16 max-w-6xl">
-          <div className="text-center space-y-4">
-            <Badge variant="secondary" className="mb-2">
-              Demo Platform
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Reamp Platform Showcase
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              A comprehensive real estate media management platform connecting real estate agents with professional photography studios
-            </p>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1 bg-gradient-to-b from-gray-50 to-white">
+        {/* Hero Section */}
+        <section className="border-b bg-white">
+          <div className="container mx-auto px-4 py-16 max-w-6xl">
+            <div className="text-center space-y-4">
+              <Badge variant="secondary" className="mb-2">
+                Demo Platform
+              </Badge>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                Reamp Platform Showcase
+              </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                A comprehensive real estate media management platform connecting real estate agents with professional photography studios
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="grid gap-8">
           {/* Agent Dashboard Section */}
           <section className="space-y-6">
@@ -457,7 +461,9 @@ export default function ShowcasePage() {
             </Card>
           </section>
         </div>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

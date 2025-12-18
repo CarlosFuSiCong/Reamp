@@ -7,8 +7,8 @@ using Reamp.Infrastructure;
 namespace Reamp.Application.Common.Services
 {
     /// <summary>
-    /// 账户关联查询服务实现
-    /// 这个服务封装了跨聚合的查询逻辑，避免 Application Service 直接依赖 DbContext
+    /// Account query service implementation.
+    /// Encapsulates cross-aggregate query logic to avoid Application Services directly depending on DbContext.
     /// </summary>
     public sealed class AccountQueryService : IAccountQueryService
     {

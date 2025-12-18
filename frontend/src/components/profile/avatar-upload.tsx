@@ -34,8 +34,8 @@ export function AvatarUpload({
       mediaApi
         .getById(avatarAssetId)
         .then((asset) => {
-          const url = asset.variants[0]?.url || `/api/media/${avatarAssetId}`;
-          setAvatarUrl(url);
+          const url = asset.publicUrl || asset.variants[0]?.transformedUrl;
+          setAvatarUrl(url || "");
         })
         .catch((err) => {
           console.error("Failed to load avatar:", err);
@@ -63,14 +63,49 @@ export function AvatarUpload({
     setUploadProgress(0);
 
     try {
-      // TODO: Implement avatar upload using chunked upload
-      throw new Error("Avatar upload not yet implemented");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://localhost:5000/api/media/avatar", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to upload avatar");
+      }
+
+      const result = await response.json();
+      const assetId = result.data?.id;
+
+      if (!assetId) {
+        throw new Error("No asset ID returned from server");
+      }
+
+      // Update preview to show uploaded image immediately
+      const uploadedUrl = result.data?.publicUrl || result.data?.variants?.[0]?.transformedUrl;
+      if (uploadedUrl) {
+        setAvatarUrl(uploadedUrl);
+      }
+
+      onUpload(assetId);
+      toast.success("Avatar uploaded successfully");
+      
+      setFile(null);
+      setPreview(null);
+      setUploadProgress(100);
     } catch (error: unknown) {
       const err = error as { message?: string };
       toast.error(err?.message || "Failed to upload avatar");
       setFile(null);
       setPreview(null);
       setUploadProgress(0);
+    } finally {
       setUploading(false);
     }
   };
@@ -97,7 +132,7 @@ export function AvatarUpload({
       <CardContent>
         <div className="flex items-center gap-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={preview || avatarUrl || ""} />
+            <AvatarImage src={preview || avatarUrl || undefined} />
             <AvatarFallback>{displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
