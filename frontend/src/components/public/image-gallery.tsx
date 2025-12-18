@@ -20,7 +20,11 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
 
   // Separate photos and floor plans
   const photos = media
-    ?.filter((m) => m.isVisible !== false && m.role !== ListingMediaRole.FloorPlan && Number(m.role) !== 3)
+    ?.filter((m) => {
+      if (m.isVisible === false) return false;
+      // Check if role is FloorPlan (can be string "FloorPlan" or number 3)
+      return m.role !== "FloorPlan" && m.role !== ListingMediaRole.FloorPlan && Number(m.role) !== 3;
+    })
     .sort((a, b) => {
       if (a.isCover) return -1;
       if (b.isCover) return 1;
@@ -28,7 +32,11 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
     }) || [];
 
   const floorPlans = media
-    ?.filter((m) => m.isVisible !== false && (m.role === ListingMediaRole.FloorPlan || Number(m.role) === 3))
+    ?.filter((m) => {
+      if (m.isVisible === false) return false;
+      // Check if role is FloorPlan (can be string "FloorPlan" or number 3)
+      return m.role === "FloorPlan" || m.role === ListingMediaRole.FloorPlan || Number(m.role) === 3;
+    })
     .sort((a, b) => a.sortOrder - b.sortOrder) || [];
 
   const visibleMedia = showingFloorPlans ? floorPlans : photos;
