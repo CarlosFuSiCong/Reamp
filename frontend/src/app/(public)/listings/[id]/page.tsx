@@ -111,7 +111,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <div className="lg:col-span-2 space-y-8">
               {/* Gallery */}
               <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100 bg-white">
-                 <ImageGallery media={listing.media || []} title={listing.title} />
+              <ImageGallery media={listing.media || []} title={listing.title} />
               </div>
 
               {/* Title and Price */}
@@ -160,26 +160,26 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     <Bed className="h-7 w-7 text-gray-400 group-hover:text-blue-600 transition-colors mb-3" />
                     <span className="text-2xl font-bold text-gray-900">{listing.bedrooms}</span>
                     <span className="text-sm text-gray-500 font-medium">Bedrooms</span>
-                  </div>
+                </div>
                   <div className="flex flex-col items-center justify-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                     <Bath className="h-7 w-7 text-gray-400 group-hover:text-blue-600 transition-colors mb-3" />
                     <span className="text-2xl font-bold text-gray-900">{listing.bathrooms}</span>
                     <span className="text-sm text-gray-500 font-medium">Bathrooms</span>
-                  </div>
+              </div>
                   <div className="flex flex-col items-center justify-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                     <Car className="h-7 w-7 text-gray-400 group-hover:text-blue-600 transition-colors mb-3" />
                     <span className="text-2xl font-bold text-gray-900">{listing.parkingSpaces}</span>
                     <span className="text-sm text-gray-500 font-medium">Parking</span>
-                  </div>
+                      </div>
                   <div className="flex flex-col items-center justify-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                     <Maximize className="h-7 w-7 text-gray-400 group-hover:text-blue-600 transition-colors mb-3" />
                     <span className="text-2xl font-bold text-gray-900">
                       {listing.floorAreaSqm || listing.landAreaSqm || "-"}
                     </span>
                     <span className="text-sm text-gray-500 font-medium">Area m²</span>
+                      </div>
+                      </div>
                   </div>
-                </div>
-              </div>
 
               <Separator className="bg-gray-200" />
 
@@ -188,8 +188,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <h2 className="text-2xl font-bold text-gray-900">About this property</h2>
                 <div className="prose prose-lg prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
                   {listing.description || "No description provided."}
-                </div>
-              </div>
+                    </div>
+                  </div>
 
               <Separator className="bg-gray-200" />
 
@@ -197,20 +197,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-gray-900">Location</h2>
                 <div className="h-[400px] rounded-2xl overflow-hidden shadow-md border border-gray-200 relative group">
-                  <PropertyMap
-                    latitude={listing.latitude}
-                    longitude={listing.longitude}
-                    address={`${listing.addressLine1}, ${listing.city}, ${listing.state} ${listing.postcode}`}
-                    title="Property Location"
-                  />
-                </div>
-                <div className="flex items-center gap-3 text-gray-600 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                   <div className="bg-blue-50 p-2 rounded-full">
-                     <MapPin className="h-5 w-5 text-blue-600" />
-                   </div>
-                   <span className="text-base font-medium">
-                     {listing.addressLine1}, {listing.city}, {listing.state} {listing.postcode}
-                   </span>
+              <PropertyMap
+                latitude={listing.latitude}
+                longitude={listing.longitude}
+                address={`${listing.addressLine1}, ${listing.city}, ${listing.state} ${listing.postcode}`}
+                title="Property Location"
+              />
                 </div>
               </div>
             </div>
@@ -224,26 +216,26 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     <div className="bg-gradient-to-r from-blue-600 to-blue-500 h-2 w-full"></div>
                     <CardHeader className="pb-4">
                       <CardTitle className="text-xl font-bold text-gray-900">Contact Agent</CardTitle>
-                    </CardHeader>
+                  </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center border-2 border-white shadow-md overflow-hidden">
                           <User className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <div>
+                      </div>
+                      <div>
                           <p className="font-bold text-lg text-gray-900">
-                            {primaryAgent.firstName} {primaryAgent.lastName}
-                          </p>
-                          {primaryAgent.isPrimary && (
+                          {primaryAgent.firstName} {primaryAgent.lastName}
+                        </p>
+                        {primaryAgent.isPrimary && (
                             <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 mt-1 font-medium border-blue-100">
                               Listing Agent
-                            </Badge>
-                          )}
-                        </div>
+                          </Badge>
+                        )}
                       </div>
+                    </div>
 
                       <div className="space-y-3 pt-2">
-                        {primaryAgent.email && (
+                      {primaryAgent.email && (
                           <a
                             href={`mailto:${primaryAgent.email}`}
                             className="flex items-center gap-3 text-sm p-3 rounded-lg hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 group"
@@ -253,8 +245,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                             </div>
                             <span className="text-gray-600 group-hover:text-blue-700 font-medium truncate">{primaryAgent.email}</span>
                           </a>
-                        )}
-                        {primaryAgent.phone && (
+                      )}
+                      {primaryAgent.phone && (
                           <a
                             href={`tel:${primaryAgent.phone}`}
                             className="flex items-center gap-3 text-sm p-3 rounded-lg hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 group"
@@ -264,48 +256,48 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                             </div>
                             <span className="text-gray-600 group-hover:text-blue-700 font-medium">{primaryAgent.phone}</span>
                           </a>
-                        )}
-                      </div>
+                      )}
+                    </div>
 
                       <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-blue-600/20 bg-blue-600 hover:bg-blue-700 transition-all hover:scale-[1.02]">
                         Enquire Now
-                      </Button>
-                    </CardContent>
-                  </Card>
+                    </Button>
+                  </CardContent>
+                </Card>
 
-                  {/* Additional Agents */}
-                  {listing.agents && listing.agents.length > 1 && (
+              {/* Additional Agents */}
+              {listing.agents && listing.agents.length > 1 && (
                     <Card className="border-gray-100 shadow-sm">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-bold text-gray-500 uppercase tracking-wider">Other Agents</CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                  </CardHeader>
+                  <CardContent>
                         <div className="space-y-1">
-                          {listing.agents
-                            .filter((a) => !a.isPrimary)
-                            .map((agent, index) => (
+                      {listing.agents
+                        .filter((a) => !a.isPrimary)
+                        .map((agent, index) => (
                               <div key={index} className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-gray-50 transition-colors">
                                 <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 text-gray-400">
                                   <User className="h-4 w-4" />
-                                </div>
-                                <div className="flex-1 min-w-0">
+                            </div>
+                            <div className="flex-1 min-w-0">
                                   <p className="font-medium text-gray-900 truncate">
-                                    {agent.firstName} {agent.lastName}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
+                                {agent.firstName} {agent.lastName}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
                   <div className="text-center">
                     <p className="text-xs text-gray-400 font-mono">
                       ID: {listing.id.slice(0, 8).toUpperCase()}
                     </p>
+                    </div>
                   </div>
-                </div>
               )}
             </div>
           </div>
