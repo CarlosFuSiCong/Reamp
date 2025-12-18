@@ -32,14 +32,16 @@ export function AvatarUpload({
   useEffect(() => {
     if (avatarAssetId) {
       mediaApi
-        .getUrl(avatarAssetId)
-        .then((url) => setAvatarUrl(url))
+        .getById(avatarAssetId)
+        .then((asset) => {
+          const url = asset.variants[0]?.url || `/api/media/${avatarAssetId}`;
+          setAvatarUrl(url);
+        })
         .catch((err) => {
           console.error("Failed to load avatar:", err);
           setAvatarUrl("");
         });
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarUrl("");
     }
   }, [avatarAssetId]);
@@ -61,11 +63,11 @@ export function AvatarUpload({
     setUploadProgress(0);
 
     try {
-      const response = await mediaApi.upload(file, setUploadProgress);
-      setUploading(false);
-      onUpload(response.id);
+      // TODO: Implement avatar upload using chunked upload
+      throw new Error("Avatar upload not yet implemented");
     } catch (error: unknown) {
-      toast.error(error?.message || "Failed to upload avatar");
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to upload avatar");
       setFile(null);
       setPreview(null);
       setUploadProgress(0);

@@ -1,8 +1,8 @@
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Entities;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Entities;
+using Reamp.Domain.Orders.Enums;
 
-namespace Reamp.Domain.Shoots.Repositories
+namespace Reamp.Domain.Orders.Repositories
 {
     public interface IShootOrderRepository : IRepository<ShootOrder>
     {

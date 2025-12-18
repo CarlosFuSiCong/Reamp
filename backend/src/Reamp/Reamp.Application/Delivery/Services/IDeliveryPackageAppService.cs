@@ -25,6 +25,9 @@ namespace Reamp.Application.Delivery.Services
         // Add item to delivery package
         Task<DeliveryPackageDetailDto> AddItemAsync(Guid packageId, AddDeliveryItemDto dto, CancellationToken ct = default);
 
+        // Add multiple items to delivery package in one transaction
+        Task<DeliveryPackageDetailDto> AddItemsBatchAsync(Guid packageId, List<AddDeliveryItemDto> items, CancellationToken ct = default);
+
         // Remove item from delivery package
         Task<DeliveryPackageDetailDto> RemoveItemAsync(Guid packageId, Guid itemId, CancellationToken ct = default);
 

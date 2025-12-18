@@ -25,6 +25,8 @@ namespace Reamp.Application.Delivery.Dtos
         public Guid MediaAssetId { get; set; }
         public string VariantName { get; set; } = default!;
         public int SortOrder { get; set; }
+        public string? MediaUrl { get; set; }
+        public string? ThumbnailUrl { get; set; }
     }
 
     public sealed class DeliveryAccessDto

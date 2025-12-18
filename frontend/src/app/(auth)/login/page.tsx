@@ -39,18 +39,19 @@ export default function LoginPage() {
       console.error("Login failed:", error);
 
       let message = "Login failed. Please try again.";
+      const err = error as { statusCode?: number; message?: string; errors?: string[] };
 
-      if (error?.statusCode === 401) {
+      if (err.statusCode === 401) {
         // 401 means account doesn't exist or wrong password
         message = "Account does not exist or password is incorrect.";
-      } else if (error?.statusCode === 400) {
+      } else if (err.statusCode === 400) {
         message = "Invalid input. Please check your email and password.";
-      } else if (error?.statusCode === 500) {
+      } else if (err.statusCode === 500) {
         message = "Server error. Please try again later.";
-      } else if (error?.message) {
-        message = error.message;
-      } else if (error?.errors && Array.isArray(error.errors)) {
-        message = error.errors.join("; ");
+      } else if (err.message) {
+        message = err.message;
+      } else if (err.errors && Array.isArray(err.errors)) {
+        message = err.errors.join("; ");
       }
 
       setErrorMessage(message);
@@ -70,7 +71,7 @@ export default function LoginPage() {
       }
     >
       <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <ErrorAlert message={errorMessage || loginError?.message} />
+        <ErrorAlert message={errorMessage || (loginError as { message?: string })?.message} />
 
         <div className="space-y-4 rounded-md shadow-sm">
           <FormField

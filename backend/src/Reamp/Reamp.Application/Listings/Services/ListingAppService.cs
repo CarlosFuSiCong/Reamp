@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Reamp.Application.Listings.Dtos;
+using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Listings.Entities;
 using Reamp.Domain.Listings.Repositories;
@@ -14,18 +15,48 @@ namespace Reamp.Application.Listings.Services
     public sealed class ListingAppService : IListingAppService
     {
         private readonly IListingRepository _repo;
+        private readonly IUserProfileRepository _userProfileRepo;
+        private readonly IAgentRepository _agentRepo;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<ListingAppService> _logger;
 
-        public ListingAppService(IListingRepository repo, IUnitOfWork uow, ILogger<ListingAppService> logger)
+        public ListingAppService(
+            IListingRepository repo, 
+            IUserProfileRepository userProfileRepo,
+            IAgentRepository agentRepo,
+            IUnitOfWork uow, 
+            ILogger<ListingAppService> logger)
         {
             _repo = repo;
+            _userProfileRepo = userProfileRepo;
+            _agentRepo = agentRepo;
             _uow = uow;
             _logger = logger;
         }
 
-        public async Task<Guid> CreateAsync(CreateListingDto dto, CancellationToken ct)
+        public async Task<Guid> CreateAsync(CreateListingDto dto, Guid applicationUserId, CancellationToken ct)
         {
+            // Get UserProfile to find UserProfileId
+            var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(applicationUserId, asNoTracking: true, ct: ct);
+            if (userProfile == null)
+            {
+                _logger.LogWarning("User {ApplicationUserId} attempted to create listing but has no user profile", applicationUserId);
+                throw new InvalidOperationException("User profile not found");
+            }
+
+            // Get Agent record using UserProfileId
+            var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
+            if (agent == null)
+            {
+                _logger.LogWarning("UserProfile {UserProfileId} (ApplicationUser {ApplicationUserId}) attempted to create listing but has no agent record", 
+                    userProfile.Id, applicationUserId);
+                throw new InvalidOperationException("Agent record not found");
+            }
+
+            // Set ownerAgencyId and agentUserId
+            dto.OwnerAgencyId = agent.AgencyId;
+            dto.AgentUserId = userProfile.Id;  // Use UserProfileId, not ApplicationUserId
+
             var listing = new Listing(
                 ownerAgencyId: dto.OwnerAgencyId,
                 title: dto.Title,

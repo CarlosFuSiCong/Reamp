@@ -5,9 +5,9 @@ using Reamp.Application.Read.Staff;
 using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Application.Read.Shared;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Entities;
-using Reamp.Domain.Shoots.Repositories;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Entities;
+using Reamp.Domain.Orders.Repositories;
+using Reamp.Domain.Orders.Enums;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Listings.Repositories;
 using Reamp.Domain.Accounts.Enums;
@@ -19,6 +19,7 @@ namespace Reamp.Application.Orders.Services
     {
         private readonly IShootOrderRepository _repo;
         private readonly IAgencyRepository _agencyRepo;
+        private readonly IAgentRepository _agentRepo;
         private readonly IStudioRepository _studioRepo;
         private readonly IListingRepository _listingRepo;
         private readonly IStaffRepository _staffRepo;
@@ -30,6 +31,7 @@ namespace Reamp.Application.Orders.Services
         public ShootOrderAppService(
             IShootOrderRepository repo,
             IAgencyRepository agencyRepo,
+            IAgentRepository agentRepo,
             IStudioRepository studioRepo,
             IListingRepository listingRepo,
             IStaffRepository staffRepo,
@@ -40,6 +42,7 @@ namespace Reamp.Application.Orders.Services
         {
             _repo = repo;
             _agencyRepo = agencyRepo;
+            _agentRepo = agentRepo;
             _studioRepo = studioRepo;
             _listingRepo = listingRepo;
             _staffRepo = staffRepo;
@@ -51,6 +54,27 @@ namespace Reamp.Application.Orders.Services
 
         public async Task<OrderDetailDto> PlaceOrderAsync(PlaceOrderDto dto, Guid currentUserId, CancellationToken ct = default)
         {
+            // Auto-populate AgencyId if not provided
+            if (dto.AgencyId == Guid.Empty)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile == null)
+                {
+                    _logger.LogWarning("No UserProfile found for ApplicationUserId: {UserId}", currentUserId);
+                    throw new ArgumentException("User profile not found", nameof(currentUserId));
+                }
+
+                var agent = await _agentRepo.GetByUserProfileIdAsync(userProfile.Id, ct);
+                if (agent == null)
+                {
+                    _logger.LogWarning("User {UserId} (UserProfile {ProfileId}) has no agent record", currentUserId, userProfile.Id);
+                    throw new InvalidOperationException("You must be part of an agency to create orders. Please submit an agency application first.");
+                }
+
+                dto.AgencyId = agent.AgencyId;
+                _logger.LogInformation("Auto-populated AgencyId {AgencyId} for user {UserId}", dto.AgencyId, currentUserId);
+            }
+
             var agency = await _agencyRepo.GetByIdAsync(dto.AgencyId, asNoTracking: true, ct);
             if (agency == null)
                 throw new ArgumentException($"Agency with ID {dto.AgencyId} does not exist", nameof(dto.AgencyId));
@@ -171,7 +195,7 @@ namespace Reamp.Application.Orders.Services
                         _logger.LogDebug("Order {OrderId} belongs to staff's studio {StudioId}", id, staff.StudioId);
                     }
                     // 3. It's a marketplace order (StudioId is null) and they can claim it
-                    else if (!order.StudioId.HasValue && (order.Status == Domain.Shoots.Enums.ShootOrderStatus.Placed || order.Status == Domain.Shoots.Enums.ShootOrderStatus.Accepted))
+                    else if (!order.StudioId.HasValue && (order.Status == ShootOrderStatus.Placed || order.Status == ShootOrderStatus.Accepted))
                     {
                         canViewAsStaff = true;
                         _logger.LogDebug("Order {OrderId} is a marketplace order available for staff {StaffId}", id, staff.Id);
@@ -260,8 +284,30 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            if (order.CreatedBy != currentUserId)
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            // Only studio members can schedule orders (not the creator/agent)
+            var isStudioMember = false;
+
+            if (order.StudioId.HasValue)
+            {
+                // Check if user is a member of the studio that accepted this order
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile != null)
+                {
+                    var staff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                    if (staff != null && staff.StudioId == order.StudioId)
+                    {
+                        isStudioMember = true;
+                        _logger.LogDebug("User {UserId} is a member of studio {StudioId} for order {OrderId}", currentUserId, order.StudioId, orderId);
+                    }
+                }
+            }
+
+            if (!isStudioMember)
+            {
+                _logger.LogWarning("User {UserId} attempted to schedule order {OrderId} without studio permission. StudioId: {StudioId}",
+                    currentUserId, orderId, order.StudioId);
+                throw new UnauthorizedAccessException("Only studio members can schedule orders");
+            }
 
             order.MarkScheduled();
             await _uow.SaveChangesAsync(ct);
@@ -295,6 +341,18 @@ namespace Reamp.Application.Orders.Services
 
             order.Start();
             await _uow.SaveChangesAsync(ct);
+        }
+
+        public async Task MarkAwaitingConfirmationAsync(Guid orderId, CancellationToken ct = default)
+        {
+            var order = await _repo.GetAggregateAsync(orderId, asNoTracking: false, ct);
+            if (order == null)
+                throw new KeyNotFoundException($"Order {orderId} not found");
+
+            order.MarkAwaitingConfirmation();
+            await _uow.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Order {OrderId} marked as awaiting confirmation", orderId);
         }
 
         public async Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default)
@@ -346,8 +404,37 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            if (order.CreatedBy != currentUserId)
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            // Check if user has permission to assign photographer
+            // Only studio managers and owners can assign staff
+            var hasPermission = false;
+            if (order.StudioId.HasValue)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile != null)
+                {
+                    var currentUserStaff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                    if (currentUserStaff != null && currentUserStaff.StudioId == order.StudioId)
+                    {
+                        // Only Manager (2) and Owner (3) can assign staff
+                        if (currentUserStaff.Role == StudioRole.Manager || currentUserStaff.Role == StudioRole.Owner)
+                        {
+                            hasPermission = true;
+                            _logger.LogDebug("User {UserId} with role {Role} is authorized to assign staff for order {OrderId}", 
+                                currentUserId, currentUserStaff.Role, orderId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("User {UserId} with role {Role} attempted to assign staff but lacks permission", 
+                                currentUserId, currentUserStaff.Role);
+                        }
+                    }
+                }
+            }
+
+            if (!hasPermission)
+            {
+                throw new UnauthorizedAccessException("Only studio managers and owners can assign staff to orders");
+            }
 
             var staff = await _staffRepo.GetByIdAsync(dto.PhotographerId, asNoTracking: true, ct);
             if (staff == null || staff.StudioId != order.StudioId)
@@ -366,8 +453,30 @@ namespace Reamp.Application.Orders.Services
             if (order == null)
                 throw new KeyNotFoundException($"Order {orderId} not found");
 
-            if (order.CreatedBy != currentUserId)
-                throw new UnauthorizedAccessException("You do not have permission to modify this order");
+            // Check if user has permission to unassign photographer
+            // Only studio managers and owners can unassign staff
+            var hasPermission = false;
+            if (order.StudioId.HasValue)
+            {
+                var userProfile = await _userProfileRepo.GetByApplicationUserIdAsync(currentUserId, includeDeleted: false, asNoTracking: true, ct);
+                if (userProfile != null)
+                {
+                    var currentUserStaff = await _staffRepo.GetByUserProfileIdAsync(userProfile.Id, asNoTracking: true, ct);
+                    if (currentUserStaff != null && currentUserStaff.StudioId == order.StudioId)
+                    {
+                        // Only Manager (2) and Owner (3) can unassign staff
+                        if (currentUserStaff.Role == StudioRole.Manager || currentUserStaff.Role == StudioRole.Owner)
+                        {
+                            hasPermission = true;
+                        }
+                    }
+                }
+            }
+
+            if (!hasPermission)
+            {
+                throw new UnauthorizedAccessException("Only studio managers and owners can unassign staff from orders");
+            }
 
             order.UnassignPhotographer();
             await _uow.SaveChangesAsync(ct);
@@ -419,7 +528,7 @@ namespace Reamp.Application.Orders.Services
             await _uow.SaveChangesAsync(ct);
         }
 
-        public async Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default)
+        public async Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid? currentUserId, CancellationToken ct = default)
         {
             var orders = await _repo.ListFilteredAsync(
                 pageRequest,

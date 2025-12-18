@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Delivery.Entities;
 using Reamp.Domain.Media.Entities;
@@ -32,7 +32,8 @@ namespace Reamp.Infrastructure.Configurations.Delivery
              .OnDelete(DeleteBehavior.Cascade);
 
             // Do NOT cascade delete media
-            b.HasOne<MediaAsset>()
+            // Explicitly map the MediaAsset navigation property
+            b.HasOne(x => x.MediaAsset)
              .WithMany()
              .HasForeignKey(x => x.MediaAssetId)
              .OnDelete(DeleteBehavior.NoAction);

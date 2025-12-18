@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 
 namespace Reamp.Application.Orders.Dtos
 {

@@ -1,6 +1,7 @@
 using Mapster;
 using Microsoft.Extensions.Logging;
 using Reamp.Application.Delivery.Dtos;
+using Reamp.Application.Orders.Services;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Delivery.Entities;
 using Reamp.Domain.Delivery.Repositories;
@@ -12,15 +13,18 @@ namespace Reamp.Application.Delivery.Services
     public sealed class DeliveryPackageAppService : IDeliveryPackageAppService
     {
         private readonly IDeliveryPackageRepository _deliveryRepo;
+        private readonly IShootOrderAppService _orderService;
         private readonly IUnitOfWork _uow;
         private readonly ILogger<DeliveryPackageAppService> _logger;
 
         public DeliveryPackageAppService(
             IDeliveryPackageRepository deliveryRepo,
+            IShootOrderAppService orderService,
             IUnitOfWork uow,
             ILogger<DeliveryPackageAppService> logger)
         {
             _deliveryRepo = deliveryRepo;
+            _orderService = orderService;
             _uow = uow;
             _logger = logger;
         }
@@ -41,25 +45,45 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package created with ID: {PackageId}", package.Id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var package = await _deliveryRepo.GetByIdWithDetailsAsync(id, ct);
-            return package?.Adapt<DeliveryPackageDetailDto>();
+            return package == null ? null : MapToDetailDto(package);
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByOrderIdAsync(orderId, ct);
-            return packages.Adapt<List<DeliveryPackageListDto>>();
+            return packages.Select(p => new DeliveryPackageListDto
+            {
+                Id = p.Id,
+                OrderId = p.OrderId,
+                ListingId = p.ListingId,
+                Title = p.Title,
+                Status = p.Status,
+                ItemCount = p.Items.Count,
+                ExpiresAtUtc = p.ExpiresAtUtc,
+                CreatedAtUtc = p.CreatedAtUtc
+            }).ToList();
         }
 
         public async Task<List<DeliveryPackageListDto>> GetByListingIdAsync(Guid listingId, CancellationToken ct = default)
         {
             var packages = await _deliveryRepo.GetByListingIdAsync(listingId, ct);
-            return packages.Adapt<List<DeliveryPackageListDto>>();
+            return packages.Select(p => new DeliveryPackageListDto
+            {
+                Id = p.Id,
+                OrderId = p.OrderId,
+                ListingId = p.ListingId,
+                Title = p.Title,
+                Status = p.Status,
+                ItemCount = p.Items.Count,
+                ExpiresAtUtc = p.ExpiresAtUtc,
+                CreatedAtUtc = p.CreatedAtUtc
+            }).ToList();
         }
 
         public async Task<DeliveryPackageDetailDto> UpdateAsync(Guid id, UpdateDeliveryPackageDto dto, CancellationToken ct = default)
@@ -72,7 +96,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} updated", id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken ct = default)
@@ -89,15 +113,39 @@ namespace Reamp.Application.Delivery.Services
 
         public async Task<DeliveryPackageDetailDto> AddItemAsync(Guid packageId, AddDeliveryItemDto dto, CancellationToken ct = default)
         {
-            var package = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
-            if (package == null)
+            // Use batch method for consistency
+            return await AddItemsBatchAsync(packageId, new List<AddDeliveryItemDto> { dto }, ct);
+        }
+
+        public async Task<DeliveryPackageDetailDto> AddItemsBatchAsync(Guid packageId, List<AddDeliveryItemDto> items, CancellationToken ct = default)
+        {
+            if (items == null || items.Count == 0)
+                throw new ArgumentException("At least one item is required", nameof(items));
+
+            // Verify package exists (use no tracking to avoid RowVersion conflicts)
+            var packageExists = await _deliveryRepo.GetByIdAsync(packageId, asNoTracking: true, ct);
+            if (packageExists == null)
                 throw new KeyNotFoundException($"Delivery package with ID {packageId} not found");
 
-            package.AddItem(dto.MediaAssetId, dto.VariantName, dto.SortOrder);
+            _logger.LogInformation("Adding {Count} item(s) to delivery package {PackageId}", items.Count, packageId);
+
+            // Create DeliveryItem entities
+            var deliveryItems = items.Select(dto => 
+                DeliveryItem.Create(packageId, dto.MediaAssetId, dto.VariantName, dto.SortOrder)
+            ).ToList();
+
+            // Add items directly to database without loading parent package
+            // This avoids triggering parent entity updates and RowVersion conflicts
+            await _deliveryRepo.AddItemsDirectlyAsync(packageId, deliveryItems, ct);
+            
+            // Save once after all items are added
             await _uow.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Item added to delivery package {PackageId}", packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            _logger.LogInformation("Successfully added {Count} item(s) to delivery package {PackageId}", items.Count, packageId);
+            
+            // Reload package with items to return
+            var updatedPackage = await _deliveryRepo.GetByIdWithDetailsAsync(packageId, ct);
+            return MapToDetailDto(updatedPackage!);
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveItemAsync(Guid packageId, Guid itemId, CancellationToken ct = default)
@@ -110,7 +158,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Item {ItemId} removed from delivery package {PackageId}", itemId, packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> AddAccessAsync(Guid packageId, AddDeliveryAccessDto dto, CancellationToken ct = default)
@@ -136,7 +184,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access added to delivery package {PackageId}", packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> RemoveAccessAsync(Guid packageId, Guid accessId, CancellationToken ct = default)
@@ -149,7 +197,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Access {AccessId} removed from delivery package {PackageId}", accessId, packageId);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> PublishAsync(Guid id, CancellationToken ct = default)
@@ -158,11 +206,25 @@ namespace Reamp.Application.Delivery.Services
             if (package == null)
                 throw new KeyNotFoundException($"Delivery package with ID {id} not found");
 
+            // Publish the delivery
             package.Publish();
             await _uow.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Delivery package {PackageId} published", id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            _logger.LogInformation("Delivery package {PackageId} published for order {OrderId}", id, package.OrderId);
+
+            // Automatically update order status to AwaitingConfirmation
+            try
+            {
+                await _orderService.MarkAwaitingConfirmationAsync(package.OrderId, ct);
+                _logger.LogInformation("Order {OrderId} automatically updated to AwaitingConfirmation after delivery publish", package.OrderId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to update order {OrderId} status to AwaitingConfirmation. Order may need manual status update.", package.OrderId);
+                // Don't fail the delivery publish if order update fails
+            }
+
+            return MapToDetailDto(package);
         }
 
         public async Task<DeliveryPackageDetailDto> RevokeAsync(Guid id, CancellationToken ct = default)
@@ -175,7 +237,7 @@ namespace Reamp.Application.Delivery.Services
             await _uow.SaveChangesAsync(ct);
 
             _logger.LogInformation("Delivery package {PackageId} revoked", id);
-            return package.Adapt<DeliveryPackageDetailDto>();
+            return MapToDetailDto(package);
         }
 
         public async Task<bool> VerifyAccessPasswordAsync(Guid packageId, string password, CancellationToken ct = default)
@@ -215,6 +277,32 @@ namespace Reamp.Application.Delivery.Services
             var bytes = Encoding.UTF8.GetBytes(password);
             var hash = sha256.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
+        }
+
+        private static DeliveryPackageDetailDto MapToDetailDto(DeliveryPackage package)
+        {
+            return new DeliveryPackageDetailDto
+            {
+                Id = package.Id,
+                OrderId = package.OrderId,
+                ListingId = package.ListingId,
+                Title = package.Title,
+                Status = package.Status,
+                WatermarkEnabled = package.WatermarkEnabled,
+                ExpiresAtUtc = package.ExpiresAtUtc,
+                Items = package.Items.Select(i => new DeliveryItemDto
+                {
+                    Id = i.Id,
+                    MediaAssetId = i.MediaAssetId,
+                    VariantName = i.VariantName,
+                    SortOrder = i.SortOrder,
+                    MediaUrl = i.MediaAsset?.PublicUrl,
+                    ThumbnailUrl = i.MediaAsset?.TryGetVariantUrl("thumbnail", "thumb", "preview")
+                }).ToList(),
+                Accesses = package.Accesses.Adapt<List<DeliveryAccessDto>>(),
+                CreatedAtUtc = package.CreatedAtUtc,
+                UpdatedAtUtc = package.UpdatedAtUtc
+            };
         }
     }
 }

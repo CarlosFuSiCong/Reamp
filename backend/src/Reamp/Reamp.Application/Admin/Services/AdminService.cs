@@ -7,7 +7,7 @@ using Reamp.Domain.Accounts.Enums;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Listings.Enums;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 using Reamp.Infrastructure;
 using Reamp.Infrastructure.Identity;
 

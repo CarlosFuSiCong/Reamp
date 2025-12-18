@@ -7,7 +7,7 @@ export interface StaffDetailDto {
   studioId: string;
   studioName?: string;
   role: number; // StudioRole
-  skills: StaffSkills;
+  skills: number; // StaffSkills as flags
   createdAtUtc: string;
   updatedAtUtc: string;
   firstName: string;
@@ -32,7 +32,8 @@ export const staffApi = {
       const response = await apiClient.get<StaffDetailDto>(`/api/staff/profile/${userProfileId}`);
       return response.data;
     } catch (error: unknown) {
-      if (error.status === 404) return null;
+      const err = error as { status?: number };
+      if (err.status === 404) return null;
       throw error;
     }
   },

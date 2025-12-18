@@ -22,7 +22,7 @@ using Reamp.Application.Read.Staff;
 using Reamp.Domain.Accounts.Repositories;
 using Reamp.Domain.Common.Abstractions;
 using Reamp.Domain.Listings.Repositories;
-using Reamp.Domain.Shoots.Repositories;
+using Reamp.Domain.Orders.Repositories;
 using Reamp.Infrastructure;
 using Reamp.Infrastructure.Identity;
 using Reamp.Infrastructure.Read.EF.Agencies;

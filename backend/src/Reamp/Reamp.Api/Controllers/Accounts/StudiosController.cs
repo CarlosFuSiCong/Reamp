@@ -29,15 +29,26 @@ namespace Reamp.Api.Controllers.Accounts
         public async Task<IActionResult> List([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? q = null, CancellationToken ct = default)
             => Ok(await _svc.ListAsync(page, pageSize, q, ct));
 
+        // Get studio by ID - public access
+        [HttpGet("{id:guid}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
+        {
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
+
+            var studio = await _svc.GetByIdAsync(id, ct);
+            return studio is null ? NotFound() : Ok(studio);
+        }
+
         // Get studio by slug - public access
-        [HttpGet("{slug}")]
+        [HttpGet("slug/{slug}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetBySlug([FromRoute] string slug, CancellationToken ct)
         {
-            // Handle empty GUID case (sometimes passed by UI)
-            if (string.IsNullOrWhiteSpace(slug) || 
-                slug == "00000000-0000-0000-0000-000000000000" ||
-                slug == Guid.Empty.ToString())
+            if (string.IsNullOrWhiteSpace(slug))
             {
                 return NotFound();
             }

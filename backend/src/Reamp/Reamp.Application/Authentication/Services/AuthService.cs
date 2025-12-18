@@ -16,6 +16,8 @@ namespace Reamp.Application.Authentication.Services
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IUserProfileRepository _userProfileRepo;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
+        private readonly IAgentRepository _agentRepo;
+        private readonly IStaffRepository _staffRepo;
         private readonly IUnitOfWork _uow;
         private readonly JwtSettings _jwtSettings;
 
@@ -24,6 +26,8 @@ namespace Reamp.Application.Authentication.Services
             IJwtTokenService jwtTokenService,
             IUserProfileRepository userProfileRepo,
             IRefreshTokenRepository refreshTokenRepo,
+            IAgentRepository agentRepo,
+            IStaffRepository staffRepo,
             IUnitOfWork uow,
             IOptions<JwtSettings> jwtSettings)
         {
@@ -31,6 +35,8 @@ namespace Reamp.Application.Authentication.Services
             _jwtTokenService = jwtTokenService;
             _userProfileRepo = userProfileRepo;
             _refreshTokenRepo = refreshTokenRepo;
+            _agentRepo = agentRepo;
+            _staffRepo = staffRepo;
             _uow = uow;
             _jwtSettings = jwtSettings.Value;
         }
@@ -131,7 +137,7 @@ namespace Reamp.Application.Authentication.Services
             if (profile == null)
                 return null;
 
-            return new UserInfoDto
+            var userInfo = new UserInfoDto
             {
                 UserId = user.Id,
                 Email = user.Email!,
@@ -142,6 +148,30 @@ namespace Reamp.Application.Authentication.Services
                 CreatedAtUtc = profile.CreatedAtUtc,
                 UpdatedAtUtc = profile.UpdatedAtUtc
             };
+
+            // Get agency/studio information based on role
+            if (profile.Role == Domain.Accounts.Enums.UserRole.Agent)
+            {
+                // Query Agent entity
+                var agent = await _agentRepo.GetByUserProfileIdAsync(profile.Id, ct);
+                if (agent != null)
+                {
+                    userInfo.AgencyId = agent.AgencyId;
+                    userInfo.AgencyRole = (int)agent.Role;
+                }
+            }
+            else if (profile.Role == Domain.Accounts.Enums.UserRole.Staff)
+            {
+                // Query Staff entity
+                var staff = await _staffRepo.GetByUserProfileIdAsync(profile.Id, true, ct);
+                if (staff != null)
+                {
+                    userInfo.StudioId = staff.StudioId;
+                    userInfo.StudioRole = (int)staff.Role;
+                }
+            }
+
+            return userInfo;
         }
 
         public async Task UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken ct = default)

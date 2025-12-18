@@ -1,12 +1,12 @@
 using Reamp.Domain.Common.Entities;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Reamp.Domain.Shoots.Entities
+namespace Reamp.Domain.Orders.Entities
 {
     public sealed class ShootOrder : AuditableEntity
     {
@@ -107,10 +107,25 @@ namespace Reamp.Domain.Shoots.Entities
             Status = ShootOrderStatus.InProgress; Touch();
         }
 
+        public void MarkAwaitingDelivery()
+        {
+            if (Status != ShootOrderStatus.InProgress)
+                throw new InvalidOperationException("Order must be in progress to mark as awaiting delivery");
+            Status = ShootOrderStatus.AwaitingDelivery; Touch();
+        }
+
+        public void MarkAwaitingConfirmation()
+        {
+            if (Status != ShootOrderStatus.InProgress && Status != ShootOrderStatus.AwaitingDelivery)
+                throw new InvalidOperationException("Order must be in progress or awaiting delivery");
+            Status = ShootOrderStatus.AwaitingConfirmation; Touch();
+        }
+
         public void Complete()
         {
-            if (Status != ShootOrderStatus.InProgress && Status != ShootOrderStatus.Scheduled)
-                throw new InvalidOperationException("Must be in progress/scheduled");
+            // Business rule: Orders must go through AwaitingConfirmation (delivery + agent review) before completion
+            if (Status != ShootOrderStatus.AwaitingConfirmation)
+                throw new InvalidOperationException("Order must be awaiting confirmation (after delivery publication) to complete");
             Status = ShootOrderStatus.Completed; Touch();
         }
 

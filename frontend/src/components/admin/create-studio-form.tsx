@@ -46,7 +46,8 @@ export function CreateStudioForm({ onSuccess }: CreateStudioFormProps) {
       onSuccess();
     },
     onError: (error: unknown) => {
-      toast.error(error?.message || "Failed to create studio");
+      const err = error as { message?: string };
+      toast.error(err?.message || "Failed to create studio");
     },
   });
 

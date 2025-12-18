@@ -26,9 +26,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared";
+import { ChunkedUpload } from "@/components/media";
 import { useCreateListing } from "@/lib/hooks/use-listings";
-import { ListingType, PropertyType } from "@/types";
-import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { useProfile } from "@/lib/hooks";
+import { ListingType, PropertyType, MediaAssetDetailDto } from "@/types";
+import { ChevronLeft, ChevronRight, Save, Image as ImageIcon, Trash2 } from "lucide-react";
 
 const listingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -60,12 +62,15 @@ const STEPS = [
   { id: 1, name: "Basic Info" },
   { id: 2, name: "Address" },
   { id: 3, name: "Details" },
+  { id: 4, name: "Media" },
 ];
 
 export default function NewListingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [uploadedMedia, setUploadedMedia] = useState<MediaAssetDetailDto[]>([]);
   const createMutation = useCreateListing();
+  const { user } = useProfile();
 
   const form = useForm<ListingFormValues>({
     resolver: zodResolver(listingSchema),
@@ -588,6 +593,75 @@ export default function NewListingPage() {
                     )}
                   />
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {currentStep === 4 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Media Upload</CardTitle>
+                <CardDescription>
+                  Upload photos and videos of the property (optional - you can add media later)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {user?.studioId ? (
+                  <ChunkedUpload
+                    ownerStudioId={user.studioId}
+                    onUploadComplete={(asset) => {
+                      setUploadedMedia((prev) => [...prev, asset]);
+                    }}
+                    accept="image/*,video/*"
+                    maxFiles={20}
+                    maxSizeMB={100}
+                  />
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <ImageIcon className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                    <p>Media upload is only available for Studio members.</p>
+                    <p className="text-sm mt-2">
+                      You can add media after creating the listing by ordering a photoshoot.
+                    </p>
+                  </div>
+                )}
+
+                {uploadedMedia.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">
+                      Uploaded Media ({uploadedMedia.length})
+                    </h4>
+                    <div className="grid grid-cols-4 gap-4">
+                      {uploadedMedia.map((media) => (
+                        <div
+                          key={media.id}
+                          className="relative aspect-square rounded-lg overflow-hidden border group"
+                        >
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <ImageIcon className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setUploadedMedia((prev) =>
+                                  prev.filter((m) => m.id !== media.id)
+                                );
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2">
+                            <p className="text-xs truncate">{media.originalFileName}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

@@ -54,16 +54,75 @@ export const ordersApi = {
     await apiClient.post(`/api/orders/${orderId}/tasks`, task);
   },
 
-  async cancel(id: string, reason?: string): Promise<void> {
-    await apiClient.post(`/api/orders/${id}/cancel`, { reason });
-  },
+  // ===== Marketplace Flow Methods =====
 
-  async accept(id: string): Promise<void> {
+  /**
+   * Studio accepts order from marketplace (Placed -> Accepted)
+   */
+  async acceptOrder(id: string): Promise<void> {
     await apiClient.post(`/api/orders/${id}/accept`);
   },
 
-  async start(id: string): Promise<void> {
+  /**
+   * Studio schedules order and assigns staff (Accepted -> Scheduled)
+   */
+  async scheduleOrder(id: string, data?: {
+    scheduledStartUtc?: string;
+    scheduledEndUtc?: string;
+    schedulingNotes?: string;
+  }): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/schedule`, data);
+  },
+
+  /**
+   * Assign photographer to order
+   */
+  async assignPhotographer(orderId: string, photographerId: string): Promise<void> {
+    await apiClient.post(`/api/orders/${orderId}/assign-photographer`, {
+      photographerId,
+    });
+  },
+
+  /**
+   * Unassign photographer from order
+   */
+  async unassignPhotographer(orderId: string): Promise<void> {
+    await apiClient.post(`/api/orders/${orderId}/unassign-photographer`);
+  },
+
+  /**
+   * Studio starts shooting, locks order (Scheduled -> InProgress)
+   */
+  async startShooting(id: string): Promise<void> {
     await apiClient.post(`/api/orders/${id}/start`);
+  },
+
+  /**
+   * Agent confirms delivery receipt (AwaitingConfirmation -> Completed)
+   */
+  async confirmDelivery(id: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/confirm-delivery`);
+  },
+
+  /**
+   * Agent cancels order (only before InProgress)
+   */
+  async cancelOrder(id: string, reason?: string): Promise<void> {
+    await apiClient.post(`/api/orders/${id}/cancel`, { reason });
+  },
+
+  // ===== Legacy Methods (keep for backward compatibility) =====
+
+  async cancel(id: string, reason?: string): Promise<void> {
+    await this.cancelOrder(id, reason);
+  },
+
+  async accept(id: string): Promise<void> {
+    await this.acceptOrder(id);
+  },
+
+  async start(id: string): Promise<void> {
+    await this.startShooting(id);
   },
 
   async complete(id: string): Promise<void> {

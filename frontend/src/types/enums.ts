@@ -29,13 +29,6 @@ export enum AccountStatus {
   Suspended = 2,
 }
 
-export enum StaffRole {
-  Photographer = 1,
-  Videographer = 2,
-  Editor = 3,
-  Manager = 4,
-}
-
 // Staff Skills (Flags enum)
 export enum StaffSkills {
   None = 0,
@@ -68,12 +61,14 @@ export enum ListingStatus {
 }
 
 export enum OrderStatus {
-  Placed = 1,
-  Accepted = 2,
-  Scheduled = 3,
-  InProgress = 4,
-  Completed = 5,
-  Cancelled = 6,
+  Placed = 1,              // Order placed, waiting for Studio to accept
+  Accepted = 2,            // Accepted by Studio
+  Scheduled = 3,           // Shoot scheduled (staff assigned)
+  InProgress = 4,          // Shoot in progress
+  AwaitingDelivery = 5,    // Shoot completed, waiting for delivery upload
+  AwaitingConfirmation = 6, // Delivery uploaded, waiting for Agent confirmation
+  Completed = 7,           // Completed
+  Cancelled = 8,           // Cancelled
 }
 
 export enum TaskStatus {
@@ -103,4 +98,12 @@ export enum MediaProcessStatus {
   Processing = 2,
   Ready = 3,
   Failed = 4,
+}
+
+export enum ListingMediaRole {
+  Cover = 0,
+  Gallery = 1,
+  FloorPlan = 2,
+  Video = 3,
+  VrPreview = 4,
 }

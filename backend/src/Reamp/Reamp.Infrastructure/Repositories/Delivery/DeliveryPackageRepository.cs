@@ -18,6 +18,7 @@ namespace Reamp.Infrastructure.Repositories.Delivery
         {
             return await _set
                 .Include(d => d.Items)
+                    .ThenInclude(i => i.MediaAsset)
                 .Include(d => d.Accesses)
                 .FirstOrDefaultAsync(d => d.Id == id, ct);
         }
@@ -59,6 +60,13 @@ namespace Reamp.Infrastructure.Repositories.Delivery
                            d.ExpiresAtUtc.HasValue &&
                            d.ExpiresAtUtc.Value <= now)
                 .ToListAsync(ct);
+        }
+
+        public async Task AddItemsDirectlyAsync(Guid packageId, List<DeliveryItem> items, CancellationToken ct = default)
+        {
+            // Add items directly to DbSet without loading parent package
+            // This avoids triggering parent entity updates and RowVersion conflicts
+            await _db.Set<DeliveryItem>().AddRangeAsync(items, ct);
         }
     }
 }

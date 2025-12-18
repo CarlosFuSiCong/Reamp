@@ -5,7 +5,7 @@ import { useAuth, useProfile } from "@/lib/hooks";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Navbar } from "@/components/layout";
 import { Sidebar, SidebarNavItem } from "@/components/layout/sidebar";
-import { User, Users, ShoppingCart, Settings, ClipboardList, Building2 } from "lucide-react";
+import { User, Users, ShoppingCart, Settings, ClipboardList, Building2, Package } from "lucide-react";
 import { UserRole, AgencyRole, StudioRole } from "@/types/enums";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -42,15 +42,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       return [...baseItems, ...adminItems, ...orgItems];
     }
 
-    // For regular Staff (no organization)
-    if (
-      user.role === UserRole.Staff &&
-      (profile.agencyRole === undefined || profile.agencyRole === null) &&
-      (profile.studioRole === undefined || profile.studioRole === null)
-    ) {
-      return baseItems;
-    }
-
     // Agency navigation (user has agencyRole)
     if (profile.agencyRole !== undefined && profile.agencyRole !== null) {
       const agencyItems: SidebarNavItem[] = [
@@ -67,10 +58,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         agencyItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
       }
 
-      // All agency members can view listings and orders
+      // All agency members can view listings, orders, and deliveries
       agencyItems.push(
         { title: "Listings", href: "/dashboard/listings", icon: ClipboardList },
-        { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart }
+        { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
+        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package }
       );
 
       return [...baseItems, ...agencyItems];
@@ -78,22 +70,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     // Studio navigation (user has studioRole)
     if (profile.studioRole !== undefined && profile.studioRole !== null) {
-      const studioItems: SidebarNavItem[] = [
-        { title: "Studio", href: "/dashboard/studio", icon: Building2 },
-      ];
-
       const roleValue =
         typeof profile.studioRole === "string"
           ? parseInt(profile.studioRole, 10)
           : Number(profile.studioRole);
 
-      // Owner & Manager can manage team
-      if (roleValue === StudioRole.Owner || roleValue === StudioRole.Manager) {
-        studioItems.push({ title: "Team", href: "/dashboard/team", icon: Users });
+      const studioItems: SidebarNavItem[] = [
+        { title: "Studio", href: "/dashboard/studio", icon: Building2 },
+        { title: "Marketplace", href: "/dashboard/marketplace", icon: ShoppingCart },
+      ];
+
+      // Only Owner (3) and Manager (2) can access staff assignment
+      if (roleValue === 2 || roleValue === 3) {
+        studioItems.push({ title: "Assign Staff", href: "/dashboard/staff-assignment", icon: Users });
       }
 
-      // All studio members can view orders (staff orders for shoots)
-      studioItems.push({ title: "Orders", href: "/dashboard/orders", icon: ShoppingCart });
+      studioItems.push(
+        { title: "My Orders", href: "/dashboard/orders", icon: ClipboardList },
+        { title: "Deliveries", href: "/dashboard/deliveries", icon: Package }
+      );
 
       return [...baseItems, ...studioItems];
     }

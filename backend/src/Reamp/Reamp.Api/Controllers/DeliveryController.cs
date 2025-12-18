@@ -98,6 +98,19 @@ namespace Reamp.Api.Controllers
             return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, "Item added successfully"));
         }
 
+        [HttpPost("{id:guid}/items/batch")]
+        [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
+        public async Task<IActionResult> AddItemsBatch(
+            Guid id,
+            [FromBody] List<AddDeliveryItemDto> items,
+            CancellationToken ct)
+        {
+            var result = await _appService.AddItemsBatchAsync(id, items, ct);
+            _logger.LogInformation("Batch added {Count} items to delivery package: {PackageId}", items.Count, id);
+
+            return Ok(ApiResponse<DeliveryPackageDetailDto>.Ok(result, $"{items.Count} items added successfully"));
+        }
+
         [HttpDelete("{id:guid}/items/{itemId:guid}")]
         [Authorize(Policy = AuthPolicies.RequireStaffOrAdmin)]
         public async Task<IActionResult> RemoveItem(Guid id, Guid itemId, CancellationToken ct)

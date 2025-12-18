@@ -1,4 +1,5 @@
-﻿using System;
+using Reamp.Domain.Media.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,13 @@ namespace Reamp.Domain.Delivery.Entities
         public Guid MediaAssetId { get; private set; }
         public string VariantName { get; private set; } = default!; // e.g. wm_1920 / web_1920 / hls
         public int SortOrder { get; private set; }
+        
+        // Navigation property (for Include queries)
+        public MediaAsset? MediaAsset { get; private set; }
 
         private DeliveryItem() { }
 
-        internal static DeliveryItem Create(Guid packageId, Guid mediaAssetId, string variantName, int sortOrder)
+        public static DeliveryItem Create(Guid packageId, Guid mediaAssetId, string variantName, int sortOrder)
         {
             if (packageId == Guid.Empty) throw new ArgumentException("PackageId required");
             if (mediaAssetId == Guid.Empty) throw new ArgumentException("MediaAssetId required");

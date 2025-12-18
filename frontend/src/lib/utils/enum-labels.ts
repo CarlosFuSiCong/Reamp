@@ -24,10 +24,12 @@ export const listingStatusConfig: Record<ListingStatus, StatusConfig> = {
 };
 
 export const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
-  [OrderStatus.Placed]: { label: "Placed", variant: "outline" },
-  [OrderStatus.Accepted]: { label: "Accepted", variant: "secondary" },
-  [OrderStatus.Scheduled]: { label: "Scheduled", variant: "default" },
-  [OrderStatus.InProgress]: { label: "In Progress", variant: "default" },
+  [OrderStatus.Placed]: { label: "Order Placed", variant: "outline" },
+  [OrderStatus.Accepted]: { label: "Accepted by Studio", variant: "secondary" },
+  [OrderStatus.Scheduled]: { label: "Shoot Scheduled", variant: "default" },
+  [OrderStatus.InProgress]: { label: "Shoot In Progress", variant: "default" },
+  [OrderStatus.AwaitingDelivery]: { label: "Awaiting Delivery", variant: "default" },
+  [OrderStatus.AwaitingConfirmation]: { label: "Awaiting Confirmation", variant: "default" },
   [OrderStatus.Completed]: { label: "Completed", variant: "default" },
   [OrderStatus.Cancelled]: { label: "Cancelled", variant: "destructive" },
 };

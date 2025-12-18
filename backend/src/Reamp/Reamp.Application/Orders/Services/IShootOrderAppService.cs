@@ -1,7 +1,7 @@
 using Reamp.Application.Orders.Dtos;
 using Reamp.Application.Read.Staff.DTOs;
 using Reamp.Domain.Common.Abstractions;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Enums;
 
 namespace Reamp.Application.Orders.Services
 {
@@ -17,6 +17,7 @@ namespace Reamp.Application.Orders.Services
         Task AcceptAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task ScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task StartAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
+        Task MarkAwaitingConfirmationAsync(Guid orderId, CancellationToken ct = default);
         Task CompleteAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         Task CancelAsync(Guid orderId, Guid currentUserId, string? reason = null, CancellationToken ct = default);
         
@@ -30,7 +31,7 @@ namespace Reamp.Application.Orders.Services
         Task ClearScheduleAsync(Guid orderId, Guid currentUserId, CancellationToken ct = default);
         
         // Advanced Query
-        Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);
+        Task<IPagedList<OrderListDto>> GetFilteredListAsync(OrderFilterDto filter, PageRequest pageRequest, Guid? currentUserId, CancellationToken ct = default);
         
         // Photographer-specific operations
         Task<IPagedList<OrderListDto>> GetAvailableOrdersAsync(PageRequest pageRequest, Guid currentUserId, CancellationToken ct = default);

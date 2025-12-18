@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Reamp.Domain.Delivery.Entities;
 using Reamp.Domain.Delivery.Enums;
@@ -38,7 +38,7 @@ namespace Reamp.Infrastructure.Configurations.Delivery
             b.HasQueryFilter(x => x.DeletedAtUtc == null);
 
             // strong FKs
-            b.HasOne<Reamp.Domain.Shoots.Entities.ShootOrder>()
+            b.HasOne<Reamp.Domain.Orders.Entities.ShootOrder>()
              .WithMany()
              .HasForeignKey(x => x.OrderId)
              .OnDelete(DeleteBehavior.Restrict);

@@ -1,6 +1,6 @@
 using FluentAssertions;
-using Reamp.Domain.Shoots.Entities;
-using Reamp.Domain.Shoots.Enums;
+using Reamp.Domain.Orders.Entities;
+using Reamp.Domain.Orders.Enums;
 
 namespace Reamp.Tests.Unit.Domain.Orders;
 
