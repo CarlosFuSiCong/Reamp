@@ -19,6 +19,14 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * Sanitizes text for use in email headers to prevent header injection attacks
+ * Removes newlines, carriage returns, and null bytes
+ */
+function sanitizeEmailHeader(text: string): string {
+  return text.replace(/[\r\n\0]/g, ' ').trim();
+}
+
+/**
  * Validates email format
  */
 function isValidEmail(email: string): boolean {
@@ -63,11 +71,14 @@ export async function POST(request: Request) {
     const safeCompany = company ? escapeHtml(String(company)) : '';
     const safeMessage = message ? escapeHtml(String(message)) : '';
 
+    // Sanitize name for email subject (prevent header injection)
+    const safeSubjectName = sanitizeEmailHeader(String(name));
+
     // Send email notification
     const { data, error } = await resend.emails.send({
       from: 'Reamp Demo Requests <onboarding@resend.dev>',
       to: [recipientEmail],
-      subject: `New Demo Access Request from ${name}`,
+      subject: `New Demo Access Request from ${safeSubjectName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">New Demo Access Request</h2>
