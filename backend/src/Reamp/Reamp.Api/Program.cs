@@ -61,17 +61,72 @@ namespace Reamp.Api
                     options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 });
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "Reamp API",
+                    Version = "v1",
+                    Description = "Real Estate Photography Marketplace API"
+                });
+
+                // Add JWT Authentication support
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Enter your token in the text input below.",
+                    Name = "Authorization",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+                {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
 
             // CORS
-            builder.Services.AddCors(o =>
-                o.AddPolicy("dev", p => p
-                    .WithOrigins("http://localhost:3000")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials()
-                )
-            );
+            var allowedOrigins = builder.Configuration.GetValue<string>("AllowedOrigins");
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    if (!string.IsNullOrEmpty(allowedOrigins))
+                    {
+                        // Production: use configured origins
+                        var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.Trim())
+                            .ToArray();
+                        policy.WithOrigins(origins);
+                    }
+                    else if (builder.Environment.IsDevelopment())
+                    {
+                        // Development: default to localhost:3000
+                        policy.WithOrigins("http://localhost:3000");
+                    }
+                    else
+                    {
+                        // Fallback: no origins allowed
+                        policy.WithOrigins();
+                    }
+
+                    policy.AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
 
             // Database
             var conn = builder.Configuration.GetConnectionString("SqlServerConnection");
@@ -211,30 +266,41 @@ namespace Reamp.Api
 
             app.UseSerilogRequestLogging();
 
-            if (app.Environment.IsDevelopment())
+            // CORS - enable in all environments
+            app.UseCors("AllowFrontend");
+
+            // Swagger - controlled by environment variable
+            var enableSwagger = builder.Configuration.GetValue<bool?>("EnableSwagger");
+            if (enableSwagger ?? app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
-                app.UseCors("dev");
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reamp API v1");
+                    c.DocumentTitle = "Reamp API Documentation";
+                });
+            }
 
+            if (app.Environment.IsDevelopment())
+            {
                 using var scope = app.Services.CreateScope();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 
-                logger.LogInformation("🔄 Checking database migrations...");
+                logger.LogInformation("Checking database migrations...");
                 var pendingMigrations = db.Database.GetPendingMigrations().ToList();
                 
                 if (pendingMigrations.Any())
                 {
-                    logger.LogWarning("⚠️ Found {Count} pending migrations: {Migrations}", 
+                    logger.LogWarning("Found {Count} pending migrations: {Migrations}", 
                         pendingMigrations.Count, string.Join(", ", pendingMigrations));
-                    logger.LogInformation("▶️ Applying migrations...");
+                    logger.LogInformation("Applying migrations...");
                     db.Database.Migrate();
-                    logger.LogInformation("✅ Migrations applied successfully");
+                    logger.LogInformation("Migrations applied successfully");
                 }
                 else
                 {
-                    logger.LogInformation("✅ Database is up to date - no pending migrations");
+                    logger.LogInformation("Database is up to date - no pending migrations");
                 }
             }
 
@@ -243,7 +309,9 @@ namespace Reamp.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            if (app.Environment.IsDevelopment())
+            // Hangfire Dashboard - controlled by environment variable
+            var enableHangfire = builder.Configuration.GetValue<bool?>("EnableHangfire");
+            if (enableHangfire ?? app.Environment.IsDevelopment())
             {
                 app.UseHangfireDashboard("/hangfire");
             }
