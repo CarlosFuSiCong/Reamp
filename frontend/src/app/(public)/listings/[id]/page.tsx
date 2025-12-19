@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { listingsApi } from "@/lib/api";
 import { ImageGallery } from "@/components/public";
 import { Footer } from "@/components/layout";
-
 import { Navbar } from "@/components/layout";
 import { PropertyMap } from "@/components/maps";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ListingType } from "@/types";
+import { ListingType, Listing } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import {
   Bed,
@@ -27,46 +28,32 @@ import {
 import { getPropertyTypeLabel, getListingTypeLabel } from "@/lib/utils/enum-labels";
 import Link from "next/link";
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  try {
-    const listing = await listingsApi.getByIdPublic(id);
-    const coverImage = listing.media?.find((m) => m.isCover) || listing.media?.[0];
-    const imageUrl = coverImage?.thumbnailUrl;
+export default function ListingDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-    return {
-      title: `${listing.title} - Reamp`,
-      description: listing.description || `${getPropertyTypeLabel(listing.propertyType)} for ${getListingTypeLabel(listing.listingType)} in ${listing.city}`,
-      openGraph: {
-        title: listing.title,
-        description: listing.description,
-        images: imageUrl ? [{ url: imageUrl }] : [],
-        type: "website",
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: listing.title,
-        description: listing.description,
-        images: imageUrl ? [imageUrl] : [],
-      },
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        setLoading(true);
+        const data = await listingsApi.getByIdPublic(id);
+        setListing(data);
+        setError(false);
+      } catch (err) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     };
-  } catch {
-    return {
-      title: "Property Not Found - Reamp",
-    };
-  }
-}
 
-export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  let listing;
-  
-  try {
-    listing = await listingsApi.getByIdPublic(id);
-  } catch {
-    notFound();
-  }
+    if (id) {
+      fetchListing();
+    }
+  }, [id]);
 
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
@@ -76,6 +63,39 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50/30">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading property...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50/30">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
+            <p className="text-gray-600 mb-6">The property you're looking for doesn't exist or has been removed.</p>
+            <Button onClick={() => router.push('/listings')}>
+              Back to Listings
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const primaryAgent = listing.agents?.find((a) => a.isPrimary) || listing.agents?.[0];
 
@@ -319,40 +339,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       </main>
 
       <Footer />
-
-      {/* JSON-LD Structured Data for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": listing.listingType === ListingType.ForSale ? "RealEstateListing" : "Apartment",
-            name: listing.title,
-            description: listing.description,
-            image: listing.media?.map((m) => m.thumbnailUrl).filter(Boolean),
-            address: {
-              "@type": "PostalAddress",
-              streetAddress: listing.addressLine1,
-              addressLocality: listing.city,
-              addressRegion: listing.state,
-              postalCode: listing.postcode,
-              addressCountry: listing.country,
-            },
-            offers: {
-              "@type": "Offer",
-              price: listing.price,
-              priceCurrency: listing.currency || "USD",
-            },
-            numberOfRooms: listing.bedrooms,
-            numberOfBathroomsTotal: listing.bathrooms,
-            floorSize: {
-              "@type": "QuantitativeValue",
-              value: listing.floorAreaSqm,
-              unitCode: "MTK",
-            },
-          }),
-        }}
-      />
     </div>
   );
 }
