@@ -40,6 +40,13 @@ export function DemoRequestDialog({ open, onOpenChange, trigger }: DemoRequestDi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Client-side validation for role (required)
+    if (!formData.role) {
+      toast.error("Please select a role");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -125,7 +132,6 @@ export function DemoRequestDialog({ open, onOpenChange, trigger }: DemoRequestDi
               value={formData.role}
               onValueChange={(value) => setFormData({ ...formData, role: value })}
               disabled={loading}
-              required
             >
               <SelectTrigger id="role">
                 <SelectValue placeholder="Select your role" />

@@ -18,6 +18,14 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"'/]/g, (char) => htmlEntities[char]);
 }
 
+/**
+ * Validates email format
+ */
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 export async function POST(request: Request) {
   try {
     const { name, email, company, role, message } = await request.json();
@@ -30,15 +38,30 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // Validate recipient email is configured
+    const recipientEmail = process.env.DEMO_REQUEST_RECIPIENT_EMAIL;
+    if (!recipientEmail) {
+      console.error('DEMO_REQUEST_RECIPIENT_EMAIL environment variable is not set');
+      return NextResponse.json(
+        { error: 'Email service is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Escape all user inputs to prevent HTML/XSS injection
     const safeName = escapeHtml(String(name));
     const safeEmail = escapeHtml(String(email));
     const safeRole = escapeHtml(String(role));
     const safeCompany = company ? escapeHtml(String(company)) : '';
     const safeMessage = message ? escapeHtml(String(message)) : '';
-
-    // Get recipient email from environment variable
-    const recipientEmail = process.env.DEMO_REQUEST_RECIPIENT_EMAIL || 'sicong.fu@outlook.com';
 
     // Send email notification
     const { data, error } = await resend.emails.send({
