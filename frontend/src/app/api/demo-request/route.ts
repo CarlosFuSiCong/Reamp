@@ -37,11 +37,14 @@ export async function POST(request: Request) {
     const safeCompany = company ? escapeHtml(String(company)) : '';
     const safeMessage = message ? escapeHtml(String(message)) : '';
 
+    // Get recipient email from environment variable
+    const recipientEmail = process.env.DEMO_REQUEST_RECIPIENT_EMAIL || 'sicong.fu@outlook.com';
+
     // Send email notification
     const { data, error } = await resend.emails.send({
       from: 'Reamp Demo Requests <onboarding@resend.dev>',
-      to: ['sicong.fu@outlook.com'],
-      subject: `New Demo Access Request from ${safeName}`,
+      to: [recipientEmail],
+      subject: `New Demo Access Request from ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">New Demo Access Request</h2>
