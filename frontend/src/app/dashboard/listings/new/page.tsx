@@ -101,22 +101,16 @@ export default function NewListingPage() {
   });
 
   const onSubmit = async (data: ListingFormValues) => {
-    console.log("📝 onSubmit called - Current step:", currentStep, "Total steps:", STEPS.length);
-    console.log("📝 Stack trace:", new Error().stack);
     // Only allow submission on the last step
     if (currentStep !== STEPS.length) {
-      console.log("❌ Form submission blocked - not on final step");
       return;
     }
 
     // Validate all fields before submission
     const isValid = await form.trigger();
     if (!isValid) {
-      console.log("❌ Form validation failed - please check all fields");
       return;
     }
-
-    console.log("✅ Proceeding with form submission");
 
     // Transform form data to API format
     const apiData = {
@@ -151,7 +145,6 @@ export default function NewListingPage() {
   const nextStep = async (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    console.log("➡️ nextStep called - Current step:", currentStep);
     let fieldsToValidate: (keyof ListingFormValues)[] = [];
 
     if (currentStep === 1) {
@@ -161,9 +154,7 @@ export default function NewListingPage() {
     }
 
     const isValid = await form.trigger(fieldsToValidate);
-    console.log("Validation result:", isValid, "for fields:", fieldsToValidate);
     if (isValid && currentStep < STEPS.length) {
-      console.log("✅ Moving to step:", currentStep + 1);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -175,17 +166,12 @@ export default function NewListingPage() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    console.log("🔑 Key pressed:", e.key, "Current step:", currentStep, "Target:", e.target);
     // Prevent form submission on Enter key unless on the last step
     if (e.key === "Enter") {
       e.preventDefault();
-      console.log("✋ Prevented Enter key default behavior");
 
       if (currentStep !== STEPS.length) {
-        console.log("➡️ Triggering next step from Enter key");
         nextStep();
-      } else {
-        console.log("📝 On final step, will submit via button click");
       }
     }
   };

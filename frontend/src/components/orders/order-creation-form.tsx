@@ -120,7 +120,6 @@ export function OrderCreationForm() {
         (orderData as any).schedulingNotes = values.schedulingNotes;
       }
 
-      console.log("📤 Submitting order data:", orderData);
       const result = await createMutation.mutateAsync(orderData);
 
       // Add tasks to the order
