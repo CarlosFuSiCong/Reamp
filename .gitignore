@@ -374,3 +374,6 @@ TEST-ACCOUNTS.md
 .env.*.local
 *.env
 !env.example
+
+# Project highlights documentation (internal use only)
+PROJECT-HIGHLIGHTS.md

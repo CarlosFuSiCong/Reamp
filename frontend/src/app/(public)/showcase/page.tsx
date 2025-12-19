@@ -23,7 +23,8 @@ import {
   Server,
   Cloud,
   Layers,
-  Code
+  Code,
+  Mail
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -87,16 +88,16 @@ export default function ShowcasePage() {
                 </div>
               </div>
               <Card className="border-blue-100 bg-blue-50/50 shadow-sm min-w-[300px]">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-blue-900">Demo Account</p>
-                    <div className="text-xs text-blue-700 font-mono bg-blue-100 px-2 py-1 rounded">
-                      agent1@reamp.com / Test@123
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-blue-600" />
+                      <p className="text-sm font-medium text-blue-900">Want to Try?</p>
                     </div>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      Email <a href="mailto:sicong.fu@outlook.com" className="font-semibold underline hover:text-blue-800">sicong.fu@outlook.com</a> for demo access
+                    </p>
                   </div>
-                  <Link href="/login">
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Login</Button>
-                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -164,16 +165,16 @@ export default function ShowcasePage() {
                 </div>
               </div>
               <Card className="border-purple-100 bg-purple-50/50 shadow-sm min-w-[300px]">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-purple-900">Demo Account</p>
-                    <div className="text-xs text-purple-700 font-mono bg-purple-100 px-2 py-1 rounded">
-                      staff1@reamp.com / Test@123
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-purple-600" />
+                      <p className="text-sm font-medium text-purple-900">Want to Try?</p>
                     </div>
+                    <p className="text-xs text-purple-700 leading-relaxed">
+                      Email <a href="mailto:sicong.fu@outlook.com" className="font-semibold underline hover:text-purple-800">sicong.fu@outlook.com</a> for demo access
+                    </p>
                   </div>
-                  <Link href="/login">
-                    <Button size="sm" className="bg-purple-600 hover:bg-purple-700">Login</Button>
-                  </Link>
                 </CardContent>
               </Card>
             </div>
