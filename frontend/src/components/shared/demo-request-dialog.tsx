@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Mail, Loader2 } from "lucide-react";
-import { toast } from "@/lib/utils/toast";
+import { toast } from "sonner";
 
 interface DemoRequestDialogProps {
   open: boolean;
