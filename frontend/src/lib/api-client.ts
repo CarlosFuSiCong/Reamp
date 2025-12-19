@@ -59,9 +59,8 @@ apiClient.interceptors.response.use(
       });
     }
 
-    // Unwrap ApiResponse if it has the standard { data, success, message } structure
-    // Some endpoints return data directly without wrapping
-    if (response.data && typeof response.data === "object" && "data" in response.data && "success" in response.data) {
+    // Unwrap ApiResponse and return only the data field
+    if (response.data && typeof response.data === "object" && "data" in response.data) {
       const unwrapped = response.data.data;
       if (process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true") {
         console.log("API Response unwrapped:", {

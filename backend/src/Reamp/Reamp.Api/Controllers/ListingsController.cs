@@ -7,6 +7,7 @@ using Reamp.Application.Listings.Services;
 using Reamp.Application.Read.Listings;
 using Reamp.Application.Read.Shared;
 using Reamp.Domain.Listings.Enums;
+using Reamp.Shared;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Reamp.Api.Controllers
@@ -71,7 +72,7 @@ namespace Reamp.Api.Controllers
             };
 
             var result = await _readService.ListAsync(agencyId, status, type, property, keyword, pageRequest, ct);
-            return Ok(result);
+            return Ok(ApiResponse<PageResult<Application.Read.Listings.DTOs.ListingSummaryDto>>.Ok(result));
         }
 
         // Get listing detail - public access
@@ -80,7 +81,9 @@ namespace Reamp.Api.Controllers
         public async Task<IActionResult> GetDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var listing = await _readService.GetDetailAsync(id, ct);
-            return listing is null ? NotFound() : Ok(listing);
+            return listing is null 
+                ? NotFound(ApiResponse<object>.Fail("Listing not found")) 
+                : Ok(ApiResponse<Application.Read.Listings.DTOs.ListingDetailDto>.Ok(listing));
         }
 
         // Get editor detail - requires Agent or Admin
@@ -89,7 +92,9 @@ namespace Reamp.Api.Controllers
         public async Task<IActionResult> GetEditorDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var listing = await _readService.GetEditorDetailAsync(id, ct);
-            return listing is null ? NotFound() : Ok(listing);
+            return listing is null 
+                ? NotFound(ApiResponse<object>.Fail("Listing not found")) 
+                : Ok(ApiResponse<Application.Read.Listings.DTOs.EditorDetailDto>.Ok(listing));
         }
 
         // Update listing details - requires Agent or Admin
