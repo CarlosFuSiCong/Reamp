@@ -1,0 +1,8 @@
+services:
+  frontend:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ../src:/app/src
+      - ../public:/app/public
+    command: pnpm dev
