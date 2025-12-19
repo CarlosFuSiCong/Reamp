@@ -377,3 +377,13 @@ TEST-ACCOUNTS.md
 
 # Project highlights documentation (internal use only)
 PROJECT-HIGHLIGHTS.md
+
+# Data migration artifacts (local use only)
+dataset/
+backend/scripts/*migration*.sql
+backend/scripts/*migration*.ps1
+backend/scripts/*export*.sql
+backend/scripts/*export*.ps1
+backend/scripts/*import*.sql
+backend/scripts/VSCODE_MIGRATION_GUIDE.md
+backend/scripts/mssql-connections.md
