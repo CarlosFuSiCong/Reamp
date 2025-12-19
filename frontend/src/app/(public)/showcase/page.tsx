@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ShowcaseClient } from "./showcase-client";
 import { 
   Building2, 
   Camera, 
@@ -77,29 +78,14 @@ export default function ShowcasePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 max-w-7xl">
           {/* Agent Dashboard Section */}
           <section id="agent-features" className="scroll-mt-24">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-2xl">
-                  <Building2 className="h-8 w-8 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Agent Dashboard</h2>
-                  <p className="text-lg text-gray-500 mt-1">Manage properties, orders, and media assets</p>
-                </div>
+            <div className="flex items-center gap-4 mb-12">
+              <div className="p-3 bg-blue-100 rounded-2xl">
+                <Building2 className="h-8 w-8 text-blue-600" />
               </div>
-              <Card className="border-blue-100 bg-blue-50/50 shadow-sm min-w-[300px]">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-blue-600" />
-                      <p className="text-sm font-medium text-blue-900">Want to Try?</p>
-                    </div>
-                    <p className="text-xs text-blue-700 leading-relaxed">
-                      Email <a href="mailto:sicong.fu@outlook.com" className="font-semibold underline hover:text-blue-800">sicong.fu@outlook.com</a> for demo access
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Agent Dashboard</h2>
+                <p className="text-lg text-gray-500 mt-1">Manage properties, orders, and media assets</p>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -154,29 +140,14 @@ export default function ShowcasePage() {
 
           {/* Studio Dashboard Section */}
           <section className="space-y-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-2xl">
-                  <Camera className="h-8 w-8 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Studio Dashboard</h2>
-                  <p className="text-lg text-gray-500 mt-1">Professional photography service management</p>
-                </div>
+            <div className="flex items-center gap-4 mb-12">
+              <div className="p-3 bg-purple-100 rounded-2xl">
+                <Camera className="h-8 w-8 text-purple-600" />
               </div>
-              <Card className="border-purple-100 bg-purple-50/50 shadow-sm min-w-[300px]">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-purple-600" />
-                      <p className="text-sm font-medium text-purple-900">Want to Try?</p>
-                    </div>
-                    <p className="text-xs text-purple-700 leading-relaxed">
-                      Email <a href="mailto:sicong.fu@outlook.com" className="font-semibold underline hover:text-purple-800">sicong.fu@outlook.com</a> for demo access
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Studio Dashboard</h2>
+                <p className="text-lg text-gray-500 mt-1">Professional photography service management</p>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -275,31 +246,8 @@ export default function ShowcasePage() {
             </div>
           </section>
 
-          {/* CTA Section */}
-          <section className="mt-24">
-            <div className="relative rounded-3xl overflow-hidden bg-gray-900 text-white p-12 text-center">
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
-              <div className="relative z-10 space-y-8 max-w-3xl mx-auto">
-                <h2 className="text-3xl md:text-4xl font-bold">Ready to Experience Reamp?</h2>
-                <p className="text-xl text-gray-300">
-                  Join the platform transforming real estate media management.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/register">
-                    <Button size="lg" className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700">
-                      Get Started Free
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link href="/contact">
-                    <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-white/10 backdrop-blur-sm text-white border-white/50 hover:bg-white hover:text-gray-900 hover:border-white transition-colors">
-                      Contact Sales
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
+          {/* CTA Section - Client Component */}
+          <ShowcaseClient />
         </div>
       </main>
       <Footer />
