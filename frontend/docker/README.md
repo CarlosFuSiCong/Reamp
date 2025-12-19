@@ -33,7 +33,7 @@ Copy `env.example` to `.env` and configure:
 
 ```bash
 # Backend API URL
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5000
 
 # Google Maps API Key (optional)
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
@@ -139,7 +139,7 @@ az containerapp create \
   --target-port 3000 \
   --ingress external \
   --env-vars \
-    NEXT_PUBLIC_API_BASE_URL=<backend-url> \
+    NEXT_PUBLIC_API_URL=<backend-url> \
     RESEND_API_KEY=<secretref:resend-api-key> \
     DEMO_REQUEST_RECIPIENT_EMAIL=<your-email>
 ```
