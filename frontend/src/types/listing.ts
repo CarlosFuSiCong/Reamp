@@ -21,6 +21,8 @@ export interface Listing {
   state: string;
   postcode: string;
   country: string;
+  latitude?: number;
+  longitude?: number;
   media: ListingMedia[];
   agents: ListingAgent[];
 }

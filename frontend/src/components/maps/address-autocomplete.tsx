@@ -6,6 +6,21 @@ import { FormControl, FormMessage } from "@/components/ui/form";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { MapPin } from "lucide-react";
 
+declare global {
+  interface Window {
+    google?: {
+      maps: {
+        places: {
+          Autocomplete: any;
+        };
+        event: {
+          clearInstanceListeners: (instance: any) => void;
+        };
+      };
+    };
+  }
+}
+
 export interface AddressComponents {
   line1: string;
   line2?: string;
@@ -33,7 +48,7 @@ export function AddressAutocomplete({
   error,
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const autocompleteRef = useRef<any>(null);
   const [isApiReady, setIsApiReady] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   
@@ -57,8 +72,9 @@ export function AddressAutocomplete({
         fields: ["address_components", "formatted_address", "geometry"],
       });
 
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current?.getPlace();
+      if (autocompleteRef.current) {
+        autocompleteRef.current.addListener("place_changed", () => {
+          const place = autocompleteRef.current?.getPlace();
 
         if (!place || !place.address_components) {
           return;
@@ -78,8 +94,8 @@ export function AddressAutocomplete({
         let streetNumber = "";
         let route = "";
 
-        place.address_components.forEach((component) => {
-          const types = component.types;
+        place.address_components.forEach((component: any) => {
+          const types = component.types as string[];
 
           if (types.includes("street_number")) {
             streetNumber = component.long_name;
@@ -103,14 +119,19 @@ export function AddressAutocomplete({
         const formattedAddress = place.formatted_address || "";
         setInputValue(formattedAddress);
         onChange(formattedAddress, components);
-      });
+        });
+      }
     } catch (error) {
       console.error("Failed to initialize Google Places Autocomplete:", error);
     }
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      if (autocompleteRef.current && typeof window !== 'undefined' && window.google) {
+        try {
+          window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        } catch (e) {
+          console.error("Error clearing listeners:", e);
+        }
       }
     };
   }, [places, onChange]);

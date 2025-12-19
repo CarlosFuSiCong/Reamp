@@ -8,7 +8,7 @@ import { toast } from "sonner";
 function getRedirectPath(role: UserRole): string {
   switch (role) {
     case UserRole.Admin:
-      return "/admin";
+      return "/dashboard/admin";
     case UserRole.Agent:
       return "/dashboard/agency";
     case UserRole.Staff:

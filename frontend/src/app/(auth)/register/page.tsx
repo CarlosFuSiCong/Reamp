@@ -11,6 +11,7 @@ import { AuthLayout } from "@/components/auth/auth-layout";
 import { FormField } from "@/components/auth/form-field";
 import { ErrorAlert } from "@/components/auth/error-alert";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { showToast } from "@/lib/utils/toast";
 
 const registerSchema = z
   .object({
@@ -49,6 +50,7 @@ export default function RegisterPage() {
     try {
       setErrorMessage("");
       await registerUser(data);
+      showToast.success("Account created successfully", "Welcome to Reamp! Please sign in to continue");
     } catch (error: unknown) {
       console.error("Registration failed:", error);
 
@@ -68,6 +70,7 @@ export default function RegisterPage() {
       }
 
       setErrorMessage(message);
+      showToast.error("Registration failed", message);
     }
   };
 
@@ -91,7 +94,7 @@ export default function RegisterPage() {
             label="Email address"
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="name@company.com"
             autoComplete="email"
             error={errors.email?.message}
             register={register("email")}
@@ -101,10 +104,10 @@ export default function RegisterPage() {
             label="Password"
             name="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Create a strong password"
             autoComplete="new-password"
             error={errors.password?.message}
-            helperText="Must be at least 6 characters and contain a special character (!@#$%^&*)"
+            helperText="Minimum 6 characters with at least one special character (!@#$%^&*)"
             register={register("password")}
           />
 
@@ -112,7 +115,7 @@ export default function RegisterPage() {
             label="Confirm password"
             name="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder="Re-enter your password"
             autoComplete="new-password"
             error={errors.confirmPassword?.message}
             register={register("confirmPassword")}
