@@ -270,9 +270,6 @@ namespace Reamp.Api
 
             app.UseSerilogRequestLogging();
 
-            // CORS - enable in all environments
-            app.UseCors("AllowFrontend");
-
             // Swagger - controlled by environment variable
             var enableSwagger = builder.Configuration.GetValue<bool?>("EnableSwagger");
             if (enableSwagger ?? app.Environment.IsDevelopment())
@@ -310,6 +307,11 @@ namespace Reamp.Api
 
             app.UseHttpsRedirection();
             app.UseMiddleware<GlobalExceptionMiddleware>();
+            
+            // CORS must be after UseRouting (implicit) and before UseAuthentication
+            app.UseRouting();
+            app.UseCors("AllowFrontend");
+            
             app.UseAuthentication();
             app.UseAuthorization();
 
