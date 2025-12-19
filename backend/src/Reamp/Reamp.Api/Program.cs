@@ -133,7 +133,7 @@ namespace Reamp.Api
             });
 
             // Database
-            var conn = builder.Configuration.GetConnectionString("SqlServerConnection");
+            var conn = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(conn, sql =>
                 {
