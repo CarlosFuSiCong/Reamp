@@ -13,13 +13,18 @@ RUN corepack enable pnpm && pnpm install --frozen-lockfile
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Build with placeholder values that will be replaced at runtime
-ENV NEXT_PUBLIC_API_URL=__NEXT_PUBLIC_API_URL__
+# Accept build arguments
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+
+# Set environment variables from build args (will be baked into the build)
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_API_TIMEOUT=30000
 ENV NEXT_PUBLIC_APP_NAME=Reamp
-ENV NEXT_PUBLIC_APP_URL=__NEXT_PUBLIC_APP_URL__
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV NEXT_PUBLIC_ENABLE_DEBUG=false
-ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=__NEXT_PUBLIC_GOOGLE_MAPS_API_KEY__
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
