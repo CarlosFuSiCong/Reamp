@@ -9,3 +9,4 @@ export { StatusBadge } from "./status-badge";
 export { ConfirmDialog } from "./confirm-dialog";
 export { SearchInput } from "./search-input";
 export { Pagination } from "./pagination";
+export { DemoRequestDialog } from "./demo-request-dialog";
