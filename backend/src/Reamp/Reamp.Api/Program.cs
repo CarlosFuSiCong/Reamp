@@ -118,8 +118,8 @@ namespace Reamp.Api
                     {
                         // Development: default to localhost:3000
                         policy.WithOrigins("http://localhost:3000")
-                              .AllowAnyHeader()
-                              .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
                               .AllowCredentials();
                     }
                     else

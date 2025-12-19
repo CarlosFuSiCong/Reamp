@@ -79,13 +79,13 @@ export default function ShowcasePage() {
           {/* Agent Dashboard Section */}
           <section id="agent-features" className="scroll-mt-24">
             <div className="flex items-center gap-4 mb-12">
-              <div className="p-3 bg-blue-100 rounded-2xl">
-                <Building2 className="h-8 w-8 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">Agent Dashboard</h2>
-                <p className="text-lg text-gray-500 mt-1">Manage properties, orders, and media assets</p>
-              </div>
+                <div className="p-3 bg-blue-100 rounded-2xl">
+                  <Building2 className="h-8 w-8 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Agent Dashboard</h2>
+                  <p className="text-lg text-gray-500 mt-1">Manage properties, orders, and media assets</p>
+                </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -141,13 +141,13 @@ export default function ShowcasePage() {
           {/* Studio Dashboard Section */}
           <section className="space-y-6">
             <div className="flex items-center gap-4 mb-12">
-              <div className="p-3 bg-purple-100 rounded-2xl">
-                <Camera className="h-8 w-8 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">Studio Dashboard</h2>
-                <p className="text-lg text-gray-500 mt-1">Professional photography service management</p>
-              </div>
+                <div className="p-3 bg-purple-100 rounded-2xl">
+                  <Camera className="h-8 w-8 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Studio Dashboard</h2>
+                  <p className="text-lg text-gray-500 mt-1">Professional photography service management</p>
+                </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
