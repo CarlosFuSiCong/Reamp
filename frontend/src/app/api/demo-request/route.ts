@@ -1,8 +1,6 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 /**
  * Escapes HTML entities to prevent XSS/HTML injection
  */
@@ -54,6 +52,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate Resend API key is configured
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY environment variable is not set');
+      return NextResponse.json(
+        { error: 'Email service is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Validate recipient email is configured
     const recipientEmail = process.env.DEMO_REQUEST_RECIPIENT_EMAIL;
     if (!recipientEmail) {
@@ -63,6 +71,9 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
+
+    // Initialize Resend client after validation
+    const resend = new Resend(resendApiKey);
 
     // Escape all user inputs to prevent HTML/XSS injection
     const safeName = escapeHtml(String(name));
