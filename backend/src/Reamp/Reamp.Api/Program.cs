@@ -109,22 +109,26 @@ namespace Reamp.Api
                         var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries)
                             .Select(o => o.Trim())
                             .ToArray();
-                        policy.WithOrigins(origins);
+                        policy.WithOrigins(origins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
                     }
                     else if (builder.Environment.IsDevelopment())
                     {
                         // Development: default to localhost:3000
-                        policy.WithOrigins("http://localhost:3000");
+                        policy.WithOrigins("http://localhost:3000")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
                     }
                     else
                     {
-                        // Fallback: no origins allowed
-                        policy.WithOrigins();
+                        // Fallback: allow all origins (not recommended for production)
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
                     }
-
-                    policy.AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
                 });
             });
 
