@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Upload } from "lucide-react";
 import { mediaApi } from "@/lib/api";
 import { toast } from "sonner";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 interface AvatarUploadProps {
   avatarAssetId?: string;
@@ -132,7 +133,13 @@ export function AvatarUpload({
       <CardContent>
         <div className="flex items-center gap-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={preview || avatarUrl || undefined} />
+            <AvatarImage 
+              src={
+                preview 
+                  ? preview 
+                  : applyCloudinaryPreset(avatarUrl, "avatar")
+              } 
+            />
             <AvatarFallback>{displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">

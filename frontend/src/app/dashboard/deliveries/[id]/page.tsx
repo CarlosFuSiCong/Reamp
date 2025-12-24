@@ -13,6 +13,7 @@ import { deliveriesApi } from "@/lib/api";
 import { useProfile } from "@/lib/hooks";
 import { DeliveryStatus } from "@/types";
 import { toast } from "sonner";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 export default function DeliveryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -166,7 +167,10 @@ export default function DeliveryDetailPage({ params }: { params: Promise<{ id: s
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                         {item.thumbnailUrl || item.mediaUrl ? (
                           <img
-                            src={item.thumbnailUrl || item.mediaUrl || ""}
+                            src={applyCloudinaryPreset(
+                              item.thumbnailUrl || item.mediaUrl,
+                              "thumbnail"
+                            )}
                             alt="Media"
                             className="w-full h-full object-cover"
                           />

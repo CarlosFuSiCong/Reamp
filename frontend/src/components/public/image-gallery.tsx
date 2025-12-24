@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X, Maximize2, FileImage } from "lucide-react";
 import type { ListingMedia } from "@/types";
 import { ListingMediaRole } from "@/types/enums";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 interface ImageGalleryProps {
   media: ListingMedia[];
@@ -98,7 +99,7 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
         {/* Main Image */}
         <div className="relative aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden group">
           <Image
-            src={currentImage.thumbnailUrl || "/placeholder-property.jpg"}
+            src={applyCloudinaryPreset(currentImage.thumbnailUrl, "galleryMain")}
             alt={`${title} - Image ${selectedIndex + 1}`}
             fill
             className="object-cover"
@@ -160,7 +161,7 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
                 }`}
               >
                 <Image
-                  src={media.thumbnailUrl || "/placeholder-property.jpg"}
+                  src={applyCloudinaryPreset(media.thumbnailUrl, "thumbnailSmall")}
                   alt={`Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
@@ -180,7 +181,7 @@ export function ImageGallery({ media, title }: ImageGalleryProps) {
         >
           <div className="relative w-full h-[90vh] flex items-center justify-center">
             <Image
-              src={currentImage.thumbnailUrl || "/placeholder-property.jpg"}
+              src={applyCloudinaryPreset(currentImage.thumbnailUrl, "lightbox")}
               alt={`${title} - Image ${selectedIndex + 1}`}
               fill
               className="object-contain"

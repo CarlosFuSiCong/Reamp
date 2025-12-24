@@ -17,6 +17,7 @@ import { deliveriesApi, listingsApi } from "@/lib/api";
 import { ListingMediaRole, DeliveryStatus } from "@/types";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/shared";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 interface ListingMediaManagerProps {
   listingId: string;
@@ -157,7 +158,7 @@ export function ListingMediaManager({ listingId }: ListingMediaManagerProps) {
                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                       {item.thumbnailUrl ? (
                         <img
-                          src={item.thumbnailUrl}
+                          src={applyCloudinaryPreset(item.thumbnailUrl, "thumbnailSquare")}
                           alt="Media"
                           className="w-full h-full object-cover"
                         />

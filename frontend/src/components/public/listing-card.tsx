@@ -6,6 +6,7 @@ import { Bed, Bath, Car, Maximize, MapPin, ArrowUpRight } from "lucide-react";
 import type { Listing } from "@/types";
 import { ListingType } from "@/types";
 import { getPropertyTypeLabel, getListingTypeLabel } from "@/lib/utils/enum-labels";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 interface ListingCardProps {
   listing: Listing;
@@ -14,7 +15,7 @@ interface ListingCardProps {
 export function ListingCard({ listing }: ListingCardProps) {
   // Get cover image or first image
   const coverImage = listing.media?.find((m) => m.isCover) || listing.media?.[0];
-  const imageUrl = coverImage?.thumbnailUrl || "/placeholder-property.jpg";
+  const imageUrl = applyCloudinaryPreset(coverImage?.thumbnailUrl, "listingCard");
 
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {

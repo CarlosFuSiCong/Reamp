@@ -13,6 +13,7 @@ import { mediaApi } from "@/lib/api";
 import { ChunkedUpload } from "./chunked-upload";
 import type { MediaAssetDetailDto, MediaAssetListDto } from "@/types";
 import { cn } from "@/lib/utils";
+import { applyCloudinaryPreset } from "@/lib/utils/cloudinary";
 
 interface MediaPickerProps {
   open: boolean;
@@ -217,7 +218,7 @@ function MediaCard({ asset, isSelected, onToggle }: MediaCardProps) {
       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
         {asset.thumbnailUrl ? (
           <img
-            src={asset.thumbnailUrl}
+            src={applyCloudinaryPreset(asset.thumbnailUrl, "thumbnailSquare")}
             alt={asset.originalFileName}
             className="w-full h-full object-cover"
           />
