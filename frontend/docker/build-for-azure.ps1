@@ -8,6 +8,8 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$FrontendAppUrl,
     
+    [string]$GoogleMapsApiKey = "",
+    
     [string]$AcrRegistry = "reampacrsicong.azurecr.io",
     
     [string]$ImageName = "reamp-frontend",
@@ -20,6 +22,11 @@ $FullImageName = "$AcrRegistry/${ImageName}:$Tag"
 Write-Host "Building frontend Docker image for Azure..." -ForegroundColor Green
 Write-Host "Backend API URL: $BackendApiUrl" -ForegroundColor Cyan
 Write-Host "Frontend App URL: $FrontendAppUrl" -ForegroundColor Cyan
+if ($GoogleMapsApiKey) {
+    Write-Host "Google Maps API Key: [CONFIGURED]" -ForegroundColor Cyan
+} else {
+    Write-Host "Google Maps API Key: [NOT CONFIGURED]" -ForegroundColor Yellow
+}
 Write-Host "Image: $FullImageName" -ForegroundColor Cyan
 Write-Host ""
 
@@ -28,13 +35,19 @@ Push-Location (Join-Path $PSScriptRoot "..")
 
 try {
     # Build the image with build arguments
-    docker build `
-        --build-arg NEXT_PUBLIC_API_URL=$BackendApiUrl `
-        --build-arg NEXT_PUBLIC_APP_URL=$FrontendAppUrl `
-        --build-arg NEXT_PUBLIC_ENABLE_DEBUG=false `
-        -t $FullImageName `
-        -f docker/Dockerfile `
-        .
+    $buildArgs = @(
+        "--build-arg", "NEXT_PUBLIC_API_URL=$BackendApiUrl",
+        "--build-arg", "NEXT_PUBLIC_APP_URL=$FrontendAppUrl",
+        "--build-arg", "NEXT_PUBLIC_ENABLE_DEBUG=false"
+    )
+    
+    if ($GoogleMapsApiKey) {
+        $buildArgs += "--build-arg", "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$GoogleMapsApiKey"
+    }
+    
+    $buildArgs += "-t", $FullImageName, "-f", "docker/Dockerfile", "."
+    
+    & docker build @buildArgs
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
