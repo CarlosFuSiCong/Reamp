@@ -120,6 +120,9 @@ namespace Reamp.Api.Controllers.Media
 
                 var result = await _mediaAssetAppService.UploadAsync(dto, currentUserId, ct);
 
+                _logger.LogInformation("Avatar uploaded successfully: AssetId={AssetId}, PublicUrl={PublicUrl}, ProviderAssetId={ProviderAssetId}",
+                    result.Id, result.PublicUrl, result.ProviderAssetId);
+
                 return Ok(ApiResponse<MediaAssetDetailDto>.Ok(
                     result,
                     "Avatar uploaded successfully"));

@@ -107,6 +107,9 @@ namespace Reamp.Application.Media.Services
                 throw new InvalidOperationException($"Upload failed: {uploadResult.Error}");
             }
 
+            _logger.LogInformation("Cloudinary upload successful: PublicId={PublicId}, SecureUrl={SecureUrl}, Format={Format}",
+                uploadResult.PublicId, uploadResult.SecureUrl, uploadResult.Format);
+
             // Create media asset
             var mediaAsset = new MediaAsset(
                 ownerStudioId: dto.OwnerStudioId,

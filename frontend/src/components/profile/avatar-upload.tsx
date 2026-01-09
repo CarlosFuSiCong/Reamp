@@ -36,10 +36,16 @@ export function AvatarUpload({
         .getById(avatarAssetId)
         .then((asset) => {
           const url = asset.publicUrl || asset.variants[0]?.transformedUrl;
+          console.log("[AvatarUpload] Loaded avatar asset:", {
+            assetId: asset.id,
+            publicUrl: asset.publicUrl,
+            variants: asset.variants,
+            finalUrl: url,
+          });
           setAvatarUrl(url || "");
         })
         .catch((err) => {
-          console.error("Failed to load avatar:", err);
+          console.error("[AvatarUpload] Failed to load avatar:", err);
           setAvatarUrl("");
         });
     } else {
@@ -67,7 +73,8 @@ export function AvatarUpload({
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:5000/api/media/avatar", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const response = await fetch(`${apiUrl}/api/media/avatar`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -90,6 +97,13 @@ export function AvatarUpload({
 
       // Update preview to show uploaded image immediately
       const uploadedUrl = result.data?.publicUrl || result.data?.variants?.[0]?.transformedUrl;
+      console.log("[AvatarUpload] Upload successful:", {
+        assetId,
+        publicUrl: result.data?.publicUrl,
+        variants: result.data?.variants,
+        uploadedUrl,
+      });
+      
       if (uploadedUrl) {
         setAvatarUrl(uploadedUrl);
       }
@@ -138,7 +152,16 @@ export function AvatarUpload({
                 preview 
                   ? preview 
                   : applyCloudinaryPreset(avatarUrl, "avatar")
-              } 
+              }
+              onError={(e) => {
+                console.error("[AvatarUpload] Image failed to load:", {
+                  src: e.currentTarget.src,
+                  avatarUrl,
+                  preview,
+                });
+                // Remove src to show fallback
+                e.currentTarget.src = "";
+              }}
             />
             <AvatarFallback>{displayName?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
           </Avatar>

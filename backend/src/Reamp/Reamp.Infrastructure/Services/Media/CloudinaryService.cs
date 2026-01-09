@@ -110,10 +110,17 @@ Status: API connection verified! 🚀";
                     };
                 }
 
+                // Build base URL without transformations for storage
+                // This ensures we always have a clean base URL to apply transformations to
+                var baseUrl = $"https://res.cloudinary.com/{_settings.CloudName}/image/upload/{uploadResult.PublicId}.{uploadResult.Format}";
+
+                _logger.LogInformation("Image uploaded to Cloudinary: PublicId={PublicId}, Format={Format}, BaseUrl={BaseUrl}",
+                    uploadResult.PublicId, uploadResult.Format, baseUrl);
+
                 return new CloudinaryUploadResult
                 {
                     PublicId = uploadResult.PublicId,
-                    SecureUrl = uploadResult.SecureUrl.ToString(),
+                    SecureUrl = baseUrl, // Use base URL without transformations
                     Format = uploadResult.Format,
                     Bytes = uploadResult.Bytes,
                     Width = uploadResult.Width,
@@ -178,10 +185,16 @@ Status: API connection verified! 🚀";
                     };
                 }
 
+                // Build base URL without transformations for storage
+                var baseUrl = $"https://res.cloudinary.com/{_settings.CloudName}/video/upload/{uploadResult.PublicId}.{uploadResult.Format}";
+
+                _logger.LogInformation("Video uploaded to Cloudinary: PublicId={PublicId}, Format={Format}, BaseUrl={BaseUrl}",
+                    uploadResult.PublicId, uploadResult.Format, baseUrl);
+
                 return new CloudinaryUploadResult
                 {
                     PublicId = uploadResult.PublicId,
-                    SecureUrl = uploadResult.SecureUrl.ToString(),
+                    SecureUrl = baseUrl, // Use base URL without transformations
                     Format = uploadResult.Format,
                     Bytes = uploadResult.Bytes,
                     Width = uploadResult.Width,

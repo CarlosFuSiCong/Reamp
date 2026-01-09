@@ -240,7 +240,19 @@ export function transformCloudinaryUrl(
   // Build new URL with transformations and preserve extension
   // If extension exists, append it; otherwise Cloudinary will use original format
   const fullPublicId = extension ? `${publicId}${extension}` : publicId;
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${transformString}/${fullPublicId}`;
+  const transformedUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${transformString}/${fullPublicId}`;
+  
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.debug('[Cloudinary] Transform URL:', {
+      original: url,
+      parsed: { cloudName, publicId, extension },
+      transformString,
+      result: transformedUrl
+    });
+  }
+  
+  return transformedUrl;
 }
 
 /**
