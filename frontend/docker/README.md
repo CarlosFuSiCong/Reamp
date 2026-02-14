@@ -115,43 +115,47 @@ docker-compose up -d
 
 ## Production Deployment
 
-### Azure Container Apps
+### VPS Deployment
 
-Build and push to Azure Container Registry:
+Deploy to your VPS using docker-compose:
 
 ```bash
-# Login to Azure
-az login
+# 1. Copy files to VPS
+scp -r frontend/docker user@your-vps:/opt/reamp/frontend/
 
-# Build and push
-az acr build \
-  --registry <your-acr-name> \
-  --image reamp-frontend:latest \
-  --file docker/Dockerfile \
-  .
+# 2. SSH into VPS
+ssh user@your-vps
 
-# Create Container App
-az containerapp create \
-  --name reamp-frontend \
-  --resource-group <your-rg> \
-  --environment <your-env> \
-  --image <your-acr>.azurecr.io/reamp-frontend:latest \
-  --target-port 3000 \
-  --ingress external \
-  --env-vars \
-    NEXT_PUBLIC_API_URL=<backend-url> \
-    RESEND_API_KEY=<secretref:resend-api-key> \
-    DEMO_REQUEST_RECIPIENT_EMAIL=<your-email>
+# 3. Navigate to directory
+cd /opt/reamp/frontend/docker
+
+# 4. Create .env file with production settings
+cat > .env << EOF
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
+RESEND_API_KEY=your_key_here
+DEMO_REQUEST_RECIPIENT_EMAIL=your_email@example.com
+EOF
+
+# 5. Deploy with production config
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-### Docker Hub
+### Docker Registry (Optional)
+
+If you want to use a private registry:
 
 ```bash
-# Build
-docker build -t your-username/reamp-frontend:latest -f docker/Dockerfile .
+# Build and tag
+docker build -t registry.yourdomain.com/reamp-frontend:latest -f docker/Dockerfile .
 
-# Push
-docker push your-username/reamp-frontend:latest
+# Push to registry
+docker push registry.yourdomain.com/reamp-frontend:latest
+
+# Pull and run on VPS
+docker pull registry.yourdomain.com/reamp-frontend:latest
+docker-compose up -d
 ```
 
 ## Troubleshooting
@@ -241,4 +245,4 @@ docker logs -f <container-id>
 
 - [Next.js Docker Documentation](https://nextjs.org/docs/deployment#docker-image)
 - [Docker Compose Reference](https://docs.docker.com/compose/compose-file/)
-- [Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/)
+- [Docker Production Best Practices](https://docs.docker.com/develop/dev-best-practices/)
