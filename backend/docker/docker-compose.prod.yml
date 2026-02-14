@@ -1,30 +1,11 @@
 version: '3.8'
 
 services:
-  # SQL Server with memory optimization for 2GB VPS
-  sqlserver:
-    environment:
-      MSSQL_SA_PASSWORD: "${SQL_SERVER_PASSWORD}"
-      # Optimize SQL Server for low memory
-      MSSQL_MEMORY_LIMIT_MB: 512  # Limit SQL Server to 512MB
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-      - ../backups:/var/opt/mssql/backups
-    # Resource limits for SQL Server
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 600M  # Max 600MB (includes 512MB for SQL + overhead)
-        reservations:
-          cpus: '0.25'
-          memory: 400M  # Min 400MB
-
-  # API with memory optimization
+  # API with memory optimization (no SQL Server in this compose)
   api:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__SqlServerConnection: "Server=sqlserver,1433;Database=ReampDb;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCert=True;MultipleActiveResultSets=true"
+      ConnectionStrings__SqlServerConnection: "Server=${SQL_SERVER_HOST:-shared-sqlserver},1433;Database=ReampDb;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCert=True;MultipleActiveResultSets=true"
       JwtSettings__Secret: "${JWT_SECRET}"
       JwtSettings__Issuer: "${JWT_ISSUER}"
       JwtSettings__Audience: "${JWT_AUDIENCE}"
@@ -36,12 +17,12 @@ services:
       DOTNET_GCHeapHardLimit: 200000000  # 200MB heap limit
       DOTNET_GCConserveMemory: 9  # Aggressive memory conservation (1-9)
     restart: always
-    # Resource limits for API
+    # Resource limits for API only (no SQL Server)
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 300M  # Max 300MB
+          memory: 300M
         reservations:
           cpus: '0.25'
-          memory: 150M  # Min 150MB
+          memory: 150M
