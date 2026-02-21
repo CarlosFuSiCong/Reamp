@@ -41,7 +41,7 @@ namespace Reamp.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Disable automatic claim type mapping to preserve original JWT claim names
             System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -282,27 +282,65 @@ namespace Reamp.Api
                 });
             }
 
-            if (app.Environment.IsDevelopment())
+            // Run migrations on startup (controlled by environment variable)
+            var autoMigrate = builder.Configuration.GetValue<bool?>("Database:AutoMigrate") ?? false;
+            if (autoMigrate)
             {
                 using var scope = app.Services.CreateScope();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 
-                logger.LogInformation("Checking database migrations...");
-                var pendingMigrations = db.Database.GetPendingMigrations().ToList();
-                
-                if (pendingMigrations.Any())
+                try
                 {
-                    logger.LogWarning("Found {Count} pending migrations: {Migrations}", 
-                        pendingMigrations.Count, string.Join(", ", pendingMigrations));
-                    logger.LogInformation("Applying migrations...");
-                    db.Database.Migrate();
-                    logger.LogInformation("Migrations applied successfully");
+                    logger.LogInformation("Auto-migration is enabled. Acquiring migration lock...");
+                    
+                    // Use application lock to ensure only one instance runs migrations
+                    using var connection = db.Database.GetDbConnection();
+                    await connection.OpenAsync();
+                    using var command = connection.CreateCommand();
+                    
+                    // Acquire exclusive lock (timeout: 10 seconds)
+                    command.CommandText = "DECLARE @result INT; EXEC @result = sp_getapplock @Resource='ReampDbMigration', @LockMode='Exclusive', @LockOwner='Session', @LockTimeout=10000; SELECT @result";
+                    var lockResult = await command.ExecuteScalarAsync();
+                    
+                    if (Convert.ToInt32(lockResult) < 0)
+                    {
+                        logger.LogWarning("Could not acquire migration lock. Another instance may be running migrations.");
+                        return;
+                    }
+                    
+                    logger.LogInformation("Migration lock acquired. Checking database migrations...");
+                    var pendingMigrations = db.Database.GetPendingMigrations().ToList();
+                    
+                    if (pendingMigrations.Any())
+                    {
+                        logger.LogWarning("Found {Count} pending migrations: {Migrations}", 
+                            pendingMigrations.Count, string.Join(", ", pendingMigrations));
+                        logger.LogInformation("Applying migrations...");
+                        db.Database.Migrate();
+                        logger.LogInformation("Migrations applied successfully");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Database is up to date - no pending migrations");
+                    }
+                    
+                    // Release lock
+                    command.CommandText = "EXEC sp_releaseapplock @Resource='ReampDbMigration', @LockOwner='Session'";
+                    await command.ExecuteNonQueryAsync();
+                    logger.LogInformation("Migration lock released");
                 }
-                else
+                catch (Exception ex)
                 {
-                    logger.LogInformation("Database is up to date - no pending migrations");
+                    logger.LogError(ex, "Error during database migration");
+                    throw;
                 }
+            }
+            else
+            {
+                using var scope = app.Services.CreateScope();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("Auto-migration is disabled (Database:AutoMigrate = false)");
             }
 
             app.UseHttpsRedirection();
